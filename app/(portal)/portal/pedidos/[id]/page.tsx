@@ -2,8 +2,8 @@ import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { db } from '@/lib/db'
-import { orders } from '@/drizzle/schema'
-import { eq } from 'drizzle-orm'
+import { orderItems, orders } from '@/drizzle/schema'
+import { and, eq } from 'drizzle-orm'
 import OrderStatusBadge from '@/components/portal/OrderStatusBadge'
 import { formatARS } from '@/lib/products'
 import type { OrderStatus } from '@/drizzle/schema'
@@ -37,8 +37,8 @@ export default async function PedidoDetailPage({ params }: Props) {
   const { id } = await params
 
   const order = await db.query.orders.findFirst({
-    where: eq(orders.id, id),
-    with:  { items: true },
+    where: and(eq(orders.id, id), eq(orders.isDeleted, false)),
+    with:  { items: { where: eq(orderItems.isDeleted, false) } },
   })
 
   if (!order) notFound()

@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { db } from '@/lib/db'
-import { orders } from '@/drizzle/schema'
+import { orderItems, orders } from '@/drizzle/schema'
 import { eq, desc, and } from 'drizzle-orm'
 import OrderStatusBadge from '@/components/portal/OrderStatusBadge'
 import { formatARS } from '@/lib/products'
@@ -40,10 +40,10 @@ export default async function PedidosPage({ searchParams }: Props) {
 
   const userOrders = await db.query.orders.findMany({
     where: statusFilter
-      ? and(eq(orders.userId, user.id), eq(orders.status, statusFilter))
-      : eq(orders.userId, user.id),
+      ? and(eq(orders.userId, user.id), eq(orders.status, statusFilter), eq(orders.isDeleted, false))
+      : and(eq(orders.userId, user.id), eq(orders.isDeleted, false)),
     orderBy: [desc(orders.createdAt)],
-    with: { items: true },
+    with: { items: { where: eq(orderItems.isDeleted, false) } },
   })
 
   return (

@@ -48,7 +48,8 @@ consumer | mayorista | gastronomico | distribuidor | productor
 
 ## Flujo admin para agregar un cliente
 1. Crear usuario en Supabase Dashboard → Authentication → Users → Invite user
-2. Insertar fila en public.profiles con el mismo UUID + el rol correspondiente
+2. Insertar fila en public.profiles con `user_id` = UUID de Supabase + el rol correspondiente
+   (profiles.id es auto-generado por la DB — no hace falta proveerlo)
 
 ## Próximos pasos posibles
 - Panel admin para que el dueño de Hardy cree pedidos y actualice estados (actualmente se hace directo en la DB)

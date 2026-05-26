@@ -51,7 +51,7 @@ export default function PortalSidebar({ role, displayName, userEmail }: Props) {
                   'block px-3 py-2 font-mono text-[11px] tracking-[0.12em] uppercase transition-colors',
                   isActive(href)
                     ? 'text-paper bg-[#2a2a2a]'
-                    : 'text-paper/50 hover:text-paper',
+                    : 'text-paper/60 hover:text-paper',
                 ].join(' ')}
               >
                 {isActive(href) ? '── ' : ''}{label}
@@ -68,7 +68,7 @@ export default function PortalSidebar({ role, displayName, userEmail }: Props) {
             {ROLE_LABELS[role]}
           </span>
         </div>
-        <div className="font-body text-[13px] text-paper/70 truncate mb-3">
+        <div className="font-body text-[13px] text-white truncate mb-3">
           {displayName || userEmail}
         </div>
         <LogoutButton />

@@ -2,8 +2,8 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { db } from '@/lib/db'
-import { orders, profiles } from '@/drizzle/schema'
-import { eq, count, desc } from 'drizzle-orm'
+import { orderItems, orders, profiles } from '@/drizzle/schema'
+import { and, eq, count, desc } from 'drizzle-orm'
 import { ROLE_LABELS, ROLE_DESCRIPTIONS } from '@/lib/roles'
 import OrderStatusBadge from '@/components/portal/OrderStatusBadge'
 import { formatARS } from '@/lib/products'
@@ -15,17 +15,17 @@ export default async function PortalDashboardPage() {
 
   const [profile, recentOrders, [orderCount]] = await Promise.all([
     db.query.profiles.findFirst({
-      where: eq(profiles.id, user.id),
+      where: and(eq(profiles.userId, user.id), eq(profiles.isDeleted, false)),
     }),
     db.query.orders.findMany({
-      where:   eq(orders.userId, user.id),
+      where:   and(eq(orders.userId, user.id), eq(orders.isDeleted, false)),
       orderBy: [desc(orders.createdAt)],
       limit:   5,
-      with:    { items: true },
+      with:    { items: { where: eq(orderItems.isDeleted, false) } },
     }),
     db.select({ total: count() })
       .from(orders)
-      .where(eq(orders.userId, user.id)),
+      .where(and(eq(orders.userId, user.id), eq(orders.isDeleted, false))),
   ])
 
   const role        = profile?.role ?? 'consumer'

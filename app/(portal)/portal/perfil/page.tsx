@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { db } from '@/lib/db'
 import { profiles } from '@/drizzle/schema'
-import { eq } from 'drizzle-orm'
+import { and, eq } from 'drizzle-orm'
 import { ROLE_LABELS, ROLE_DESCRIPTIONS } from '@/lib/roles'
 import ProfileForm from '@/components/portal/ProfileForm'
 
@@ -12,7 +12,7 @@ export default async function PerfilPage() {
   if (!user) redirect('/login')
 
   const profile = await db.query.profiles.findFirst({
-    where: eq(profiles.id, user.id),
+    where: and(eq(profiles.userId, user.id), eq(profiles.isDeleted, false)),
   })
 
   if (!profile) redirect('/portal')

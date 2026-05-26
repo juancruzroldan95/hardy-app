@@ -6,6 +6,7 @@ import {
   integer,
   numeric,
   timestamp,
+  boolean,
   index,
 } from 'drizzle-orm/pg-core'
 import { relations } from 'drizzle-orm'
@@ -37,12 +38,14 @@ export const paymentStatusEnum = pgEnum('payment_status', [
 ])
 
 // ─── profiles ─────────────────────────────────────────────────────────────────
-// id is the same UUID Supabase creates in auth.users.
+// id: internal auto-generated PK.
+// userId: the UUID Supabase creates in auth.users — use this to link to the auth layer.
 // Admin creates the auth.users row via Supabase dashboard,
-// then inserts the matching profiles row with the same UUID + role.
+// then inserts the matching profiles row with userId = auth UUID + role.
 
 export const profiles = pgTable('profiles', {
-  id:          uuid('id').primaryKey(),
+  id:          uuid('id').primaryKey().defaultRandom(),
+  userId:      uuid('user_id').notNull().unique(),
   role:        userRoleEnum('role').notNull().default('consumer'),
   displayName: text('display_name'),
   phone:       text('phone'),
@@ -51,6 +54,8 @@ export const profiles = pgTable('profiles', {
   city:        text('city'),
   province:    text('province'),
   notes:       text('notes'),
+  isActive:    boolean('is_active').notNull().default(true),
+  isDeleted:   boolean('is_deleted').notNull().default(false),
   createdAt:   timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt:   timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 })
@@ -65,6 +70,8 @@ export const orders = pgTable('orders', {
   totalArs:        numeric('total_ars', { precision: 12, scale: 2 }).notNull(),
   notes:           text('notes'),
   shippingAddress: text('shipping_address'),
+  isActive:        boolean('is_active').notNull().default(true),
+  isDeleted:       boolean('is_deleted').notNull().default(false),
   createdAt:       timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt:       timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 }, (table) => [
@@ -88,6 +95,8 @@ export const orderItems = pgTable('order_items', {
   unitPriceArs: numeric('unit_price_ars', { precision: 12, scale: 2 }).notNull(),
   qty:          integer('qty').notNull(),
   subtotalArs:  numeric('subtotal_ars', { precision: 12, scale: 2 }).notNull(),
+  isActive:     boolean('is_active').notNull().default(true),
+  isDeleted:    boolean('is_deleted').notNull().default(false),
 }, (table) => [
   index('order_items_order_id_idx').on(table.orderId),
 ])
@@ -103,6 +112,8 @@ export const priceOverrides = pgTable('price_overrides', {
   productId: text('product_id').notNull(),
   priceArs:  numeric('price_ars', { precision: 12, scale: 2 }).notNull(),
   minQty:    integer('min_qty').default(1).notNull(),
+  isActive:  boolean('is_active').notNull().default(true),
+  isDeleted: boolean('is_deleted').notNull().default(false),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 }, (table) => [
   index('price_overrides_role_product_idx').on(table.role, table.productId),
@@ -117,7 +128,7 @@ export const profilesRelations = relations(profiles, ({ many }) => ({
 export const ordersRelations = relations(orders, ({ one, many }) => ({
   profile: one(profiles, {
     fields:     [orders.userId],
-    references: [profiles.id],
+    references: [profiles.userId],
   }),
   items: many(orderItems),
 }))

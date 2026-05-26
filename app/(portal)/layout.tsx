@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { db } from '@/lib/db'
 import { profiles } from '@/drizzle/schema'
-import { eq } from 'drizzle-orm'
+import { and, eq } from 'drizzle-orm'
 import PortalSidebar from '@/components/portal/PortalSidebar'
 import type { UserRole } from '@/drizzle/schema'
 
@@ -13,7 +13,7 @@ export default async function PortalLayout({ children }: { children: React.React
   if (!user) redirect('/login')
 
   const profile = await db.query.profiles.findFirst({
-    where: eq(profiles.id, user.id),
+    where: and(eq(profiles.userId, user.id), eq(profiles.isDeleted, false)),
   })
 
   const role        = (profile?.role ?? 'consumer') as UserRole
