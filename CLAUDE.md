@@ -2,6 +2,10 @@
 
 Este proyecto es desarrollado por **dos personas**: un dueño de marca (no programador) que usa Claude Code para agregar features, y un software engineer que revisa y arquitecta. Toda instrucción aquí es para que Claude Code pueda trabajar autónomamente con criterio, sin necesitar supervisión técnica en cada tarea.
 
+Para contexto adicional sobre el estado del proyecto y decisiones de arquitectura, ver los directorios `.claude/memory/` y `.claude/plans/`.
+
+**Rama de trabajo**: siempre `develop`. Nunca commitear ni pushear a `master`.
+
 ---
 
 ## CRÍTICO: Framework con breaking changes
@@ -88,18 +92,15 @@ Hardy es una marca argentina de crema de maní y miel 100% naturales. Fundada en
 ```
 hardy-app/
 ├── app/
-│   ├── (marketing)/          # Páginas públicas: home, recetas
+│   ├── (ecommerce)/          # Ecommerce público: home, tienda, recetas
 │   │   ├── layout.tsx        # Nav + Footer (Server Component)
 │   │   ├── page.tsx          # Homepage
+│   │   ├── tienda/
+│   │   │   └── page.tsx      # Catálogo de productos
 │   │   └── recetas/
 │   │       ├── page.tsx      # Listado de recetas
 │   │       └── [slug]/
 │   │           └── page.tsx  # Detalle de receta
-│   │
-│   ├── (store)/              # Tienda consumer
-│   │   ├── layout.tsx        # Nav + Footer + CartProvider + CartDrawer
-│   │   └── tienda/
-│   │       └── page.tsx      # Catálogo de productos
 │   │
 │   ├── (portal)/             # FUTURO: Portal B2B
 │   │   └── portal/

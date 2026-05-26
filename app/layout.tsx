@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
 import { Anton, Fraunces, JetBrains_Mono, Manrope } from 'next/font/google'
+import { CartProvider } from '@/lib/cart-context'
+import CartDrawer from '@/components/layout/CartDrawer'
 import './globals.css'
 
 const anton = Anton({
@@ -33,7 +35,7 @@ export const metadata: Metadata = {
     template: '%s | HARDY',
   },
   description:
-    'Crema de maní y miel 100% naturales. Un ingrediente, sin aditivos. Envíos a todo Argentina con Andreani.',
+    'Crema de maní y miel 100% naturales. Un ingrediente, sin aditivos. Envíos a todo el país.',
   keywords: ['crema de maní', 'miel', 'natural', 'sin aditivos', 'Argentina', 'Hardy'],
   openGraph: {
     siteName: 'HARDY',
@@ -53,7 +55,10 @@ export default function RootLayout({
       className={`${anton.variable} ${fraunces.variable} ${jetbrainsMono.variable} ${manrope.variable}`}
     >
       <body className="min-h-screen flex flex-col font-body bg-paper text-ink">
-        {children}
+        <CartProvider>
+          {children}
+          <CartDrawer />
+        </CartProvider>
       </body>
     </html>
   )

@@ -33,6 +33,7 @@ export const RECETAS: Receta[] = [
       'Colocá las rodajas de banana encima.',
       'Espolvoreá con canela a gusto y servir.',
     ],
+    macros: { kcal: 310, proteinas: 10, carbos: 38, grasas: 13 },
   },
   {
     slug: 'bowl-crunchy',
@@ -57,6 +58,7 @@ export const RECETAS: Receta[] = [
       'Distribuí la banana y la granola alrededor.',
       'Terminá con maní tostado y servir frío.',
     ],
+    macros: { kcal: 420, proteinas: 18, carbos: 32, grasas: 22 },
   },
   {
     slug: 'miel-cafe-tostadas',
@@ -80,6 +82,7 @@ export const RECETAS: Receta[] = [
       'Rociá con Miel Líquida HARDY en hilo fino.',
       'Acompañá con el café bien caliente.',
     ],
+    macros: { kcal: 220, proteinas: 4, carbos: 42, grasas: 3 },
   },
   {
     slug: 'cookies-mani-miel',
@@ -89,7 +92,7 @@ export const RECETAS: Receta[] = [
     porciones: '6-8 cookies',
     dificultad: 'Fácil',
     categoria: 'Snacks',
-    imagen: '/lifestyle/receta-tostadas.png',
+    imagen: '/lifestyle/receta-cookies.png',
     productos: ['Crema de Maní Natural 380g', 'Miel Líquida 500g'],
     ingredientes: [
       '1 huevo',
@@ -105,6 +108,7 @@ export const RECETAS: Receta[] = [
       'Formá bolitas y aplastá sobre placa con papel manteca.',
       'Horneá 12-15 minutos hasta dorar.',
     ],
+    macros: { kcal: 180, proteinas: 5, carbos: 22, grasas: 9 },
   },
   {
     slug: 'bites-banana',
@@ -114,7 +118,7 @@ export const RECETAS: Receta[] = [
     porciones: '8-10 bocados',
     dificultad: 'Fácil',
     categoria: 'Snacks',
-    imagen: '/lifestyle/receta-bowl.png',
+    imagen: '/lifestyle/receta-bites.png',
     productos: ['Crema de Maní Natural 380g', 'Miel Líquida 500g'],
     ingredientes: [
       '2 bananas maduras',
@@ -126,10 +130,11 @@ export const RECETAS: Receta[] = [
     preparacion: [
       'Cortá las bananas en rodajas gruesas.',
       'Untá cada rodaja con Crema de Maní Natural HARDY.',
-      'Rociar con Miel Líquida HARDY.',
+      'Rociá con Miel Líquida HARDY.',
       'Sumergí en chocolate y espolvoreá maní picado.',
       'Freezer 15 minutos y servir.',
     ],
+    macros: { kcal: 140, proteinas: 3, carbos: 18, grasas: 7 },
   },
   {
     slug: 'pancakes-saludables',
@@ -139,7 +144,7 @@ export const RECETAS: Receta[] = [
     porciones: '6-8 pancakes',
     dificultad: 'Fácil',
     categoria: 'Desayuno',
-    imagen: '/lifestyle/receta-tostadas.png',
+    imagen: '/lifestyle/receta-pancakes.png',
     productos: ['Crema de Maní Crunchy 380g', 'Miel Líquida 500g'],
     ingredientes: [
       '1 huevo',
@@ -153,6 +158,7 @@ export const RECETAS: Receta[] = [
       'Cociná porciones en sartén caliente 2-3 min de cada lado.',
       'Servir con Miel Líquida HARDY y banana extra.',
     ],
+    macros: { kcal: 380, proteinas: 14, carbos: 42, grasas: 16 },
   },
   {
     slug: 'energy-bites',
@@ -162,7 +168,7 @@ export const RECETAS: Receta[] = [
     porciones: '12-15 bolitas',
     dificultad: 'Fácil',
     categoria: 'Snacks',
-    imagen: '/lifestyle/receta-bowl.png',
+    imagen: '/lifestyle/receta-energy-bites.png',
     productos: ['Crema de Maní Natural 380g', 'Miel Sólida 500g'],
     ingredientes: [
       '1 taza de avena',
@@ -178,6 +184,7 @@ export const RECETAS: Receta[] = [
       'Pasá por coco rallado.',
       'Refrigerá 20 minutos antes de servir.',
     ],
+    macros: { kcal: 120, proteinas: 4, carbos: 12, grasas: 7 },
   },
   {
     slug: 'granola-casera',
@@ -187,7 +194,7 @@ export const RECETAS: Receta[] = [
     porciones: '1 frasco grande',
     dificultad: 'Fácil',
     categoria: 'Desayuno',
-    imagen: '/lifestyle/receta-miel.png',
+    imagen: '/lifestyle/receta-granola.png',
     productos: ['Crema de Maní Crunchy 380g', 'Miel Sólida 500g'],
     ingredientes: [
       '2 tazas de avena',
@@ -203,6 +210,7 @@ export const RECETAS: Receta[] = [
       'Extendé en placa y horneá 20 min revolviendo a mitad.',
       'Enfriar completamente antes de guardar.',
     ],
+    macros: { kcal: 280, proteinas: 7, carbos: 35, grasas: 13 },
   },
   {
     slug: 'shot-energia',
@@ -212,7 +220,7 @@ export const RECETAS: Receta[] = [
     porciones: '1 porción',
     dificultad: 'Fácil',
     categoria: 'Fit',
-    imagen: '/lifestyle/receta-miel.png',
+    imagen: '/lifestyle/receta-shot.png',
     productos: ['Crema de Maní Natural 380g', 'Miel Líquida 500g'],
     ingredientes: [
       '1 cda de Crema de Maní Natural HARDY',
@@ -224,6 +232,7 @@ export const RECETAS: Receta[] = [
       'Espolvoreá con canela.',
       'Tomarlo antes del entreno o como snack rápido.',
     ],
+    macros: { kcal: 120, proteinas: 3, carbos: 17, grasas: 5 },
   },
   {
     slug: 'barritas-energeticas',
@@ -233,7 +242,7 @@ export const RECETAS: Receta[] = [
     porciones: '8-10 barritas',
     dificultad: 'Fácil',
     categoria: 'Snacks',
-    imagen: '/lifestyle/receta-bowl.png',
+    imagen: '/lifestyle/receta-barritas.png',
     productos: ['Crema de Maní Natural 380g', 'Miel Sólida 500g'],
     ingredientes: [
       '2 tazas de avena',
@@ -250,6 +259,7 @@ export const RECETAS: Receta[] = [
       'Horneá 20-25 minutos hasta dorar.',
       'Enfriar y cortar en barritas.',
     ],
+    macros: { kcal: 190, proteinas: 6, carbos: 24, grasas: 9 },
   },
   {
     slug: 'smoothie-proteico',
@@ -259,7 +269,7 @@ export const RECETAS: Receta[] = [
     porciones: '1 vaso grande',
     dificultad: 'Fácil',
     categoria: 'Fit',
-    imagen: '/lifestyle/receta-bowl.png',
+    imagen: '/lifestyle/receta-smoothie.png',
     productos: ['Crema de Maní Crunchy 380g'],
     ingredientes: [
       '1 banana congelada',
@@ -274,6 +284,7 @@ export const RECETAS: Receta[] = [
       'Servir en vaso alto con hielo.',
       'Decorar con maní tostado opcional.',
     ],
+    macros: { kcal: 390, proteinas: 20, carbos: 38, grasas: 16 },
   },
   {
     slug: 'parfait-mani',
@@ -283,7 +294,7 @@ export const RECETAS: Receta[] = [
     porciones: '1 frasco',
     dificultad: 'Fácil',
     categoria: 'Desayuno',
-    imagen: '/lifestyle/receta-tostadas.png',
+    imagen: '/lifestyle/receta-parfait.png',
     productos: ['Crema de Maní Natural 380g', 'Miel Líquida 500g'],
     ingredientes: [
       '1 taza de yogur griego',
@@ -299,6 +310,7 @@ export const RECETAS: Receta[] = [
       'Repetí las capas.',
       'Terminá con Miel Líquida HARDY.',
     ],
+    macros: { kcal: 350, proteinas: 14, carbos: 40, grasas: 14 },
   },
   {
     slug: 'porridge-mani',
@@ -308,7 +320,7 @@ export const RECETAS: Receta[] = [
     porciones: '1 porción',
     dificultad: 'Fácil',
     categoria: 'Desayuno',
-    imagen: '/lifestyle/receta-tostadas.png',
+    imagen: '/lifestyle/receta-porridge.png',
     productos: ['Crema de Maní Crunchy 380g', 'Miel Líquida 500g'],
     ingredientes: [
       '½ taza de avena',
@@ -323,6 +335,7 @@ export const RECETAS: Receta[] = [
       'Volcá en bowl.',
       'Decorá con frutos rojos y rociá con Miel Líquida HARDY.',
     ],
+    macros: { kcal: 420, proteinas: 16, carbos: 52, grasas: 15 },
   },
   {
     slug: 'waffles-mani',
@@ -332,7 +345,7 @@ export const RECETAS: Receta[] = [
     porciones: '2 porciones',
     dificultad: 'Medio',
     categoria: 'Desayuno',
-    imagen: '/lifestyle/receta-tostadas.png',
+    imagen: '/lifestyle/receta-waffles.png',
     productos: ['Crema de Maní Natural 380g', 'Miel Sólida 500g'],
     ingredientes: [
       '1 taza de harina integral',
@@ -347,6 +360,7 @@ export const RECETAS: Receta[] = [
       'Cociná en wafflera hasta dorar.',
       'Servir con Miel Sólida HARDY, banana y frutos rojos.',
     ],
+    macros: { kcal: 460, proteinas: 16, carbos: 55, grasas: 18 },
   },
   {
     slug: 'yogurt-bowl',
@@ -356,7 +370,7 @@ export const RECETAS: Receta[] = [
     porciones: '1 porción',
     dificultad: 'Fácil',
     categoria: 'Desayuno',
-    imagen: '/lifestyle/receta-bowl.png',
+    imagen: '/lifestyle/receta-yogurt.png',
     productos: ['Crema de Maní Crunchy 380g', 'Miel Líquida 500g'],
     ingredientes: [
       '1 taza de yogur natural',
@@ -370,5 +384,6 @@ export const RECETAS: Receta[] = [
       'Decorá con fruta y granola.',
       'Rociá con Miel Líquida HARDY y servir.',
     ],
+    macros: { kcal: 340, proteinas: 18, carbos: 36, grasas: 14 },
   },
 ]

@@ -12,6 +12,8 @@ interface NavProps {
 
 const links = [
   { href: '/tienda', label: 'Tienda' },
+  { href: '/mayoristas', label: 'Mayoristas' },
+  { href: '/a-granel', label: 'A granel' },
   { href: '/recetas', label: 'Recetas' },
 ]
 
@@ -23,7 +25,7 @@ export default function Nav({ cartCount = 0, onCartOpen }: NavProps) {
     <>
       {/* Announcement bar */}
       <div className="bg-ink text-paper font-mono text-[11px] tracking-[0.2em] text-center py-[9px] px-4 uppercase">
-        10 años haciendo Hardy · Crema de maní y miel · Envíos con Andreani
+        10 años haciendo Hardy · Crema de maní y miel · Envíos a todo el país
       </div>
 
       {/* Nav */}
