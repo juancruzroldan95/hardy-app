@@ -29,14 +29,14 @@ const BALDES_MIEL = [
   {
     tag: 'Miel Líquida · 6 kg',
     title: 'Balde 6 kg',
-    img: '/lifestyle/miel-liquida-open.png',
+    img: '/lifestyle/balde-45-open.png',
     desc: 'Para cafeterías, restaurantes y pastelerías. Miel multifloral sin pasteurizar, sin procesar.',
     waText: 'Hola Hardy, quiero info de miel a granel 6kg',
   },
   {
     tag: 'Miel Líquida · 30 kg',
     title: 'Balde 30 kg',
-    img: '/lifestyle/miel-liquida-open.png',
+    img: '/lifestyle/balde-23-open.png',
     desc: 'Para producción a escala. Panificados, barras energéticas, bebidas. La mejor relación costo por kg.',
     waText: 'Hola Hardy, quiero info de miel a granel 30kg',
   },

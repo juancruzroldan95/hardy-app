@@ -49,8 +49,8 @@ export default function TiendaPage() {
 
           {/* Baldes */}
           <div className="mt-10 mb-5">
-            <div className="font-mono text-[10px] tracking-[0.2em] uppercase text-red mb-1">── Baldes</div>
-            <p className="text-[13px] text-[#888] m-0">Crema de maní a granel · Uso gastronómico, producción y reventa</p>
+            <div className="font-mono text-[10px] tracking-[0.2em] uppercase text-red mb-1">── A Granel · Baldes</div>
+            <p className="text-[13px] text-[#888] m-0">Crema de maní y miel · Baldes de 4,5 kg, 6 kg, 23 kg y 30 kg · Uso gastronómico, producción y reventa</p>
           </div>
           <div className="grid grid-cols-4 gap-[2px] max-md:grid-cols-2">
             {baldes.map((p) => (

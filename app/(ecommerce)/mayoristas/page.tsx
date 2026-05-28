@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import Image from 'next/image'
 import Link from 'next/link'
 import { WA_NUMBER, ESCALAS } from '@/lib/products'
 import SolicitudForm from '@/components/mayoristas/SolicitudForm'
@@ -39,42 +38,31 @@ export default function MayoristasPage() {
 
       {/* HERO */}
       <section className="bg-ink text-paper py-20 px-10 max-md:px-6">
-        <div className="max-w-[1100px] mx-auto grid grid-cols-2 gap-[60px] items-center max-md:grid-cols-1 max-md:gap-8">
-          <div>
-            <p className="font-mono text-[11px] tracking-[0.25em] text-red uppercase mb-5">── Mayoristas y distribuidores</p>
-            <h1
-              className="font-heading font-medium tracking-[-0.02em] leading-[1.05] m-0 mb-6"
-              style={{ fontSize: 'clamp(42px,6vw,72px)' }}
+        <div className="max-w-[1100px] mx-auto">
+          <p className="font-mono text-[11px] tracking-[0.25em] text-red uppercase mb-5">── Mayoristas y distribuidores</p>
+          <h1
+            className="font-heading font-medium tracking-[-0.02em] leading-[1.05] m-0 mb-6"
+            style={{ fontSize: 'clamp(42px,6vw,72px)' }}
+          >
+            Sumá Hardy<br /><em className="not-italic text-red">a tu negocio.</em>
+          </h1>
+          <p className="text-[16px] text-[#bbb] max-w-[560px] leading-[1.7] mb-9">
+            Cajas de crema de maní y miel para dietéticas, gimnasios, cafeterías, tiendas y distribuidores.
+            Precios escalonados desde 3 cajas.
+          </p>
+          <div className="flex gap-3 flex-wrap">
+            <a
+              href="#solicitar"
+              className="inline-block bg-red text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-7 py-[14px]"
             >
-              Sumá Hardy<br /><em className="not-italic text-red">a tu negocio.</em>
-            </h1>
-            <p className="text-[16px] text-[#bbb] max-w-[480px] leading-[1.7] mb-9">
-              Cajas de crema de maní y miel para dietéticas, gimnasios, cafeterías, tiendas y distribuidores.
-              Precios escalonados desde 3 cajas.
-            </p>
-            <div className="flex gap-3 flex-wrap">
-              <a
-                href="#solicitar"
-                className="inline-block bg-red text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-7 py-[14px]"
-              >
-                Solicitar acceso al portal →
-              </a>
-              <Link
-                href="/login"
-                className="inline-block bg-paper/10 border border-white/20 text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-7 py-[14px]"
-              >
-                Ya tengo acceso →
-              </Link>
-            </div>
-          </div>
-          <div className="overflow-hidden max-md:hidden">
-            <Image
-              src="/lifestyle/caja-mayoristas.png"
-              alt="Caja HARDY"
-              width={600}
-              height={480}
-              className="w-full block object-cover"
-            />
+              Solicitar acceso al portal →
+            </a>
+            <Link
+              href="/login"
+              className="inline-block bg-paper/10 border border-white/20 text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-7 py-[14px]"
+            >
+              Ya tengo acceso →
+            </Link>
           </div>
         </div>
       </section>

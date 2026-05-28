@@ -1,6 +1,5 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import { getProducts } from '@/lib/products'
 import { getRecetas } from '@/lib/recetas'
 import RevealSection from '@/components/ui/RevealSection'
 
@@ -13,7 +12,7 @@ const PILLARS = [
 ]
 
 // §4.3 — Columnas en orden: Negocio → A granel → Tu casa
-// Las dos primeras (B2B) con tratamiento dark dominante
+// Default: todos en gris (bg-paper-2); hover: negro con botón rojo
 const FORMATS = [
   {
     label: 'Para tu negocio',
@@ -21,7 +20,6 @@ const FORMATS = [
     desc: 'Sumá Hardy a tu dietética, gimnasio, cafetería o red de distribución. Cajas mayoristas con precio por volumen.',
     cta: 'ACCEDER AL PORTAL',
     href: '/portal',
-    dark: true,
     items: [
       'Dietéticas y tiendas naturales',
       'Gimnasios y centros de salud',
@@ -35,7 +33,6 @@ const FORMATS = [
     desc: 'Baldes de 4,5 kg, 6 kg, 23 kg y 30 kg para gastronomía, repostería y producción. Mejor costo por kilo.',
     cta: 'CONSULTAR A GRANEL',
     href: '/portal',
-    dark: true,
     items: [
       'Baldes crema de maní 4,5 kg y 23 kg',
       'Baldes miel líquida 6 kg y 30 kg',
@@ -49,7 +46,6 @@ const FORMATS = [
     desc: 'Comprá directo online. Enviamos a todo el país. Pagás con Mercado Pago.',
     cta: 'COMPRAR EN LA TIENDA',
     href: '/tienda',
-    dark: false,
     items: [
       'Crema de maní Natural 380g',
       'Crema de maní Crunchy 380g',
@@ -97,12 +93,8 @@ const PHILOSOPHY = [
 ]
 
 export default function HomePage() {
-  const products = getProducts()
   const recetas  = getRecetas()
   const featuredRecetas = recetas.slice(0, 3)
-
-  const balde45 = products.find((p) => p.id === 'balde-45')
-  const balde23 = products.find((p) => p.id === 'balde-23')
 
   return (
     <div className="bg-paper text-ink">
@@ -204,30 +196,19 @@ export default function HomePage() {
               <RevealSection
                 key={f.label}
                 delay={i * 80}
-                className={[
-                  'group flex flex-col transition-colors duration-200 border-t-[3px] border-transparent',
-                  f.dark
-                    ? 'bg-ink text-paper hover:border-red'
-                    : 'bg-paper-2 text-ink hover:bg-ink hover:text-paper hover:border-red',
-                ].join(' ')}
+                className="group flex flex-col transition-colors duration-200 border-t-[3px] border-transparent bg-paper-2 text-ink hover:bg-ink hover:text-paper hover:border-red"
               >
                 <div className="p-10 flex flex-col flex-1">
                   <div className="font-mono text-[10px] tracking-[0.2em] uppercase text-red mb-[10px]">{f.sublabel}</div>
                   <div className="font-heading text-[28px] font-medium mb-3 leading-[1.1]">{f.label}</div>
-                  <div className={[
-                    'text-[14px] leading-[1.6] mb-6 transition-colors',
-                    f.dark ? 'opacity-70' : 'text-[#555] group-hover:text-paper/70',
-                  ].join(' ')}>{f.desc}</div>
+                  <div className="text-[14px] leading-[1.6] mb-6 transition-colors text-[#555] group-hover:text-paper/70">
+                    {f.desc}
+                  </div>
                   <ul className="m-0 p-0 list-none mb-7">
                     {f.items.map((it) => (
                       <li
                         key={it}
-                        className={[
-                          'text-[13px] pb-2 mb-2 flex items-center gap-2 border-b transition-colors',
-                          f.dark
-                            ? 'opacity-80 border-white/10'
-                            : 'text-ink/70 group-hover:text-paper/70 border-ink/15 group-hover:border-white/10',
-                        ].join(' ')}
+                        className="text-[13px] pb-2 mb-2 flex items-center gap-2 border-b transition-colors text-ink/70 group-hover:text-paper/70 border-ink/15 group-hover:border-white/10"
                       >
                         <span className="text-red text-[10px]">✓</span> {it}
                       </li>
@@ -236,10 +217,7 @@ export default function HomePage() {
                   <div className="flex-1" />
                   <Link
                     href={f.href}
-                    className={[
-                      'text-center font-mono text-[11px] tracking-[0.15em] uppercase px-6 py-[14px] text-paper transition-colors',
-                      f.dark ? 'bg-red' : 'bg-ink group-hover:bg-red',
-                    ].join(' ')}
+                    className="text-center font-mono text-[11px] tracking-[0.15em] uppercase px-6 py-[14px] text-paper transition-colors bg-ink group-hover:bg-red"
                   >
                     {f.cta} →
                   </Link>
@@ -330,23 +308,29 @@ export default function HomePage() {
 
       {/* ── 4. LANZAMIENTO CRUNCHY — BAJA debajo de prueba social ──── */}
       {/* §4.5 — sección intacta en contenido y diseño */}
-      <section className="bg-ink text-paper overflow-hidden">
-        <div className="max-w-[1240px] mx-auto grid grid-cols-2 max-md:grid-cols-1">
-          {/* Image */}
-          <div className="relative aspect-square max-md:aspect-[4/3] overflow-hidden">
-            <Image
-              src="/lifestyle/crunchy-380-open.png"
-              alt="Crema de Maní Crunchy"
-              fill
-              className="object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-r from-ink/60 via-transparent to-transparent" />
-            <div className="absolute top-6 left-6 bg-red text-paper font-mono text-[10px] tracking-[0.2em] uppercase px-3 py-[6px]">
+      {/* Imagen como fondo full-bleed con background-blend-mode para mimetizar con bg-ink */}
+      <section
+        className="relative text-paper overflow-hidden"
+        style={{
+          backgroundImage: "url('/lifestyle/crunchy-380-open.png')",
+          backgroundSize: 'cover',
+          backgroundPosition: 'right center',
+          backgroundBlendMode: 'multiply',
+          backgroundColor: '#1A1A1A',
+        }}
+      >
+        {/* Gradiente: oscuro a la izquierda (texto), abre a la derecha (foto) */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{ background: 'linear-gradient(to right, rgba(26,26,26,1) 0%, rgba(26,26,26,0.97) 40%, rgba(26,26,26,0.55) 70%, rgba(26,26,26,0) 100%)' }}
+        />
+        <div className="relative z-[1] max-w-[1240px] mx-auto px-16 py-20 max-w-[640px] max-md:px-6 max-md:py-12">
+          <div className="absolute top-8 right-8 max-md:top-5 max-md:right-5">
+            <span className="bg-red text-paper font-mono text-[10px] tracking-[0.2em] uppercase px-3 py-[6px]">
               Nuevo
-            </div>
+            </span>
           </div>
-          {/* Text */}
-          <RevealSection className="px-14 py-16 flex flex-col justify-center max-md:px-8 max-md:py-10">
+          <RevealSection>
             <p className="font-mono text-[11px] tracking-[0.25em] text-red uppercase mb-5">
               ── Lanzamiento · Crema de Maní
             </p>
@@ -358,10 +342,10 @@ export default function HomePage() {
               <br />
               <em className="not-italic text-red">Con textura real.</em>
             </h2>
-            <p className="text-[15px] leading-[1.8] mb-8 text-paper/65">
+            <p className="text-[15px] leading-[1.8] mb-8 text-paper/65 max-w-[480px]">
               La misma base 100% natural con trozos enteros de maní que te recuerdan de dónde viene cada cucharada. Sin aditivos. Sin aceite. Sin azúcar. Solo maní — pero que se siente.
             </p>
-            <div className="flex gap-[2px] mb-8">
+            <div className="flex gap-[2px] mb-8 flex-wrap">
               {['100% Maní', 'Trozos enteros', 'Sin aditivos', '380g'].map((tag) => (
                 <span key={tag} className="bg-paper/8 font-mono text-[9px] tracking-[0.15em] uppercase px-3 py-[6px] text-paper/60">
                   {tag}
@@ -370,7 +354,7 @@ export default function HomePage() {
             </div>
             <Link
               href="/tienda"
-              className="bg-red text-paper font-mono text-[12px] tracking-[0.15em] uppercase px-8 py-[16px] self-start"
+              className="bg-red text-paper font-mono text-[12px] tracking-[0.15em] uppercase px-8 py-[16px] self-start inline-block"
             >
               Comprar Crunchy →
             </Link>
@@ -378,7 +362,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── A GRANEL spotlight (retenido de fase 2) ──────────────────── */}
+      {/* ── A GRANEL spotlight — todos los formatos ──────────────────── */}
       {/* CTAs → /portal per §2: "CONSULTAR PRECIO en baldes → el CTA lleva al portal" */}
       <section className="py-20 px-10 bg-paper-2 max-md:px-5">
         <div className="max-w-[1240px] mx-auto">
@@ -405,45 +389,65 @@ export default function HomePage() {
             </div>
           </RevealSection>
 
-          <div className="grid grid-cols-2 gap-[2px] max-md:grid-cols-1">
-            {[balde45, balde23].filter(Boolean).map((p, i) => p && (
-              <RevealSection
-                key={p.id}
-                delay={i * 80}
-                className="group bg-paper hover:bg-ink transition-colors duration-200 border-t-[3px] border-transparent hover:border-red flex gap-0 overflow-hidden"
-              >
-                <div className="w-[140px] shrink-0 bg-paper-2 group-hover:bg-[#111] transition-colors flex items-center justify-center">
-                  <Image
-                    src={p.lifestyle}
-                    alt={p.name}
-                    width={120}
-                    height={120}
-                    className="object-contain p-4"
-                  />
-                </div>
-                <div className="p-7 flex flex-col justify-between flex-1">
-                  <div>
-                    <p className="font-mono text-[9px] tracking-[0.2em] text-red uppercase mb-2">
-                      {p.variant} · {p.size}
-                    </p>
-                    <h3 className="font-heading text-[20px] font-medium m-0 mb-2 group-hover:text-paper transition-colors">
-                      {p.name}
-                    </h3>
-                    <p className="text-[13px] text-[#666] group-hover:text-[#aaa] leading-[1.5] m-0 mb-4 transition-colors">
-                      {p.desc}
-                    </p>
+          {/* Layout: imagen genérica izquierda + listado de todos los formatos derecha */}
+          {/* NOTA: guardar la foto de los baldes en /public/lifestyle/baldes-duo.png */}
+          <RevealSection className="grid grid-cols-2 gap-[2px] max-md:grid-cols-1">
+            {/* Imagen genérica — reemplazar con duo shot cuando esté disponible */}
+            <div className="relative bg-ink overflow-hidden" style={{ minHeight: '420px' }}>
+              <Image
+                src="/products/balde-23-front.png"
+                alt="Baldes Hardy a granel"
+                fill
+                className="object-contain p-8"
+              />
+            </div>
+
+            {/* Todos los formatos */}
+            <div className="bg-paper px-10 py-10 flex flex-col justify-between max-md:px-6 max-md:py-8">
+              <div>
+                <p className="font-mono text-[10px] tracking-[0.2em] text-red uppercase mb-6">── Todos los formatos disponibles</p>
+
+                {/* Crema de Maní */}
+                <div className="mb-7">
+                  <p className="font-mono text-[9px] tracking-[0.2em] uppercase text-[#888] mb-3">Crema de Maní</p>
+                  <div className="flex flex-col gap-[2px]">
+                    {[
+                      { size: '4,5 kg', uso: 'Cafeterías · Cocinas profesionales' },
+                      { size: '23 kg',  uso: 'Producción · Distribución · Industria' },
+                    ].map((f) => (
+                      <div key={f.size} className="flex items-center justify-between bg-paper-2 px-5 py-4">
+                        <span className="font-heading text-[22px] font-medium">{f.size}</span>
+                        <span className="font-mono text-[9px] tracking-[0.12em] uppercase text-[#888] text-right">{f.uso}</span>
+                      </div>
+                    ))}
                   </div>
-                  {/* §2 — baldes → /portal, no revela precio */}
-                  <Link
-                    href="/portal"
-                    className="self-start border border-red text-red group-hover:bg-red group-hover:text-paper font-mono text-[10px] tracking-[0.15em] uppercase px-4 py-[8px] transition-colors"
-                  >
-                    Consultar precio →
-                  </Link>
                 </div>
-              </RevealSection>
-            ))}
-          </div>
+
+                {/* Miel */}
+                <div className="mb-8">
+                  <p className="font-mono text-[9px] tracking-[0.2em] uppercase text-[#888] mb-3">Miel Líquida</p>
+                  <div className="flex flex-col gap-[2px]">
+                    {[
+                      { size: '6 kg',   uso: 'Cafeterías · Repostería · Restaurantes' },
+                      { size: '30 kg',  uso: 'Producción · Panadería · Industria' },
+                    ].map((f) => (
+                      <div key={f.size} className="flex items-center justify-between bg-paper-2 px-5 py-4">
+                        <span className="font-heading text-[22px] font-medium">{f.size}</span>
+                        <span className="font-mono text-[9px] tracking-[0.12em] uppercase text-[#888] text-right">{f.uso}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <Link
+                href="/portal"
+                className="bg-ink text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-7 py-[14px] self-start inline-block hover:bg-red transition-colors"
+              >
+                Consultar precios →
+              </Link>
+            </div>
+          </RevealSection>
         </div>
       </section>
 

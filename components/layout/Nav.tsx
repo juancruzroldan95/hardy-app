@@ -56,6 +56,12 @@ export default function Nav({ cartCount = 0, onCartOpen }: NavProps) {
         {/* Actions */}
         <div className="flex gap-[10px] items-center flex-shrink-0">
           <Link
+            href="/portal"
+            className="border border-paper/30 text-paper font-mono text-[11px] tracking-[0.12em] uppercase px-5 py-[10px] max-md:hidden hover:border-red hover:text-red transition-colors"
+          >
+            Portal →
+          </Link>
+          <Link
             href="/tienda"
             className="bg-red text-paper font-mono text-[11px] tracking-[0.12em] uppercase px-5 py-[10px] max-md:hidden"
           >
@@ -92,6 +98,9 @@ export default function Nav({ cartCount = 0, onCartOpen }: NavProps) {
               {l.label}
             </Link>
           ))}
+          <Link href="/portal" className="text-red border-t border-paper/10 pt-4 mt-1" onClick={() => setMenuOpen(false)}>
+            Portal →
+          </Link>
         </div>
       )}
     </>

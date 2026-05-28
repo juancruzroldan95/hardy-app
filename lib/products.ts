@@ -191,4 +191,42 @@ export const PRODUCTS: Product[] = [
       'El formato para productores, distribuidores y fabricantes que necesitan crema de maní premium en volumen real. La misma calidad de siempre, pensada para producción a escala.',
     diferencial: 'Formato industrial · Producción a escala · Sin aditivos',
   },
+  {
+    id: 'miel-balde-6',
+    name: 'Balde Miel Líquida',
+    variant: 'Líquida',
+    size: '6 kg',
+    line: 'balde',
+    desc: 'Para cafeterías, restaurantes y pastelerías.',
+    image: '/products/balde-45-front.png',
+    lifestyle: '/lifestyle/balde-45-open.png',
+    price: 28500,
+    images: [
+      '/products/miel-liquida-front.png',
+      '/products/miel-liquida-open.png',
+    ],
+    tagline: 'Miel pura a granel para uso profesional.',
+    detail:
+      'Miel multifloral sin pasteurizar en formato balde para cocinas, cafeterías y repostería profesional. Sin azúcar agregada, sin procesar.',
+    diferencial: 'Sin pasteurizar · Multifloral · Formato profesional',
+  },
+  {
+    id: 'miel-balde-30',
+    name: 'Balde Miel Líquida',
+    variant: 'Líquida',
+    size: '30 kg',
+    line: 'balde',
+    desc: 'Formato industrial para producción a escala.',
+    image: '/products/balde-23-front.png',
+    lifestyle: '/lifestyle/balde-23-open.png',
+    price: 118000,
+    images: [
+      '/products/miel-liquida-front.png',
+      '/products/miel-liquida-open.png',
+    ],
+    tagline: 'Escala sin compromisos.',
+    detail:
+      'Miel multifloral para productores, panaderos y fabricantes que necesitan volumen real. La mejor relación costo por kg de toda la línea.',
+    diferencial: 'Formato industrial · Sin pasteurizar · Mejor precio/kg',
+  },
 ]

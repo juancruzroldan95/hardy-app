@@ -92,7 +92,7 @@ export const RECETAS: Receta[] = [
     porciones: '6-8 cookies',
     dificultad: 'Fácil',
     categoria: 'Snacks',
-    imagen: '/lifestyle/receta-cookies.png',
+    imagen: '/lifestyle/receta-tostadas.png',
     productos: ['Crema de Maní Natural 380g', 'Miel Líquida 500g'],
     ingredientes: [
       '1 huevo',
@@ -118,7 +118,7 @@ export const RECETAS: Receta[] = [
     porciones: '8-10 bocados',
     dificultad: 'Fácil',
     categoria: 'Snacks',
-    imagen: '/lifestyle/receta-bites.png',
+    imagen: '/lifestyle/receta-bowl.png',
     productos: ['Crema de Maní Natural 380g', 'Miel Líquida 500g'],
     ingredientes: [
       '2 bananas maduras',
@@ -144,7 +144,7 @@ export const RECETAS: Receta[] = [
     porciones: '6-8 pancakes',
     dificultad: 'Fácil',
     categoria: 'Desayuno',
-    imagen: '/lifestyle/receta-pancakes.png',
+    imagen: '/lifestyle/receta-tostadas.png',
     productos: ['Crema de Maní Crunchy 380g', 'Miel Líquida 500g'],
     ingredientes: [
       '1 huevo',
@@ -168,7 +168,7 @@ export const RECETAS: Receta[] = [
     porciones: '12-15 bolitas',
     dificultad: 'Fácil',
     categoria: 'Snacks',
-    imagen: '/lifestyle/receta-energy-bites.png',
+    imagen: '/lifestyle/receta-bowl.png',
     productos: ['Crema de Maní Natural 380g', 'Miel Sólida 500g'],
     ingredientes: [
       '1 taza de avena',
@@ -194,7 +194,7 @@ export const RECETAS: Receta[] = [
     porciones: '1 frasco grande',
     dificultad: 'Fácil',
     categoria: 'Desayuno',
-    imagen: '/lifestyle/receta-granola.png',
+    imagen: '/lifestyle/receta-miel.png',
     productos: ['Crema de Maní Crunchy 380g', 'Miel Sólida 500g'],
     ingredientes: [
       '2 tazas de avena',
@@ -220,7 +220,7 @@ export const RECETAS: Receta[] = [
     porciones: '1 porción',
     dificultad: 'Fácil',
     categoria: 'Fit',
-    imagen: '/lifestyle/receta-shot.png',
+    imagen: '/lifestyle/receta-miel.png',
     productos: ['Crema de Maní Natural 380g', 'Miel Líquida 500g'],
     ingredientes: [
       '1 cda de Crema de Maní Natural HARDY',
@@ -242,7 +242,7 @@ export const RECETAS: Receta[] = [
     porciones: '8-10 barritas',
     dificultad: 'Fácil',
     categoria: 'Snacks',
-    imagen: '/lifestyle/receta-barritas.png',
+    imagen: '/lifestyle/receta-bowl.png',
     productos: ['Crema de Maní Natural 380g', 'Miel Sólida 500g'],
     ingredientes: [
       '2 tazas de avena',
@@ -269,7 +269,7 @@ export const RECETAS: Receta[] = [
     porciones: '1 vaso grande',
     dificultad: 'Fácil',
     categoria: 'Fit',
-    imagen: '/lifestyle/receta-smoothie.png',
+    imagen: '/lifestyle/receta-bowl.png',
     productos: ['Crema de Maní Crunchy 380g'],
     ingredientes: [
       '1 banana congelada',
@@ -294,7 +294,7 @@ export const RECETAS: Receta[] = [
     porciones: '1 frasco',
     dificultad: 'Fácil',
     categoria: 'Desayuno',
-    imagen: '/lifestyle/receta-parfait.png',
+    imagen: '/lifestyle/receta-tostadas.png',
     productos: ['Crema de Maní Natural 380g', 'Miel Líquida 500g'],
     ingredientes: [
       '1 taza de yogur griego',
@@ -320,7 +320,7 @@ export const RECETAS: Receta[] = [
     porciones: '1 porción',
     dificultad: 'Fácil',
     categoria: 'Desayuno',
-    imagen: '/lifestyle/receta-porridge.png',
+    imagen: '/lifestyle/receta-tostadas.png',
     productos: ['Crema de Maní Crunchy 380g', 'Miel Líquida 500g'],
     ingredientes: [
       '½ taza de avena',
@@ -345,7 +345,7 @@ export const RECETAS: Receta[] = [
     porciones: '2 porciones',
     dificultad: 'Medio',
     categoria: 'Desayuno',
-    imagen: '/lifestyle/receta-waffles.png',
+    imagen: '/lifestyle/receta-tostadas.png',
     productos: ['Crema de Maní Natural 380g', 'Miel Sólida 500g'],
     ingredientes: [
       '1 taza de harina integral',
@@ -370,7 +370,7 @@ export const RECETAS: Receta[] = [
     porciones: '1 porción',
     dificultad: 'Fácil',
     categoria: 'Desayuno',
-    imagen: '/lifestyle/receta-yogurt.png',
+    imagen: '/lifestyle/receta-bowl.png',
     productos: ['Crema de Maní Crunchy 380g', 'Miel Líquida 500g'],
     ingredientes: [
       '1 taza de yogur natural',
