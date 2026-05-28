@@ -19,6 +19,7 @@ export const userRoleEnum = pgEnum('user_role', [
   'gastronomico',
   'distribuidor',
   'productor',
+  'admin',
 ])
 
 export const orderStatusEnum = pgEnum('order_status', [
@@ -37,11 +38,40 @@ export const paymentStatusEnum = pgEnum('payment_status', [
   'failed',
 ])
 
+export const shippingMethodEnum = pgEnum('shipping_method', [
+  'coordinar_whatsapp',
+  'andreani',
+  'oca',
+  'retiro_deposito',
+])
+
+export const paymentMethodEnum = pgEnum('payment_method', [
+  'transferencia',
+  'efectivo',
+  'credito30',
+  'credito60',
+  'cheque',
+])
+
+export const tipoNegocioEnum = pgEnum('tipo_negocio', [
+  'dietetica',
+  'suplementos',
+  'distribuidor',
+  'cafeteria',
+  'restaurante',
+  'gimnasio',
+  'almacen',
+  'otro',
+])
+
+export const estadoSolicitudEnum = pgEnum('estado_solicitud', [
+  'pendiente',
+  'contactado',
+  'aprobada',
+  'rechazada',
+])
+
 // ─── profiles ─────────────────────────────────────────────────────────────────
-// id: internal auto-generated PK.
-// userId: the UUID Supabase creates in auth.users — use this to link to the auth layer.
-// Admin creates the auth.users row via Supabase dashboard,
-// then inserts the matching profiles row with userId = auth UUID + role.
 
 export const profiles = pgTable('profiles', {
   id:          uuid('id').primaryKey().defaultRandom(),
@@ -53,8 +83,11 @@ export const profiles = pgTable('profiles', {
   address:     text('address'),
   city:        text('city'),
   province:    text('province'),
-  notes:       text('notes'),
-  isActive:    boolean('is_active').notNull().default(true),
+  notes:            text('notes'),
+  cuit:             text('cuit'),
+  vendedorNombre:   text('vendedor_nombre'),
+  vendedorWhatsapp: text('vendedor_whatsapp'),
+  isActive:         boolean('is_active').notNull().default(true),
   isDeleted:   boolean('is_deleted').notNull().default(false),
   createdAt:   timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt:   timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
@@ -68,6 +101,8 @@ export const orders = pgTable('orders', {
   status:          orderStatusEnum('status').notNull().default('pending'),
   paymentStatus:   paymentStatusEnum('payment_status').notNull().default('unpaid'),
   totalArs:        numeric('total_ars', { precision: 12, scale: 2 }).notNull(),
+  shippingMethod:  shippingMethodEnum('shipping_method'),
+  paymentMethod:   paymentMethodEnum('payment_method'),
   notes:           text('notes'),
   shippingAddress: text('shipping_address'),
   isActive:        boolean('is_active').notNull().default(true),
@@ -81,9 +116,6 @@ export const orders = pgTable('orders', {
 ])
 
 // ─── order_items ──────────────────────────────────────────────────────────────
-// Stores a snapshot of product data at the time of the order.
-// Products live in lib/products.ts as static data — there is no products table.
-// Snapshotting preserves price history if the catalog changes later.
 
 export const orderItems = pgTable('order_items', {
   id:           uuid('id').primaryKey().defaultRandom(),
@@ -102,9 +134,6 @@ export const orderItems = pgTable('order_items', {
 ])
 
 // ─── price_overrides ──────────────────────────────────────────────────────────
-// Per-role pricing for products. Admin manages these rows directly in the DB.
-// If no row exists for a (role, productId) pair, falls back to the base price
-// defined in lib/products.ts.
 
 export const priceOverrides = pgTable('price_overrides', {
   id:        uuid('id').primaryKey().defaultRandom(),
@@ -117,6 +146,48 @@ export const priceOverrides = pgTable('price_overrides', {
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 }, (table) => [
   index('price_overrides_role_product_idx').on(table.role, table.productId),
+])
+
+// ─── solicitudes ──────────────────────────────────────────────────────────────
+// Registro de interesados en acceder al portal B2B.
+// No crea usuario en Supabase — eso lo hace el admin manualmente tras verificar.
+
+export const solicitudes = pgTable('solicitudes', {
+  id:          uuid('id').primaryKey().defaultRandom(),
+  nombre:      text('nombre').notNull(),
+  empresa:     text('empresa').notNull(),
+  tipoNegocio: tipoNegocioEnum('tipo_negocio').notNull(),
+  email:       text('email').notNull(),
+  whatsapp:    text('whatsapp').notNull(),
+  ciudad:      text('ciudad').notNull(),
+  provincia:   text('provincia').notNull(),
+  cuit:        text('cuit'),
+  mensaje:     text('mensaje'),
+  notasAdmin:  text('notas_admin'),
+  estado:      estadoSolicitudEnum('estado').notNull().default('pendiente'),
+  isActive:    boolean('is_active').notNull().default(true),
+  isDeleted:   boolean('is_deleted').notNull().default(false),
+  createdAt:   timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt:   timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+}, (table) => [
+  index('solicitudes_estado_idx').on(table.estado),
+  index('solicitudes_email_idx').on(table.email),
+])
+
+// ─── novedades ────────────────────────────────────────────────────────────────
+// Publicaciones internas del portal (avisos, promociones, actualizaciones).
+
+export const novedades = pgTable('novedades', {
+  id:        uuid('id').primaryKey().defaultRandom(),
+  titulo:    text('titulo').notNull(),
+  cuerpo:    text('cuerpo').notNull(),
+  imageUrl:  text('image_url'),
+  isActive:  boolean('is_active').notNull().default(true),
+  isDeleted: boolean('is_deleted').notNull().default(false),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+}, (table) => [
+  index('novedades_created_at_idx').on(table.createdAt),
 ])
 
 // ─── Relations ────────────────────────────────────────────────────────────────
@@ -142,14 +213,22 @@ export const orderItemsRelations = relations(orderItems, ({ one }) => ({
 
 // ─── TypeScript types ─────────────────────────────────────────────────────────
 
-export type Profile        = typeof profiles.$inferSelect
-export type NewProfile     = typeof profiles.$inferInsert
-export type Order          = typeof orders.$inferSelect
-export type NewOrder       = typeof orders.$inferInsert
-export type OrderItem      = typeof orderItems.$inferSelect
-export type NewOrderItem   = typeof orderItems.$inferInsert
-export type PriceOverride  = typeof priceOverrides.$inferSelect
-export type UserRole       = (typeof userRoleEnum.enumValues)[number]
-export type OrderStatus    = (typeof orderStatusEnum.enumValues)[number]
-export type PaymentStatus  = (typeof paymentStatusEnum.enumValues)[number]
-export type OrderWithItems = Order & { items: OrderItem[] }
+export type Profile          = typeof profiles.$inferSelect
+export type NewProfile       = typeof profiles.$inferInsert
+export type Order            = typeof orders.$inferSelect
+export type NewOrder         = typeof orders.$inferInsert
+export type OrderItem        = typeof orderItems.$inferSelect
+export type NewOrderItem     = typeof orderItems.$inferInsert
+export type PriceOverride    = typeof priceOverrides.$inferSelect
+export type Solicitud        = typeof solicitudes.$inferSelect
+export type NewSolicitud     = typeof solicitudes.$inferInsert
+export type Novedad          = typeof novedades.$inferSelect
+export type NewNovedad       = typeof novedades.$inferInsert
+export type UserRole         = (typeof userRoleEnum.enumValues)[number]
+export type OrderStatus      = (typeof orderStatusEnum.enumValues)[number]
+export type PaymentStatus    = (typeof paymentStatusEnum.enumValues)[number]
+export type ShippingMethod   = (typeof shippingMethodEnum.enumValues)[number]
+export type PaymentMethod    = (typeof paymentMethodEnum.enumValues)[number]
+export type TipoNegocio      = (typeof tipoNegocioEnum.enumValues)[number]
+export type EstadoSolicitud  = (typeof estadoSolicitudEnum.enumValues)[number]
+export type OrderWithItems   = Order & { items: OrderItem[] }

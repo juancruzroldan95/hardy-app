@@ -25,6 +25,7 @@ export interface Receta {
   dificultad: 'Fácil' | 'Medio' | 'Difícil'
   categoria: 'Desayuno' | 'Fit' | 'Snacks'
   imagen: string
+  videoUrl?: string
   productos: string[]
   ingredientes: string[]
   preparacion: string[]

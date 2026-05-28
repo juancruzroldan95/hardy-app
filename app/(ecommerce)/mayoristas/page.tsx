@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import Image from 'next/image'
+import Link from 'next/link'
 import { WA_NUMBER, ESCALAS } from '@/lib/products'
+import SolicitudForm from '@/components/mayoristas/SolicitudForm'
 
 export const metadata: Metadata = {
   title: 'Mayoristas — Hardy',
@@ -50,14 +52,20 @@ export default function MayoristasPage() {
               Cajas de crema de maní y miel para dietéticas, gimnasios, cafeterías, tiendas y distribuidores.
               Precios escalonados desde 3 cajas.
             </p>
-            <a
-              href={`${WA_NUMBER}?text=Hola%20Hardy,%20quiero%20información%20mayorista`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block bg-red text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-7 py-[14px]"
-            >
-              Consultar lista mayorista →
-            </a>
+            <div className="flex gap-3 flex-wrap">
+              <a
+                href="#solicitar"
+                className="inline-block bg-red text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-7 py-[14px]"
+              >
+                Solicitar acceso al portal →
+              </a>
+              <Link
+                href="/login"
+                className="inline-block bg-paper/10 border border-white/20 text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-7 py-[14px]"
+              >
+                Ya tengo acceso →
+              </Link>
+            </div>
           </div>
           <div className="overflow-hidden max-md:hidden">
             <Image
@@ -191,26 +199,56 @@ export default function MayoristasPage() {
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="py-16 px-10 bg-ink text-paper text-center max-md:px-6">
-        <div className="max-w-[500px] mx-auto">
-          <p
-            className="font-heading font-medium mb-[14px]"
-            style={{ fontSize: 'clamp(24px,5vw,36px)' }}
-          >
-            ¿Hablamos?
-          </p>
-          <p className="text-[#bbb] text-[15px] mb-7 leading-[1.6]">
-            Escribinos y te respondemos con precios y condiciones para tu perfil.
-          </p>
-          <a
-            href={`${WA_NUMBER}?text=Hola%20Hardy,%20quiero%20información%20para%20revender`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-block bg-red text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-8 py-[14px]"
-          >
-            Escribir por WhatsApp →
-          </a>
+      {/* FORMULARIO DE SOLICITUD */}
+      <section id="solicitar" className="py-20 px-10 bg-paper max-md:px-5">
+        <div className="max-w-[1100px] mx-auto grid grid-cols-2 gap-20 items-start max-md:grid-cols-1 max-md:gap-10">
+
+          <div className="sticky top-[100px] max-md:static">
+            <p className="font-mono text-[11px] tracking-[0.25em] text-red uppercase mb-[14px]">
+              ── Solicitar acceso
+            </p>
+            <h2
+              className="font-heading font-medium tracking-[-0.02em] m-0 mb-5"
+              style={{ fontSize: 'clamp(28px, 3vw, 42px)', lineHeight: 1.1 }}
+            >
+              Completá el formulario.
+              <br />
+              <em className="not-italic text-red">Nos ponemos en contacto.</em>
+            </h2>
+            <p className="font-body text-[15px] text-ink/60 leading-[1.7] mb-6">
+              Revisamos tu información y te contactamos por WhatsApp y email
+              con tu usuario y contraseña para acceder al portal. Proceso de
+              verificación de 24 a 48 horas.
+            </p>
+            <div className="space-y-3 mb-8">
+              {[
+                '✓ Acceso al portal de pedidos',
+                '✓ Lista de precios según tu segmento',
+                '✓ Coordinación de envíos directo',
+                '✓ Soporte por WhatsApp',
+              ].map((item) => (
+                <p key={item} className="font-mono text-[11px] tracking-[0.1em] text-ink/60">
+                  {item}
+                </p>
+              ))}
+            </div>
+            <p className="font-mono text-[10px] tracking-[0.1em] text-ink/40 uppercase">
+              ¿Preferís escribirnos directo?{' '}
+              <a
+                href={`${WA_NUMBER}?text=Hola%20Hardy,%20quiero%20acceso%20al%20portal%20mayorista`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-ink border-b border-ink"
+              >
+                WhatsApp →
+              </a>
+            </p>
+          </div>
+
+          <div>
+            <SolicitudForm />
+          </div>
+
         </div>
       </section>
 

@@ -193,6 +193,24 @@ export default async function RecetaDetallePage({ params }: Props) {
         </div>
       </section>
 
+      {/* Video UGC */}
+      {receta.videoUrl && (
+        <section className="py-14 px-10 bg-ink max-md:px-5">
+          <div className="max-w-[1100px] mx-auto">
+            <div className="font-mono text-[11px] tracking-[0.25em] text-red uppercase mb-6">── En video</div>
+            <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+              <iframe
+                src={receta.videoUrl}
+                title={receta.titulo}
+                className="absolute inset-0 w-full h-full border-0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Más recetas CTA */}
       <section className="py-14 px-10 bg-paper text-center max-md:px-5">
         <div className="max-w-[500px] mx-auto">

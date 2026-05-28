@@ -6,6 +6,7 @@ export const ROLE_LABELS: Record<UserRole, string> = {
   gastronomico: 'Gastronómico',
   distribuidor: 'Distribuidor',
   productor:    'Productor',
+  admin:        'Admin',
 }
 
 export const ROLE_DESCRIPTIONS: Record<UserRole, string> = {
@@ -14,4 +15,5 @@ export const ROLE_DESCRIPTIONS: Record<UserRole, string> = {
   gastronomico: 'Cocinas y cafés · baldes 4.5kg',
   distribuidor: 'Red regional · 30–100+ cajas',
   productor:    'Industria · baldes 23kg',
+  admin:        'Acceso completo al panel',
 }

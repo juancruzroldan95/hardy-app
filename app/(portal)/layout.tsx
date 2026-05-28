@@ -16,8 +16,10 @@ export default async function PortalLayout({ children }: { children: React.React
     where: and(eq(profiles.userId, user.id), eq(profiles.isDeleted, false)),
   })
 
-  const role        = (profile?.role ?? 'consumer') as UserRole
-  const displayName = profile?.displayName ?? ''
+  const role             = (profile?.role ?? 'consumer') as UserRole
+  const displayName      = profile?.displayName ?? ''
+  const vendedorNombre   = profile?.vendedorNombre ?? undefined
+  const vendedorWhatsapp = profile?.vendedorWhatsapp ?? undefined
 
   return (
     <div className="min-h-screen bg-paper-2 flex max-md:flex-col">
@@ -25,6 +27,8 @@ export default async function PortalLayout({ children }: { children: React.React
         role={role}
         displayName={displayName}
         userEmail={user.email ?? ''}
+        vendedorNombre={vendedorNombre}
+        vendedorWhatsapp={vendedorWhatsapp}
       />
       <main className="flex-1 min-w-0 p-8 max-md:p-5">
         {children}
