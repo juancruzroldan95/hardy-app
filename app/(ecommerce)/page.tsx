@@ -97,8 +97,8 @@ const PHILOSOPHY = [
 ]
 
 export default function HomePage() {
-  const products  = getProducts()
-  const recetas   = getRecetas()
+  const products = getProducts()
+  const recetas  = getRecetas()
   const featuredRecetas = recetas.slice(0, 3)
 
   const balde45 = products.find((p) => p.id === 'balde-45')
@@ -358,12 +358,12 @@ export default function HomePage() {
               <br />
               <em className="not-italic text-red">Con textura real.</em>
             </h2>
-            <p className="text-[15px] leading-[1.8] mb-8" style={{ color: 'rgba(250,250,248,0.65)' }}>
+            <p className="text-[15px] leading-[1.8] mb-8 text-paper/65">
               La misma base 100% natural con trozos enteros de maní que te recuerdan de dónde viene cada cucharada. Sin aditivos. Sin aceite. Sin azúcar. Solo maní — pero que se siente.
             </p>
             <div className="flex gap-[2px] mb-8">
               {['100% Maní', 'Trozos enteros', 'Sin aditivos', '380g'].map((tag) => (
-                <span key={tag} className="bg-white/8 font-mono text-[9px] tracking-[0.15em] uppercase px-3 py-[6px] text-paper/60">
+                <span key={tag} className="bg-paper/8 font-mono text-[9px] tracking-[0.15em] uppercase px-3 py-[6px] text-paper/60">
                   {tag}
                 </span>
               ))}
@@ -530,7 +530,7 @@ export default function HomePage() {
               <br />
               Hoy estamos en <em className="not-italic text-red">todo el país.</em>
             </h2>
-            <p className="text-[15px] leading-[1.8] m-0" style={{ color: 'rgba(250,250,248,0.65)' }}>
+            <p className="text-[15px] leading-[1.8] m-0 text-paper/65">
               HARDY empezó en Buenos Aires con una idea simple: hacer productos nobles, de pocos ingredientes y sin vueltas. Diez años después llega a dietéticas, cafés, restaurantes y negocios de todo el país. La marca creció. La obsesión por lo simple, no.
             </p>
           </RevealSection>
@@ -544,7 +544,7 @@ export default function HomePage() {
                 <span className="font-mono text-[11px] text-red pt-[3px]">{v.n}</span>
                 <div>
                   <div className="font-body text-[15px] font-bold mb-1">{v.title}</div>
-                  <div className="text-[13px] leading-[1.6]" style={{ color: 'rgba(250,250,248,0.55)' }}>{v.desc}</div>
+                  <div className="text-[13px] leading-[1.6] text-paper/55">{v.desc}</div>
                 </div>
               </div>
             ))}

@@ -91,9 +91,7 @@ function PortalPublicLanding() {
               {/* §5 — aviso de validación visible, no promete precios instantáneos */}
               <div className="bg-ink text-paper px-5 py-3 mb-6 inline-block">
                 <p className="font-mono text-[10px] tracking-[0.12em] uppercase text-paper/70 m-0">
-                  ⏱ Proceso de validación: 24 a 48 horas hábiles.
-                  <br />
-                  Validamos tu cuenta y te habilitamos la lista de precios que te corresponde.
+                  ⏱ Validación: 24 a 48 horas hábiles.
                 </p>
               </div>
             </div>
