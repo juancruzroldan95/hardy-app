@@ -198,12 +198,12 @@ export const PRODUCTS: Product[] = [
     size: '6 kg',
     line: 'balde',
     desc: 'Para cafeterías, restaurantes y pastelerías.',
-    image: '/products/balde-45-front.png',
-    lifestyle: '/lifestyle/balde-45-open.png',
+    image: '/products/miel-balde-6-front.png',
+    lifestyle: '/products/miel-balde-6-open.png',
     price: 28500,
     images: [
-      '/products/miel-liquida-front.png',
-      '/products/miel-liquida-open.png',
+      '/products/miel-balde-6-front.png',
+      '/products/miel-balde-6-open.png',
     ],
     tagline: 'Miel pura a granel para uso profesional.',
     detail:
@@ -217,12 +217,12 @@ export const PRODUCTS: Product[] = [
     size: '30 kg',
     line: 'balde',
     desc: 'Formato industrial para producción a escala.',
-    image: '/products/balde-23-front.png',
-    lifestyle: '/lifestyle/balde-23-open.png',
+    image: '/products/miel-balde-30-front.png',
+    lifestyle: '/products/miel-balde-30-open.png',
     price: 118000,
     images: [
-      '/products/miel-liquida-front.png',
-      '/products/miel-liquida-open.png',
+      '/products/miel-balde-30-front.png',
+      '/products/miel-balde-30-open.png',
     ],
     tagline: 'Escala sin compromisos.',
     detail:

@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
 import { ShoppingBag, Menu, X } from 'lucide-react'
+import { WA_NUMBER } from '@/lib/products'
 
 interface NavProps {
   cartCount?: number
@@ -59,14 +60,16 @@ export default function Nav({ cartCount = 0, onCartOpen }: NavProps) {
             href="/portal"
             className="border border-paper/30 text-paper font-mono text-[11px] tracking-[0.12em] uppercase px-5 py-[10px] max-md:hidden hover:border-red hover:text-red transition-colors"
           >
-            Portal →
+            Portal Cliente
           </Link>
-          <Link
-            href="/tienda"
+          <a
+            href={`${WA_NUMBER}?text=Hola%21%20Quiero%20lista%20de%20precios%20y%20condiciones%20mayoristas.`}
+            target="_blank"
+            rel="noopener noreferrer"
             className="bg-red text-paper font-mono text-[11px] tracking-[0.12em] uppercase px-5 py-[10px] max-md:hidden"
           >
-            Comprar ahora
-          </Link>
+            Contactanos por WhatsApp
+          </a>
 
           {onCartOpen && (
             <button
@@ -99,7 +102,7 @@ export default function Nav({ cartCount = 0, onCartOpen }: NavProps) {
             </Link>
           ))}
           <Link href="/portal" className="text-red border-t border-paper/10 pt-4 mt-1" onClick={() => setMenuOpen(false)}>
-            Portal →
+            Portal Cliente →
           </Link>
         </div>
       )}

@@ -55,13 +55,13 @@ export default function MayoristasPage() {
               href="#solicitar"
               className="inline-block bg-red text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-7 py-[14px]"
             >
-              Solicitar acceso al portal →
+              Solicitar acceso a Portal Cliente →
             </a>
             <Link
-              href="/login"
+              href="/portal"
               className="inline-block bg-paper/10 border border-white/20 text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-7 py-[14px]"
             >
-              Ya tengo acceso →
+              Acceder a Portal Cliente →
             </Link>
           </div>
         </div>
@@ -149,16 +149,24 @@ export default function MayoristasPage() {
           <div className="bg-ink text-paper px-10 py-10 text-center">
             <p className="font-heading text-[24px] font-medium mb-3">¿Listo para vender Hardy?</p>
             <p className="text-[13px] text-[#bbb] mb-6 leading-[1.6]">
-              Escribinos y te enviamos lista de precios y condiciones mayoristas.
+              Solicitá tu acceso al portal de clientes y realizá tu compra o contactanos por WhatsApp.
             </p>
-            <a
-              href={`${WA_NUMBER}?text=Hola%20Hardy,%20quiero%20información%20mayorista`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block bg-red text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-6 py-[14px]"
-            >
-              Escribir por WhatsApp →
-            </a>
+            <div className="flex gap-3 flex-wrap justify-center">
+              <Link
+                href="/portal"
+                className="inline-block bg-red text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-6 py-[14px]"
+              >
+                Portal Cliente →
+              </Link>
+              <a
+                href={`${WA_NUMBER}?text=Hola%20Hardy,%20quiero%20información%20mayorista`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block bg-paper/10 border border-white/20 text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-6 py-[14px]"
+              >
+                WhatsApp →
+              </a>
+            </div>
           </div>
         </div>
       </section>
