@@ -456,10 +456,10 @@ export default function HomePage() {
                   href={`${WA_NUMBER}?text=Hola%20Hardy,%20quiero%20consultar%20por%20volumen%20a%20granel`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="bg-ink text-paper w-[52px] h-[52px] flex items-center justify-center hover:bg-red transition-colors flex-shrink-0"
+                  className="bg-ink text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-7 py-[14px] flex items-center gap-2 hover:bg-red transition-colors"
                   aria-label="Consultar por WhatsApp"
                 >
-                  <MessageCircle size={20} />
+                  Contactanos <MessageCircle size={14} />
                 </a>
               </div>
             </div>

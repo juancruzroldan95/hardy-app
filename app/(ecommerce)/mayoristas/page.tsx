@@ -163,10 +163,10 @@ export default function MayoristasPage() {
                 href={`${WA_NUMBER}?text=Hola%20Hardy,%20quiero%20información%20mayorista`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="bg-paper/10 border border-white/20 text-paper w-[52px] h-[52px] flex items-center justify-center"
+                className="bg-paper/10 border border-white/20 text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-6 py-[14px] flex items-center gap-2"
                 aria-label="WhatsApp"
               >
-                <MessageCircle size={20} />
+                Contactanos <MessageCircle size={14} />
               </a>
             </div>
           </div>
@@ -236,10 +236,10 @@ export default function MayoristasPage() {
                 href={`${WA_NUMBER}?text=Hola%20Hardy,%20quiero%20acceso%20al%20portal%20mayorista`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-ink inline-flex items-center align-middle"
+                className="text-ink inline-flex items-center gap-1 align-middle border-b border-ink"
                 aria-label="WhatsApp"
               >
-                <MessageCircle size={14} />
+                Contactanos <MessageCircle size={12} className="inline" />
               </a>
             </p>
           </div>

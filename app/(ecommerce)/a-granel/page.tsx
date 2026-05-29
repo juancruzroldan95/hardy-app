@@ -119,10 +119,10 @@ export default function AGranelPage() {
               href={`${WA_NUMBER}?text=Hola%20Hardy,%20quiero%20información%20de%20productos%20a%20granel`}
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-paper/10 border border-white/20 text-paper w-[50px] h-[50px] flex items-center justify-center"
+              className="bg-paper/10 border border-white/20 text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-7 py-[13px] flex items-center gap-2"
               aria-label="Consultar por WhatsApp"
             >
-              <MessageCircle size={20} />
+              Contactanos <MessageCircle size={14} />
             </a>
           </div>
         </div>
@@ -201,10 +201,10 @@ export default function AGranelPage() {
             href={`${WA_NUMBER}?text=Hola%20Hardy,%20quiero%20consultar%20por%20volumen%20a%20granel`}
             target="_blank"
             rel="noopener noreferrer"
-            className="bg-red text-paper w-[60px] h-[60px] flex items-center justify-center mx-auto"
+            className="bg-red text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-8 py-[16px] inline-flex items-center gap-2 mx-auto"
             aria-label="Consultar por WhatsApp"
           >
-            <MessageCircle size={26} />
+            Contactanos <MessageCircle size={16} />
           </a>
         </div>
       </section>

@@ -213,28 +213,6 @@ export const RECETAS: Receta[] = [
     macros: { kcal: 280, proteinas: 7, carbos: 35, grasas: 13 },
   },
   {
-    slug: 'shot-energia',
-    titulo: 'Shot de energía natural',
-    descripcion: 'Una combinación simple, pura y llena de energía real.',
-    tiempo: '1 min',
-    porciones: '1 porción',
-    dificultad: 'Fácil',
-    categoria: 'Fit',
-    imagen: '/lifestyle/recetas/receta-08.png',
-    productos: ['Crema de Maní Natural 380g', 'Miel Líquida 500g'],
-    ingredientes: [
-      '1 cda de Crema de Maní Natural HARDY',
-      '1 cda de Miel Líquida HARDY',
-      '1 pizca de canela',
-    ],
-    preparacion: [
-      'Mezclá la crema de maní con la miel.',
-      'Espolvoreá con canela.',
-      'Tomarlo antes del entreno o como snack rápido.',
-    ],
-    macros: { kcal: 120, proteinas: 3, carbos: 17, grasas: 5 },
-  },
-  {
     slug: 'barritas-energeticas',
     titulo: 'Barritas energéticas',
     descripcion: 'Crocantes, nutritivas y cargadas de energía real.',
