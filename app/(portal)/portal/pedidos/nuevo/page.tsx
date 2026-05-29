@@ -39,15 +39,19 @@ export default async function NuevoPedidoPage({ searchParams }: Props) {
 
   const products     = getProducts()
   const productosOrden: ProductOrden[] = products.map((p) => {
-    const override = overrideMap.get(p.id)
+    const override      = overrideMap.get(p.id)
+    const unitPrice     = override?.price ?? p.price
+    const unitsPerBox   = p.unitsPerBox ?? 1
     return {
-      id:       p.id,
-      name:     p.name,
-      variant:  p.variant,
-      size:     p.size,
-      image:    p.image,
-      b2bPrice: override?.price ?? p.price,
-      minQty:   override?.minQty ?? 1,
+      id:           p.id,
+      name:         p.name,
+      variant:      p.variant,
+      size:         p.size,
+      image:        p.image,
+      b2bPrice:     unitPrice,
+      b2bPriceCaja: unitPrice * unitsPerBox,
+      unitsPerBox,
+      minQty:       override?.minQty ?? 1,
     }
   })
 

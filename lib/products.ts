@@ -48,6 +48,7 @@ export const PRODUCTS: Product[] = [
     detail:
       '100% maní seleccionado de Córdoba. Sin azúcar agregada, sin aceites vegetales, sin conservantes. Lo que ves en la etiqueta es todo lo que hay adentro.',
     diferencial: '100% maní · Sin aditivos · Sin azúcar',
+    unitsPerBox: 15,
     nutriLabel: 'Porción 20g (1 cucharada)',
     nutri: [
       ['Valor energético', '117 kcal / 485 kJ'],
@@ -79,6 +80,7 @@ export const PRODUCTS: Product[] = [
     detail:
       'La misma base 100% natural con trozos enteros de maní que te recuerdan de dónde viene cada cucharada. Textura que se siente — no se disimula.',
     diferencial: 'Con trozos enteros · Textura real · Sin aditivos',
+    unitsPerBox: 15,
     nutriLabel: 'Porción 20g (1 cucharada)',
     nutri: [
       ['Valor energético', '117 kcal / 485 kJ'],
@@ -110,6 +112,7 @@ export const PRODUCTS: Product[] = [
     detail:
       'Multifloral, cruda y sin procesar. Del panal directo al frasco, sin calor ni filtros que comprometan sus enzimas naturales, su aroma y sus propiedades.',
     diferencial: 'Sin pasteurizar · Sin procesar · Cruda',
+    unitsPerBox: 12,
     nutriLabel: 'Porción 20g (1 cucharada)',
     nutri: [
       ['Valor energético', '61 kcal / 255 kJ'],
@@ -140,6 +143,7 @@ export const PRODUCTS: Product[] = [
     detail:
       'La miel que se vuelve sólida no está en mal estado — está en su estado más puro. Un proceso 100% natural que preserva enzimas, aromas y valor nutritivo intactos.',
     diferencial: 'Multifloral · Cristalización natural · 100% pura',
+    unitsPerBox: 12,
     nutriLabel: 'Porción 20g (1 cucharada)',
     nutri: [
       ['Valor energético', '61 kcal / 255 kJ'],
@@ -170,6 +174,7 @@ export const PRODUCTS: Product[] = [
     detail:
       'El formato ideal para cocinas profesionales, cafeterías, gimnasios y revendedores que necesitan calidad constante sin pagar precio minorista. Mismo maní 100% natural, en volumen real.',
     diferencial: 'Sin aditivos · Precio mayorista · Ideal para reventa',
+    unitsPerBox: 1,
   },
   {
     id: 'balde-23',
@@ -190,6 +195,7 @@ export const PRODUCTS: Product[] = [
     detail:
       'El formato para productores, distribuidores y fabricantes que necesitan crema de maní premium en volumen real. La misma calidad de siempre, pensada para producción a escala.',
     diferencial: 'Formato industrial · Producción a escala · Sin aditivos',
+    unitsPerBox: 1,
   },
   {
     id: 'miel-balde-6',
@@ -209,6 +215,7 @@ export const PRODUCTS: Product[] = [
     detail:
       'Miel multifloral sin pasteurizar en formato balde para cocinas, cafeterías y repostería profesional. Sin azúcar agregada, sin procesar.',
     diferencial: 'Sin pasteurizar · Multifloral · Formato profesional',
+    unitsPerBox: 1,
   },
   {
     id: 'miel-balde-30',
@@ -228,5 +235,6 @@ export const PRODUCTS: Product[] = [
     detail:
       'Miel multifloral para productores, panaderos y fabricantes que necesitan volumen real. La mejor relación costo por kg de toda la línea.',
     diferencial: 'Formato industrial · Sin pasteurizar · Mejor precio/kg',
+    unitsPerBox: 1,
   },
 ]

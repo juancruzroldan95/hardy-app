@@ -13,7 +13,9 @@ export interface ProductOrden {
   variant: string
   size: string
   image: string
-  b2bPrice: number
+  b2bPrice: number      // precio por UNIDAD (de price_overrides)
+  b2bPriceCaja: number  // precio por CAJA = b2bPrice × unitsPerBox
+  unitsPerBox: number   // 15 (maní) | 12 (miel) | 1 (baldes)
   minQty: number
 }
 
@@ -45,7 +47,7 @@ const SHIPPING_OPTIONS = [
     value:   'sin_urgencia_caba',
     emoji:   '⏳',
     label:   'SIN URGENCIA — CABA',
-    sub:     'Entrega en 5 a 10 días hábiles',
+    sub:     'Entrega en 3 a 5 días hábiles',
     cost:    'Desde $15.000 + IVA',
     tiers:   [
       '1 a 14 cajas / 1 a 4 baldes → $15.000 + IVA',
@@ -57,7 +59,7 @@ const SHIPPING_OPTIONS = [
     value:   'sin_urgencia_gba',
     emoji:   '⏳',
     label:   'SIN URGENCIA — GBA',
-    sub:     'Entrega en 5 a 10 días hábiles',
+    sub:     'Entrega en 3 a 5 días hábiles',
     cost:    'Desde $25.000 + IVA',
     tiers:   [
       '1 a 14 cajas / 1 a 4 baldes → $25.000 + IVA',
@@ -101,7 +103,7 @@ const PAYMENT_OPTIONS = [
 type ShippingValue = typeof SHIPPING_OPTIONS[number]['value']
 type PaymentValue  = typeof PAYMENT_OPTIONS[number]['value']
 
-const BANK_PAYMENT_VALUES: string[] = ['transferencia', 'deposito_bancario']
+const BANK_PAYMENT_VALUES: string[] = ['transferencia', 'deposito_bancario', 'echeq_30']
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
@@ -118,8 +120,15 @@ export default function NuevoPedidoForm({ productos, initialQtys }: Props) {
   const [selectedPayment, setSelectedPayment] = useState<string | null>(null)
   const [selectedShipping, setSelectedShipping] = useState<string | null>(null)
 
+  // Total en cajas (para calcular costo de envío)
+  const totalCajas = useMemo(
+    () => Object.values(qtys).reduce((s, q) => s + q, 0),
+    [qtys]
+  )
+
+  // Total en ARS (suma de qty_cajas × precioPorCaja)
   const total = useMemo(
-    () => productos.reduce((acc, p) => acc + (qtys[p.id] ?? 0) * p.b2bPrice, 0),
+    () => productos.reduce((acc, p) => acc + (qtys[p.id] ?? 0) * p.b2bPriceCaja, 0),
     [qtys, productos]
   )
 
@@ -133,28 +142,38 @@ export default function NuevoPedidoForm({ productos, initialQtys }: Props) {
   const showBankDetails = selectedPayment && BANK_PAYMENT_VALUES.includes(selectedPayment)
   const selectedShippingOpt = SHIPPING_OPTIONS.find((o) => o.value === selectedShipping)
 
+  // Calcular qué tier de envío aplica según totalCajas
+  function getActiveTierIndex(tiers: readonly string[]): number {
+    if (!tiers) return -1
+    if (totalCajas <= 14) return 0
+    if (totalCajas <= 25) return 1
+    return 2
+  }
+
   return (
     <form action={action}>
 
       {/* ── Productos ───────────────────────────────────────── */}
       <div className="bg-paper border border-ink/8 mb-6">
-        <div className="px-5 py-3 border-b border-ink/8 grid gap-4" style={{ gridTemplateColumns: '1fr 80px 90px 80px' }}>
+        <div className="px-5 py-3 border-b border-ink/8 grid gap-4" style={{ gridTemplateColumns: '1fr 100px 90px 80px' }}>
           <span className="font-mono text-[9px] tracking-[0.15em] uppercase text-ink/40">Producto</span>
-          <span className="font-mono text-[9px] tracking-[0.15em] uppercase text-ink/40 text-right">Precio</span>
-          <span className="font-mono text-[9px] tracking-[0.15em] uppercase text-ink/40 text-center">Cantidad</span>
+          <span className="font-mono text-[9px] tracking-[0.15em] uppercase text-ink/40 text-right">Precio/caja</span>
+          <span className="font-mono text-[9px] tracking-[0.15em] uppercase text-ink/40 text-center">Cajas</span>
           <span className="font-mono text-[9px] tracking-[0.15em] uppercase text-ink/40 text-right">Subtotal</span>
         </div>
 
         {productos.map((p) => {
           const qty      = qtys[p.id] ?? 0
-          const subtotal = qty * p.b2bPrice
+          const subtotal = qty * p.b2bPriceCaja
+          const isBalde  = p.unitsPerBox === 1
           return (
             <div
               key={p.id}
               className="px-5 py-4 border-b border-ink/8 grid gap-4 items-center last:border-0"
-              style={{ gridTemplateColumns: '1fr 80px 90px 80px' }}
+              style={{ gridTemplateColumns: '1fr 100px 90px 80px' }}
             >
               <input type="hidden" name={`qty-${p.id}`} value={qty} />
+              <input type="hidden" name={`upb-${p.id}`} value={p.unitsPerBox} />
 
               <div className="flex items-center gap-3 min-w-0">
                 <Image src={p.image} alt={p.name} width={40} height={40} className="object-contain shrink-0" />
@@ -162,22 +181,33 @@ export default function NuevoPedidoForm({ productos, initialQtys }: Props) {
                   <div className="font-body font-semibold text-[13px] truncate">{p.name}</div>
                   <div className="font-mono text-[9px] tracking-[0.12em] text-red uppercase">
                     {p.variant} · {p.size}
-                    {p.minQty > 1 && <span className="text-ink/30 ml-2">mín. {p.minQty}u</span>}
+                    {!isBalde && <span className="text-ink/40 ml-2">· caja {p.unitsPerBox}u</span>}
+                    {p.minQty > 1 && <span className="text-ink/30 ml-2">mín. {p.minQty}</span>}
                   </div>
                 </div>
               </div>
 
-              <div className="font-mono text-[12px] text-ink/70 text-right">{formatARS(p.b2bPrice)}</div>
+              <div className="text-right">
+                <div className="font-mono text-[12px] text-ink/70">{formatARS(p.b2bPriceCaja)}</div>
+                <div className="font-mono text-[9px] text-ink/30">{isBalde ? 'por unidad' : 'por caja'}</div>
+              </div>
 
               <div className="flex items-center justify-center">
-                <input
-                  type="number"
-                  min={0}
-                  value={qty || ''}
-                  placeholder="0"
-                  onChange={(e) => setQty(p.id, e.target.value)}
-                  className="w-[70px] text-center bg-paper-2 border border-ink/15 font-mono text-[13px] py-2 outline-none focus:border-ink transition-colors"
-                />
+                <div className="relative">
+                  <input
+                    type="number"
+                    min={0}
+                    value={qty || ''}
+                    placeholder="0"
+                    onChange={(e) => setQty(p.id, e.target.value)}
+                    className="w-[70px] text-center bg-paper-2 border border-ink/15 font-mono text-[13px] py-2 outline-none focus:border-ink transition-colors"
+                  />
+                  {!isBalde && qty > 0 && (
+                    <div className="absolute -bottom-[16px] left-0 right-0 text-center font-mono text-[8px] text-ink/30 whitespace-nowrap">
+                      {qty * p.unitsPerBox}u
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className={`font-heading text-[16px] font-medium text-right ${subtotal > 0 ? 'text-ink' : 'text-ink/20'}`}>
@@ -222,11 +252,27 @@ export default function NuevoPedidoForm({ productos, initialQtys }: Props) {
                   <span className="font-mono text-[10px] tracking-[0.1em] text-red uppercase ml-auto">{opt.cost}</span>
                 </div>
                 <div className="font-body text-[12px] text-ink/50 mt-[2px]">{opt.sub}</div>
-                {opt.tiers && selectedShipping === opt.value && (
-                  <div className="mt-3 bg-ink/5 border border-ink/8 px-3 py-2 flex flex-col gap-1">
-                    {opt.tiers.map((tier) => (
-                      <p key={tier} className="font-mono text-[10px] tracking-[0.06em] text-ink/60">{tier}</p>
-                    ))}
+                {opt.tiers && (
+                  <div className="mt-3 bg-ink/5 border border-ink/8 px-3 py-2 flex flex-col gap-[3px]">
+                    {opt.tiers.map((tier, ti) => {
+                      const isActive = selectedShipping === opt.value && getActiveTierIndex(opt.tiers!) === ti
+                      return (
+                        <p
+                          key={tier}
+                          className={[
+                            'font-mono text-[10px] tracking-[0.06em] transition-colors',
+                            isActive ? 'text-ink font-semibold' : 'text-ink/40',
+                          ].join(' ')}
+                        >
+                          {isActive && '▶ '}{tier}
+                        </p>
+                      )
+                    })}
+                    {selectedShipping === opt.value && totalCajas > 0 && (
+                      <p className="font-mono text-[9px] text-red mt-1 pt-1 border-t border-ink/10">
+                        Con {totalCajas} caja{totalCajas > 1 ? 's' : ''} seleccionada{totalCajas > 1 ? 's' : ''}
+                      </p>
+                    )}
                   </div>
                 )}
               </div>

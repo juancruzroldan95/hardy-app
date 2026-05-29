@@ -39,8 +39,16 @@ export async function createPortalOrder(
   if (!shippingMethod) return { error: 'Seleccioná un método de envío.' }
   if (!paymentMethod)  return { error: 'Seleccioná un método de pago.' }
 
-  // Parsear líneas del pedido desde el FormData (qty-<productId>)
+  // Parsear líneas del pedido desde el FormData (qty-<productId>, upb-<productId>)
   const lines: OrderLineInput[] = []
+  const unitsPerBoxMap = new Map<string, number>()
+
+  for (const [key, value] of formData.entries()) {
+    if (key.startsWith('upb-')) {
+      const productId = key.replace('upb-', '')
+      unitsPerBoxMap.set(productId, parseInt(value as string, 10) || 1)
+    }
+  }
   for (const [key, value] of formData.entries()) {
     if (key.startsWith('qty-')) {
       const productId = key.replace('qty-', '')
@@ -58,6 +66,7 @@ export async function createPortalOrder(
   const overrideMap = new Map(overrides.map((o) => [o.productId, Number(o.priceArs)]))
 
   // Calcular total y construir items
+  // qty = cajas, unitPriceArs = precio por caja (unitPrice × unitsPerBox)
   let totalArs = 0
   const itemsToInsert: {
     productId: string
@@ -73,17 +82,19 @@ export async function createPortalOrder(
     const product = getProductById(line.productId)
     if (!product) return { error: `Producto no encontrado: ${line.productId}` }
 
-    const unitPrice  = overrideMap.get(line.productId) ?? product.price
-    const subtotal   = unitPrice * line.qty
-    totalArs        += subtotal
+    const unitPrice    = overrideMap.get(line.productId) ?? product.price
+    const unitsPerBox  = unitsPerBoxMap.get(line.productId) ?? product.unitsPerBox ?? 1
+    const pricePerCaja = unitPrice * unitsPerBox  // precio por caja
+    const subtotal     = pricePerCaja * line.qty  // line.qty = cajas
+    totalArs          += subtotal
 
     itemsToInsert.push({
       productId:    product.id,
       productName:  product.name,
       variant:      product.variant,
       size:         product.size,
-      unitPriceArs: unitPrice.toFixed(2),
-      qty:          line.qty,
+      unitPriceArs: pricePerCaja.toFixed(2),       // guardamos precio/caja
+      qty:          line.qty,                       // guardamos cajas
       subtotalArs:  subtotal.toFixed(2),
     })
   }

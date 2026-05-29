@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 import { db } from '@/lib/db'
 import { profiles, priceOverrides } from '@/drizzle/schema'
 import { and, eq } from 'drizzle-orm'
-import { getProducts, formatARS } from '@/lib/products'
+import { getProducts } from '@/lib/products'
 import { ROLE_LABELS } from '@/lib/roles'
 
 export default async function CatalogoPage() {
@@ -103,7 +103,11 @@ export default async function CatalogoPage() {
         </p>
         <div className="bg-paper border border-ink/8 divide-y divide-ink/8">
           {frascos.map((p) => (
-            <div key={p.id} className="flex items-center gap-5 px-5 py-4">
+            <Link
+              key={p.id}
+              href={`/portal/catalogo/${p.id}`}
+              className="flex items-center gap-5 px-5 py-4 hover:bg-paper-2 transition-colors group"
+            >
               <Image
                 src={p.image}
                 alt={p.name}
@@ -116,16 +120,16 @@ export default async function CatalogoPage() {
                 <div className="font-mono text-[9px] tracking-[0.15em] text-red uppercase mt-[2px]">
                   {p.variant} · {p.size}
                 </div>
+                {p.diferencial && (
+                  <div className="font-mono text-[9px] tracking-[0.06em] text-ink/40 mt-[4px] truncate">
+                    {p.diferencial}
+                  </div>
+                )}
               </div>
-              <div className="text-right shrink-0">
-                <div className="font-heading text-[20px] font-medium text-ink">
-                  {formatARS(p.b2bPrice)}
-                </div>
-                <div className="font-mono text-[9px] tracking-[0.1em] text-ink/40 uppercase">
-                  por unidad · mín. {p.minQty}u
-                </div>
-              </div>
-            </div>
+              <span className="font-mono text-[11px] text-ink/30 group-hover:text-red transition-colors shrink-0">
+                Ver detalle →
+              </span>
+            </Link>
           ))}
         </div>
       </div>
@@ -138,7 +142,11 @@ export default async function CatalogoPage() {
           </p>
           <div className="bg-paper border border-ink/8 divide-y divide-ink/8">
             {baldes.map((p) => (
-              <div key={p.id} className="flex items-center gap-5 px-5 py-4">
+              <Link
+                key={p.id}
+                href={`/portal/catalogo/${p.id}`}
+                className="flex items-center gap-5 px-5 py-4 hover:bg-paper-2 transition-colors group"
+              >
                 <Image
                   src={p.image}
                   alt={p.name}
@@ -151,16 +159,16 @@ export default async function CatalogoPage() {
                   <div className="font-mono text-[9px] tracking-[0.15em] text-red uppercase mt-[2px]">
                     {p.variant} · {p.size}
                   </div>
+                  {p.diferencial && (
+                    <div className="font-mono text-[9px] tracking-[0.06em] text-ink/40 mt-[4px] truncate">
+                      {p.diferencial}
+                    </div>
+                  )}
                 </div>
-                <div className="text-right shrink-0">
-                  <div className="font-heading text-[20px] font-medium text-ink">
-                    {formatARS(p.b2bPrice)}
-                  </div>
-                  <div className="font-mono text-[9px] tracking-[0.1em] text-ink/40 uppercase">
-                    por unidad · mín. {p.minQty}u
-                  </div>
-                </div>
-              </div>
+                <span className="font-mono text-[11px] text-ink/30 group-hover:text-red transition-colors shrink-0">
+                  Ver detalle →
+                </span>
+              </Link>
             ))}
           </div>
         </div>

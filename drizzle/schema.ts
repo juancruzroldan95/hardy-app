@@ -211,6 +211,8 @@ export const clientAlerts = pgTable('client_alerts', {
   profileId:       uuid('profile_id').notNull(),
   tipo:            alertTipoEnum('tipo').notNull().default('custom'),
   mensaje:         text('mensaje').notNull(),
+  scheduledFor:    timestamp('scheduled_for', { withTimezone: true }),
+  emailSentAt:     timestamp('email_sent_at',  { withTimezone: true }),
   isResolved:      boolean('is_resolved').notNull().default(false),
   resolvedAt:      timestamp('resolved_at', { withTimezone: true }),
   createdByUserId: uuid('created_by_user_id').notNull(),

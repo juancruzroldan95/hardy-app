@@ -12,6 +12,7 @@ import {
   resolveClientAlert,
   deleteClientAlert,
   updateClientNotes,
+  updateClientRole,
 } from '@/lib/actions/admin'
 
 const ALERT_TIPO_LABELS = {
@@ -65,9 +66,17 @@ export default async function AdminClientesPage() {
       <h1 className="font-heading text-[clamp(24px,3vw,36px)] font-medium leading-[1.1] tracking-[-0.02em] mb-2">
         Clientes ({clients.length})
       </h1>
-      <p className="font-body text-[14px] text-ink/40 mb-8">
+      <p className="font-body text-[14px] text-ink/40 mb-6">
         Historial de compras, alertas y gestión de cuenta por cliente.
       </p>
+      <div className="flex justify-end mb-6">
+        <Link
+          href="/portal/admin/clientes/nuevo"
+          className="bg-red text-paper font-mono text-[11px] tracking-[0.15em] uppercase px-5 py-[11px] hover:bg-red/90 transition-colors"
+        >
+          + Agregar cliente
+        </Link>
+      </div>
 
       {clients.length === 0 ? (
         <div className="bg-paper border border-ink/8 p-10 text-center">
@@ -209,7 +218,17 @@ export default async function AdminClientesPage() {
                           <span className={`font-mono text-[8px] tracking-[0.12em] uppercase border px-2 py-[3px] shrink-0 mt-[1px] ${ALERT_TIPO_COLORS[alert.tipo]}`}>
                             {ALERT_TIPO_LABELS[alert.tipo]}
                           </span>
-                          <p className="font-body text-[13px] text-ink flex-1">{alert.mensaje}</p>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-body text-[13px] text-ink">{alert.mensaje}</p>
+                            {alert.scheduledFor && (
+                              <p className="font-mono text-[9px] tracking-[0.08em] text-amber-600 mt-[3px]">
+                                📅 Programada: {new Date(alert.scheduledFor).toLocaleDateString('es-AR', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' })}
+                                {alert.emailSentAt && (
+                                  <span className="text-[#2d6a35] ml-2">✓ Email enviado</span>
+                                )}
+                              </p>
+                            )}
+                          </div>
                           <span className="font-mono text-[9px] text-ink/30 shrink-0">
                             {new Date(alert.createdAt).toLocaleDateString('es-AR', { day: '2-digit', month: 'short' })}
                           </span>
@@ -237,14 +256,34 @@ export default async function AdminClientesPage() {
                   </div>
                 )}
 
-                {/* ── Resolved alerts (collapsed count) ─────────────── */}
-                {clientAlertsList.filter((a) => a.isResolved).length > 0 && (
-                  <div className="px-6 py-2 border-b border-ink/8">
-                    <p className="font-mono text-[9px] tracking-[0.1em] uppercase text-ink/25">
-                      {clientAlertsList.filter((a) => a.isResolved).length} alerta{clientAlertsList.filter((a) => a.isResolved).length > 1 ? 's' : ''} resuelta{clientAlertsList.filter((a) => a.isResolved).length > 1 ? 's' : ''}
-                    </p>
-                  </div>
-                )}
+                {/* ── Resolved alerts history ───────────────────────── */}
+                {(() => {
+                  const resolved = clientAlertsList.filter((a) => a.isResolved)
+                  if (resolved.length === 0) return null
+                  return (
+                    <div className="px-6 py-4 border-b border-ink/8">
+                      <p className="font-mono text-[9px] tracking-[0.15em] uppercase text-ink/30 mb-3">
+                        Historial de alertas resueltas ({resolved.length})
+                      </p>
+                      <div className="flex flex-col gap-2">
+                        {resolved.map((alert) => (
+                          <div key={alert.id} className="flex items-start gap-3 px-3 py-2 border border-ink/5 bg-paper-2/50 opacity-60">
+                            <span className="font-mono text-[7px] tracking-[0.12em] uppercase text-ink/30 border border-ink/10 px-2 py-[2px] shrink-0 mt-[1px]">
+                              {ALERT_TIPO_LABELS[alert.tipo]}
+                            </span>
+                            <p className="font-body text-[12px] text-ink/60 flex-1 line-through">{alert.mensaje}</p>
+                            <span className="font-mono text-[9px] text-ink/20 shrink-0 whitespace-nowrap">
+                              ✓ {alert.resolvedAt
+                                ? new Date(alert.resolvedAt).toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric' })
+                                : new Date(alert.updatedAt).toLocaleDateString('es-AR', { day: '2-digit', month: 'short' })
+                              }
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )
+                })()}
 
                 {/* ── Add alert form ─────────────────────────────────── */}
                 <div className="px-6 py-4 border-b border-ink/8">
@@ -252,12 +291,14 @@ export default async function AdminClientesPage() {
                   <form
                     action={async (formData: FormData) => {
                       'use server'
-                      const tipo    = (formData.get('alertTipo')    as string) ?? 'custom'
-                      const mensaje = (formData.get('alertMensaje') as string) ?? ''
+                      const tipo         = (formData.get('alertTipo')    as string) ?? 'custom'
+                      const mensaje      = (formData.get('alertMensaje') as string) ?? ''
+                      const scheduledFor = (formData.get('scheduledFor') as string) || null
                       await createClientAlert(
                         client.id,
                         tipo as 'reorder' | 'payment' | 'inactivity' | 'custom',
                         mensaje,
+                        scheduledFor,
                       )
                     }}
                     className="flex items-end gap-3 flex-wrap"
@@ -282,6 +323,16 @@ export default async function AdminClientesPage() {
                         required
                         placeholder="Ej: Llamar para coordinar próximo pedido"
                         className="w-full bg-paper-2 border border-ink/15 font-body text-[13px] px-3 py-2 outline-none focus:border-ink transition-colors"
+                      />
+                    </div>
+                    <div>
+                      <label className="font-mono text-[9px] tracking-[0.1em] uppercase text-ink/40 block mb-1">
+                        Fecha programada
+                      </label>
+                      <input
+                        type="date"
+                        name="scheduledFor"
+                        className="bg-paper-2 border border-ink/15 font-mono text-[12px] px-3 py-[9px] outline-none focus:border-ink transition-colors w-[150px]"
                       />
                     </div>
                     <button
@@ -316,6 +367,41 @@ export default async function AdminClientesPage() {
                       className="bg-ink text-paper font-mono text-[10px] tracking-[0.12em] uppercase px-4 py-[9px] hover:bg-ink/80 transition-colors shrink-0"
                     >
                       Guardar →
+                    </button>
+                  </form>
+                </div>
+
+                {/* ── Cambiar rol ───────────────────────────────────── */}
+                <div className="px-6 py-4 border-b border-ink/8">
+                  <p className="font-mono text-[9px] tracking-[0.15em] uppercase text-ink/40 mb-3">Rol / acceso</p>
+                  <form
+                    action={async (formData: FormData) => {
+                      'use server'
+                      const role = (formData.get('role') as string) ?? client.role
+                      await updateClientRole(client.id, role as 'consumer' | 'mayorista' | 'gastronomico' | 'distribuidor' | 'productor' | 'admin')
+                    }}
+                    className="flex items-end gap-3 flex-wrap"
+                  >
+                    <div>
+                      <label className="font-mono text-[9px] tracking-[0.1em] uppercase text-ink/40 block mb-1">Segmento</label>
+                      <select
+                        name="role"
+                        defaultValue={client.role}
+                        className="bg-paper-2 border border-ink/15 font-body text-[13px] px-3 py-[9px] outline-none focus:border-ink transition-colors"
+                      >
+                        <option value="consumer">Consumidor</option>
+                        <option value="mayorista">Mayorista</option>
+                        <option value="gastronomico">Gastronómico</option>
+                        <option value="distribuidor">Distribuidor</option>
+                        <option value="productor">Productor</option>
+                        <option value="admin">Administrador</option>
+                      </select>
+                    </div>
+                    <button
+                      type="submit"
+                      className="bg-ink text-paper font-mono text-[10px] tracking-[0.12em] uppercase px-4 py-[9px] hover:bg-ink/80 transition-colors"
+                    >
+                      Cambiar rol →
                     </button>
                   </form>
                 </div>
