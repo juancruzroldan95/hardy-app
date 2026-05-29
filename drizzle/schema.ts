@@ -43,6 +43,10 @@ export const shippingMethodEnum = pgEnum('shipping_method', [
   'andreani',
   'oca',
   'retiro_deposito',
+  'urgente_caba',
+  'urgente_gba',
+  'sin_urgencia_caba',
+  'sin_urgencia_gba',
 ])
 
 export const paymentMethodEnum = pgEnum('payment_method', [
@@ -51,6 +55,8 @@ export const paymentMethodEnum = pgEnum('payment_method', [
   'credito30',
   'credito60',
   'cheque',
+  'deposito_bancario',
+  'echeq_30',
 ])
 
 export const tipoNegocioEnum = pgEnum('tipo_negocio', [

@@ -36,6 +36,13 @@
       "when": 1780019476538,
       "tag": "0004_add_client_alerts",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1780021832080,
+      "tag": "0005_add_shipping_payment_values",
+      "breakpoints": true
     }
   ]
 }

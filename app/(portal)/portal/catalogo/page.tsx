@@ -49,6 +49,17 @@ export default async function CatalogoPage() {
   const frascos = productosCatalogo.filter((p) => p.line === 'frasco')
   const baldes  = productosCatalogo.filter((p) => p.line !== 'frasco')
 
+  // Catálogo PDF por rol
+  const catalogoPDF: Record<string, string | null> = {
+    mayorista:    '/catalogos/catalogo-mayorista.pdf',
+    gastronomico: '/catalogos/catalogo-gastronomico.pdf',
+    distribuidor: '/catalogos/catalogo-distribuidor.pdf',
+    productor:    '/catalogos/catalogo-distribuidor.pdf',
+    consumer:     null,
+    admin:        null,
+  }
+  const pdfUrl = catalogoPDF[role] ?? null
+
   return (
     <div className="max-w-[1000px]">
       <div className="flex items-center justify-between mb-2 flex-wrap gap-4">
@@ -61,13 +72,15 @@ export default async function CatalogoPage() {
           </h1>
         </div>
         <div className="flex items-center gap-3 flex-wrap">
-          <a
-            href="/downloads/lista-precios.pdf"
-            download
-            className="bg-paper-2 border border-ink/15 text-ink font-mono text-[11px] tracking-[0.15em] uppercase px-5 py-[12px] whitespace-nowrap hover:bg-paper transition-colors"
-          >
-            ↓ Descargar PDF
-          </a>
+          {pdfUrl && (
+            <a
+              href={pdfUrl}
+              download
+              className="bg-paper-2 border border-ink/15 text-ink font-mono text-[11px] tracking-[0.15em] uppercase px-5 py-[12px] whitespace-nowrap hover:bg-paper transition-colors"
+            >
+              ↓ Descargar catálogo PDF
+            </a>
+          )}
           <Link
             href="/portal/pedidos/nuevo"
             className="bg-red text-paper font-mono text-[11px] tracking-[0.15em] uppercase px-6 py-[13px] whitespace-nowrap"

@@ -42,6 +42,13 @@ export default function PortalSidebar({
 
   function isActive(href: string) {
     if (href === '/portal') return pathname === '/portal'
+    // "Nuevo Pedido" solo activo en esa ruta exacta
+    if (href === '/portal/pedidos/nuevo') return pathname === '/portal/pedidos/nuevo'
+    // "Mis Pedidos": activo en /portal/pedidos y /portal/pedidos/[id], pero NO en /nuevo
+    if (href === '/portal/pedidos') {
+      return pathname === '/portal/pedidos' ||
+        (pathname.startsWith('/portal/pedidos/') && !pathname.startsWith('/portal/pedidos/nuevo'))
+    }
     return pathname.startsWith(href)
   }
 
