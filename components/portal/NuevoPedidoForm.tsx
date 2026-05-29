@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useMemo, useState } from 'react'
 import Image from 'next/image'
+import { Zap, Clock, Warehouse, ClipboardList, AlertTriangle, Info } from 'lucide-react'
 import { createPortalOrder } from '@/lib/actions/orders'
 import type { CreateOrderState } from '@/lib/actions/orders'
 import { formatARS, WA_NUMBER } from '@/lib/products'
@@ -97,10 +98,18 @@ function getTomorrow(): string {
 
 // ─── Options ──────────────────────────────────────────────────────────────────
 
+// Shipping icon components (Lucide)
+const SHIPPING_ICONS = {
+  urgente_caba:      Zap,
+  urgente_gba:       Zap,
+  sin_urgencia_caba: Clock,
+  sin_urgencia_gba:  Clock,
+  retiro_deposito:   Warehouse,
+} as const
+
 const SHIPPING_OPTIONS = [
   {
     value: 'urgente_caba',
-    emoji: '🚀',
     label: 'URGENTE — CABA',
     sub:   'Entrega en 48-72hs hábiles',
     cost:  '$50.000 + IVA',
@@ -108,7 +117,6 @@ const SHIPPING_OPTIONS = [
   },
   {
     value: 'urgente_gba',
-    emoji: '🚀',
     label: 'URGENTE — GBA',
     sub:   'Entrega en 48-72hs hábiles',
     cost:  '$75.000 + IVA',
@@ -116,7 +124,6 @@ const SHIPPING_OPTIONS = [
   },
   {
     value: 'sin_urgencia_caba',
-    emoji: '⏳',
     label: 'SIN URGENCIA — CABA',
     sub:   'Entrega en 3 a 5 días hábiles',
     cost:  'Desde $15.000 + IVA',
@@ -128,7 +135,6 @@ const SHIPPING_OPTIONS = [
   },
   {
     value: 'sin_urgencia_gba',
-    emoji: '⏳',
     label: 'SIN URGENCIA — GBA',
     sub:   'Entrega en 3 a 5 días hábiles',
     cost:  'Desde $25.000 + IVA',
@@ -140,7 +146,6 @@ const SHIPPING_OPTIONS = [
   },
   {
     value: 'retiro_deposito',
-    emoji: '🏭',
     label: 'RETIRO EN DEPÓSITO',
     sub:   `${HARDY_DEPOSITO.direccion} · ${HARDY_DEPOSITO.horario}`,
     cost:  'Sin costo',
@@ -365,7 +370,7 @@ export default function NuevoPedidoForm({
       {hasDraft && (
         <div className="bg-amber-50 border border-amber-200 px-5 py-4 mb-6 flex items-center justify-between gap-4 flex-wrap">
           <div className="flex items-center gap-3">
-            <span className="text-[16px]">📋</span>
+            <ClipboardList size={16} className="text-amber-700 shrink-0" />
             <p className="font-mono text-[10px] tracking-[0.08em] text-amber-800">
               Tenés un borrador guardado de tu último pedido. ¿Lo restauramos?
             </p>
@@ -393,8 +398,8 @@ export default function NuevoPedidoForm({
       {tierGroups.length > 0 && (
         <div className="mb-6 bg-paper border border-ink/8">
           <div className="px-5 py-3 border-b border-ink/8 flex items-center justify-between">
-            <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-ink/50">── Precios por volumen</p>
-            <p className="font-mono text-[9px] tracking-[0.1em] text-ink/30 uppercase">Base imponible · IVA 21% se suma al total</p>
+            <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-ink font-semibold">── Precios por volumen</p>
+            <p className="font-mono text-[9px] tracking-[0.1em] text-ink/60 uppercase">Base imponible · +IVA 21%</p>
           </div>
 
           {tierGroups.map((group) => {
@@ -404,8 +409,8 @@ export default function NuevoPedidoForm({
             return (
               <div key={group.label} className="px-5 py-4 border-b border-ink/8 last:border-0">
                 <div className="mb-3">
-                  <p className="font-mono text-[10px] tracking-[0.12em] uppercase text-ink font-medium">{group.label}</p>
-                  <p className="font-mono text-[9px] tracking-[0.08em] text-ink/40 mt-[2px]">{group.sublabel}</p>
+                  <p className="font-mono text-[10px] tracking-[0.12em] uppercase text-ink font-semibold">{group.label}</p>
+                  <p className="font-mono text-[9px] tracking-[0.08em] text-ink/60 mt-[2px]">{group.sublabel}</p>
                 </div>
 
                 <div className="grid gap-[3px]">
@@ -422,8 +427,8 @@ export default function NuevoPedidoForm({
                       <div
                         key={tier.minQty}
                         className={[
-                          'flex items-center justify-between px-3 py-2 transition-colors',
-                          isActive ? 'bg-ink text-paper' : 'bg-transparent text-ink/35',
+                          'flex items-center justify-between px-3 py-[7px] transition-colors rounded-[1px]',
+                          isActive ? 'bg-ink text-paper' : 'bg-paper-2 text-ink',
                         ].join(' ')}
                       >
                         <div className="flex items-center gap-2">
@@ -438,13 +443,13 @@ export default function NuevoPedidoForm({
                         <div className="flex items-center gap-4">
                           <span className={[
                             'font-mono text-[10px]',
-                            isActive ? 'text-paper/60' : 'text-ink/25',
+                            isActive ? 'text-paper/70' : 'text-ink/60',
                           ].join(' ')}>
                             {formatARS(tier.pricePerUnit)}/u
                           </span>
                           <span className={[
-                            'font-mono text-[12px] font-medium tabular-nums',
-                            isActive ? 'text-paper' : 'text-ink/30',
+                            'font-mono text-[13px] font-semibold tabular-nums',
+                            isActive ? 'text-paper' : 'text-red',
                           ].join(' ')}>
                             {formatARS(tier.pricePerCaja)}/caja
                           </span>
@@ -480,7 +485,10 @@ export default function NuevoPedidoForm({
             ? 'bg-red/8 border-red/20'
             : 'bg-paper-2 border-ink/8',
         ].join(' ')}>
-          <span className="text-[14px] mt-[1px]">{belowMinimum ? '⚠️' : 'ℹ️'}</span>
+          {belowMinimum
+            ? <AlertTriangle size={15} className="text-red shrink-0 mt-[1px]" />
+            : <Info size={15} className="text-ink/50 shrink-0 mt-[1px]" />
+          }
           <p className="font-mono text-[10px] tracking-[0.08em] text-ink/70">
             {belowMinimum
               ? `Pedido mínimo para ${roleName}: ${minTotalCajas} cajas. Actualmente tenés ${totalFrascoCajas} caja${totalFrascoCajas !== 1 ? 's' : ''}.`
@@ -496,10 +504,10 @@ export default function NuevoPedidoForm({
           className="px-5 py-3 border-b border-ink/8 grid gap-4"
           style={{ gridTemplateColumns: '1fr 120px 90px 80px' }}
         >
-          <span className="font-mono text-[9px] tracking-[0.15em] uppercase text-ink/40">Producto</span>
-          <span className="font-mono text-[9px] tracking-[0.15em] uppercase text-ink/40 text-right">Precio/caja</span>
-          <span className="font-mono text-[9px] tracking-[0.15em] uppercase text-ink/40 text-center">Cajas</span>
-          <span className="font-mono text-[9px] tracking-[0.15em] uppercase text-ink/40 text-right">Subtotal</span>
+          <span className="font-mono text-[9px] tracking-[0.15em] uppercase text-ink/70">Producto</span>
+          <span className="font-mono text-[9px] tracking-[0.15em] uppercase text-ink/70 text-right">Precio/caja</span>
+          <span className="font-mono text-[9px] tracking-[0.15em] uppercase text-ink/70 text-center">Cajas</span>
+          <span className="font-mono text-[9px] tracking-[0.15em] uppercase text-ink/70 text-right">Subtotal</span>
         </div>
 
         {productos.map((p) => {
@@ -540,12 +548,12 @@ export default function NuevoPedidoForm({
               </div>
 
               <div className="text-right">
-                <div className={`font-mono text-[12px] ${priceChanged ? 'text-red font-semibold' : 'text-ink/70'}`}>
+                <div className={`font-mono text-[13px] font-semibold ${priceChanged ? 'text-red' : 'text-red'}`}>
                   {formatARS(pricePerCaja)}
                 </div>
-                <div className="font-mono text-[9px] text-ink/30">{p.isBalde ? 'por unidad' : 'por caja'}</div>
+                <div className="font-mono text-[9px] text-ink/55">{p.isBalde ? 'por unidad' : 'por caja'}</div>
                 {priceChanged && (
-                  <div className="font-mono text-[8px] text-ink/30 line-through">
+                  <div className="font-mono text-[8px] text-ink/40 line-through">
                     {formatARS(p.b2bPriceCaja)}
                   </div>
                 )}
@@ -584,22 +592,22 @@ export default function NuevoPedidoForm({
         {total > 0 ? (
           <div className="border-t border-ink/8">
             <div className="px-5 py-2 bg-paper-2 flex justify-between items-center">
-              <span className="font-mono text-[9px] tracking-[0.12em] uppercase text-ink/35">
+              <span className="font-mono text-[9px] tracking-[0.12em] uppercase text-ink/65">
                 Subtotal sin IVA
               </span>
-              <span className="font-mono text-[12px] text-ink/50">{formatARS(total)}</span>
+              <span className="font-mono text-[12px] text-ink/70">{formatARS(total)}</span>
             </div>
             <div className="px-5 py-2 bg-paper-2 flex justify-between items-center border-t border-ink/5">
-              <span className="font-mono text-[9px] tracking-[0.12em] uppercase text-ink/35">
+              <span className="font-mono text-[9px] tracking-[0.12em] uppercase text-ink/65">
                 IVA 21%
               </span>
-              <span className="font-mono text-[12px] text-ink/50">{formatARS(productIVA)}</span>
+              <span className="font-mono text-[12px] text-ink/70">{formatARS(productIVA)}</span>
             </div>
-            <div className="px-5 py-4 bg-paper-2 flex justify-between items-center border-t border-ink/10">
-              <span className="font-mono text-[10px] tracking-[0.15em] uppercase text-ink/60 font-semibold">
-                Total productos
+            <div className="px-5 py-4 bg-ink flex justify-between items-center">
+              <span className="font-mono text-[10px] tracking-[0.15em] uppercase text-paper/70 font-semibold">
+                Total productos c/IVA
               </span>
-              <span className="font-heading text-[22px] font-medium text-ink">
+              <span className="font-heading text-[22px] font-medium text-paper">
                 {formatARS(totalConIVA)}
               </span>
             </div>
@@ -614,7 +622,7 @@ export default function NuevoPedidoForm({
 
       {/* ── Envío ────────────────────────────────────────────────────── */}
       <div className="mb-6">
-        <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-ink/50 mb-3">── Método de envío *</p>
+        <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-ink font-semibold mb-3">── Método de envío *</p>
         <div className="bg-paper border border-ink/8 divide-y divide-ink/8">
           {SHIPPING_OPTIONS.map((opt) => (
             <label
@@ -634,11 +642,11 @@ export default function NuevoPedidoForm({
               />
               <div className="flex-1">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-[14px]">{opt.emoji}</span>
+                  {(() => { const Icon = SHIPPING_ICONS[opt.value as keyof typeof SHIPPING_ICONS]; return <Icon size={15} className="text-red shrink-0" /> })()}
                   <span className="font-body font-semibold text-[14px]">{opt.label}</span>
-                  <span className="font-mono text-[10px] tracking-[0.1em] text-red uppercase ml-auto">{opt.cost}</span>
+                  <span className="font-mono text-[10px] tracking-[0.1em] text-red font-semibold uppercase ml-auto">{opt.cost}</span>
                 </div>
-                <div className="font-body text-[12px] text-ink/50 mt-[2px]">{opt.sub}</div>
+                <div className="font-body text-[12px] text-ink/70 mt-[2px]">{opt.sub}</div>
                 {opt.tiers && (
                   <div className="mt-3 bg-ink/5 border border-ink/8 px-3 py-2 flex flex-col gap-[3px]">
                     {opt.tiers.map((tier, ti) => {
@@ -648,7 +656,7 @@ export default function NuevoPedidoForm({
                           key={ti}
                           className={[
                             'flex items-center justify-between font-mono text-[10px] tracking-[0.06em] transition-colors',
-                            isActive ? 'text-ink font-semibold' : 'text-ink/40',
+                            isActive ? 'text-ink font-semibold' : 'text-ink/60',
                           ].join(' ')}
                         >
                           <span>{isActive && '▶ '}{tier.label}</span>
@@ -715,7 +723,7 @@ export default function NuevoPedidoForm({
 
       {/* ── Pago ──────────────────────────────────────────────────────── */}
       <div className="mb-6">
-        <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-ink/50 mb-3">── Forma de pago *</p>
+        <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-ink font-semibold mb-3">── Forma de pago *</p>
         <div className="bg-paper border border-ink/8 divide-y divide-ink/8">
           {PAYMENT_OPTIONS.map((opt) => (
             <label
@@ -735,7 +743,7 @@ export default function NuevoPedidoForm({
               />
               <div>
                 <div className="font-body font-semibold text-[14px]">{opt.label}</div>
-                <div className="font-body text-[12px] text-ink/50">{opt.sub}</div>
+                <div className="font-body text-[12px] text-ink/70">{opt.sub}</div>
               </div>
             </label>
           ))}
@@ -769,7 +777,7 @@ export default function NuevoPedidoForm({
       {/* ── Dirección de entrega ─────────────────────────────────────── */}
       {deliveryAddresses.length > 0 && (
         <div className="mb-6">
-          <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-ink/50 mb-3">── Dirección de entrega</p>
+          <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-ink font-semibold mb-3">── Dirección de entrega</p>
           <div className="bg-paper border border-ink/8 divide-y divide-ink/8">
             {deliveryAddresses.map((addr) => (
               <label
@@ -817,7 +825,7 @@ export default function NuevoPedidoForm({
       {/* ── OC + Fecha de entrega ─────────────────────────────────────── */}
       <div className="grid grid-cols-2 gap-4 mb-6 max-md:grid-cols-1">
         <div>
-          <label htmlFor="purchaseOrderNumber" className="font-mono text-[10px] tracking-[0.2em] uppercase text-ink/50 block mb-3">
+          <label htmlFor="purchaseOrderNumber" className="font-mono text-[10px] tracking-[0.2em] uppercase text-ink font-semibold block mb-3">
             ── N° de Orden de Compra (opcional)
           </label>
           <input
@@ -827,12 +835,12 @@ export default function NuevoPedidoForm({
             placeholder="Ej: OC-2025-0047"
             className="w-full bg-paper border border-ink/15 text-ink font-mono text-[13px] px-4 py-3 outline-none focus:border-ink transition-colors"
           />
-          <p className="font-mono text-[9px] text-ink/30 mt-1 tracking-[0.06em]">
+          <p className="font-mono text-[9px] text-ink/55 mt-1 tracking-[0.06em]">
             Aparece en el remito y en el detalle del pedido.
           </p>
         </div>
         <div>
-          <label htmlFor="requestedDeliveryDate" className="font-mono text-[10px] tracking-[0.2em] uppercase text-ink/50 block mb-3">
+          <label htmlFor="requestedDeliveryDate" className="font-mono text-[10px] tracking-[0.2em] uppercase text-ink font-semibold block mb-3">
             ── Fecha de entrega deseada (opcional)
           </label>
           <input
@@ -842,7 +850,7 @@ export default function NuevoPedidoForm({
             min={getTomorrow()}
             className="w-full bg-paper border border-ink/15 text-ink font-body text-[14px] px-4 py-3 outline-none focus:border-ink transition-colors"
           />
-          <p className="font-mono text-[9px] text-ink/30 mt-1 tracking-[0.06em]">
+          <p className="font-mono text-[9px] text-ink/55 mt-1 tracking-[0.06em]">
             Nos ayuda a planificar la logística.
           </p>
         </div>
@@ -850,7 +858,7 @@ export default function NuevoPedidoForm({
 
       {/* ── Notas ────────────────────────────────────────────────────── */}
       <div className="mb-6">
-        <label htmlFor="notes" className="font-mono text-[10px] tracking-[0.2em] uppercase text-ink/50 block mb-3">
+        <label htmlFor="notes" className="font-mono text-[10px] tracking-[0.2em] uppercase text-ink font-semibold block mb-3">
           ── Notas del pedido (opcional)
         </label>
         <textarea

@@ -1,22 +1,54 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useCart } from '@/lib/cart-context'
 import { formatARS, WA_NUMBER } from '@/lib/products'
 import type { Product } from '@/types'
 
 export default function ProductCard({ product }: { product: Product }) {
   const { addItem } = useCart()
-  const [imgIdx, setImgIdx] = useState(0)
-  const [modalOpen, setModalOpen] = useState(false)
-  const [modalImgIdx, setModalImgIdx] = useState(0)
+  const [imgIdx,        setImgIdx]        = useState(0)
+  const [modalMounted,  setModalMounted]  = useState(false)  // controls DOM presence
+  const [modalVisible,  setModalVisible]  = useState(false)  // controls CSS opacity/scale
+  const [modalImgIdx,   setModalImgIdx]   = useState(0)
 
   const images = product.images ?? [product.image]
 
-  function openModal() {
+  // ── URL param: auto-open on mount if ?producto=id matches ────────────────────
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('producto') === product.id) {
+      openModal()
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Open: mount → next frame → show (two-frame trick for CSS transitions) ────
+  const openModal = useCallback(() => {
     setModalImgIdx(0)
-    setModalOpen(true)
-  }
+    setModalMounted(true)
+    window.history.replaceState({}, '', `?producto=${product.id}`)
+    // Two rAFs: first paints the mounted-but-invisible state, second triggers transition
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => setModalVisible(true))
+    })
+  }, [product.id])
+
+  // ── Close: fade out → unmount ────────────────────────────────────────────────
+  const closeModal = useCallback(() => {
+    setModalVisible(false)
+    window.history.replaceState({}, '', window.location.pathname)
+    setTimeout(() => setModalMounted(false), 280)
+  }, [])
+
+  // Close on Escape key
+  useEffect(() => {
+    if (!modalMounted) return
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') closeModal()
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [modalMounted, closeModal])
 
   return (
     <>
@@ -34,7 +66,6 @@ export default function ProductCard({ product }: { product: Product }) {
               className="w-full h-full object-contain block p-4"
             />
           </div>
-          {/* Thumbnails */}
           {images.length > 1 && (
             <div className="absolute bottom-[10px] left-1/2 -translate-x-1/2 flex gap-[6px]">
               {images.map((src, i) => (
@@ -97,15 +128,23 @@ export default function ProductCard({ product }: { product: Product }) {
         </div>
       </article>
 
-      {/* Product modal */}
-      {modalOpen && (
+      {/* Product modal — mount/unmount controlled separately from visibility */}
+      {modalMounted && (
         <div
-          className="fixed inset-0 z-[300] flex items-center justify-center p-5 overflow-y-auto"
+          className={[
+            'fixed inset-0 z-[300] flex items-center justify-center p-5 overflow-y-auto',
+            'transition-opacity duration-[260ms]',
+            modalVisible ? 'opacity-100' : 'opacity-0',
+          ].join(' ')}
           style={{ background: 'rgba(0,0,0,0.82)' }}
-          onClick={() => setModalOpen(false)}
+          onClick={closeModal}
         >
           <div
-            className="bg-ink max-w-[920px] w-full grid grid-cols-2 max-md:grid-cols-1 rounded-[2px] overflow-hidden relative"
+            className={[
+              'bg-ink max-w-[920px] w-full grid grid-cols-2 max-md:grid-cols-1 rounded-[2px] overflow-hidden relative',
+              'transition-all duration-[260ms]',
+              modalVisible ? 'scale-100 translate-y-0' : 'scale-[0.96] translate-y-4',
+            ].join(' ')}
             style={{ maxHeight: '92vh' }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -139,8 +178,8 @@ export default function ProductCard({ product }: { product: Product }) {
                 {/* Close button */}
                 <div className="flex justify-end mb-5">
                   <button
-                    onClick={() => setModalOpen(false)}
-                    className="bg-white/10 border-none text-white w-8 h-8 rounded-full cursor-pointer text-[18px] flex items-center justify-center"
+                    onClick={closeModal}
+                    className="bg-white/10 border-none text-white w-8 h-8 rounded-full cursor-pointer text-[18px] flex items-center justify-center hover:bg-white/20 transition-colors"
                   >
                     ×
                   </button>
@@ -214,7 +253,7 @@ export default function ProductCard({ product }: { product: Product }) {
                       </span>
                     </div>
                     <button
-                      onClick={() => { addItem(product.id); setModalOpen(false) }}
+                      onClick={() => { addItem(product.id); closeModal() }}
                       className="w-full bg-red text-white border-none p-[15px] cursor-pointer font-mono text-[11px] tracking-[0.15em] uppercase"
                     >
                       + Agregar al carrito

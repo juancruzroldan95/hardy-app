@@ -15,15 +15,14 @@ interface Props {
 }
 
 const CLIENT_LINKS = [
-  { href: '/portal',                 label: 'Dashboard'    },
-  { href: '/portal/catalogo',        label: 'Catálogo'     },
-  { href: '/portal/pedidos/nuevo',   label: 'Nuevo Pedido' },
-  { href: '/portal/pedidos',         label: 'Mis Pedidos'  },
-  { href: '/portal/cuenta',          label: 'Mi Cuenta'    },
-  { href: '/portal/materiales',      label: 'Materiales'   },
-  { href: '/portal/calculadora',     label: 'Calculadora'  },
-  { href: '/portal/novedades',       label: 'Novedades'    },
-  { href: '/portal/perfil',          label: 'Mi Perfil'    },
+  { href: '/portal',                label: 'Dashboard'    },
+  { href: '/portal/catalogo',       label: 'Catálogo'     },
+  { href: '/portal/pedidos/nuevo',  label: 'Nuevo Pedido' },
+  { href: '/portal/pedidos',        label: 'Mis Pedidos'  },
+  { href: '/portal/cuenta',         label: 'Mi Cuenta'    },
+  { href: '/portal/materiales',     label: 'Materiales'   },
+  { href: '/portal/novedades',      label: 'Novedades'    },
+  { href: '/portal/perfil',         label: 'Mi Perfil'    },
 ]
 
 const ADMIN_LINKS = [

@@ -198,7 +198,7 @@ export default function MayoristasPage() {
       </section>
 
       {/* FORMULARIO DE SOLICITUD */}
-      <section id="solicitar" className="py-20 px-10 bg-paper max-md:px-5">
+      <section id="solicitar" className="py-20 px-10 bg-paper-2 max-md:px-5">
         <div className="max-w-[1100px] mx-auto grid grid-cols-2 gap-20 items-start max-md:grid-cols-1 max-md:gap-10">
 
           <div className="sticky top-[100px] max-md:static">
@@ -244,7 +244,7 @@ export default function MayoristasPage() {
             </p>
           </div>
 
-          <div>
+          <div className="bg-paper border border-ink/8 p-8 max-md:p-5">
             <SolicitudForm />
           </div>
 

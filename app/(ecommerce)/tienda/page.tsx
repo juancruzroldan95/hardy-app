@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { MapPin, Zap, Package, MessageCircle } from 'lucide-react'
 import { getProducts } from '@/lib/products'
 import { WA_NUMBER } from '@/lib/products'
 import ProductCard from '@/components/store/ProductCard'
@@ -89,13 +90,13 @@ export default function TiendaPage() {
           </div>
           <div className="flex flex-col gap-[2px]">
             {[
-              { icon: '📍', t: 'Todo el país', d: 'Llegamos a cualquier provincia. Coordinamos directamente con vos.' },
-              { icon: '⚡', t: 'Según tu urgencia', d: 'Si necesitás el pedido rápido, lo resolvemos. Hablamos y buscamos la mejor opción.' },
-              { icon: '📦', t: 'Según tu volumen', d: 'El envío se calcula en función de lo que pedís — frascos, baldes o cajas mayoristas.' },
-              { icon: '💬', t: 'Sin sorpresas', d: 'Te confirmamos el costo antes de que pagues. Nada oculto, todo claro.' },
+              { Icon: MapPin,        t: 'Todo el país',     d: 'Llegamos a cualquier provincia. Coordinamos directamente con vos.' },
+              { Icon: Zap,          t: 'Según tu urgencia', d: 'Si necesitás el pedido rápido, lo resolvemos. Hablamos y buscamos la mejor opción.' },
+              { Icon: Package,      t: 'Según tu volumen',  d: 'El envío se calcula en función de lo que pedís — frascos, baldes o cajas mayoristas.' },
+              { Icon: MessageCircle, t: 'Sin sorpresas',    d: 'Te confirmamos el costo antes de que pagues. Nada oculto, todo claro.' },
             ].map((f, i) => (
               <div key={i} className="flex gap-[14px] items-start px-5 py-[18px]" style={{ background: 'rgba(255,255,255,0.05)' }}>
-                <span className="text-[18px] flex-shrink-0 mt-[2px]">{f.icon}</span>
+                <f.Icon size={18} className="flex-shrink-0 mt-[2px] text-red" />
                 <div>
                   <div className="font-body font-bold text-[14px] mb-1">{f.t}</div>
                   <div className="text-[13px] text-[#888] leading-[1.5]">{f.d}</div>
