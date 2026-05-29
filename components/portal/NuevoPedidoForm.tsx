@@ -209,9 +209,11 @@ export default function NuevoPedidoForm({ productos, initialQtys, minTotalCajas,
     [qtys, productos, activePrices],
   )
 
+  const productIVA   = Math.round(total * IVA)
+  const totalConIVA  = total + productIVA
   const shippingCost = selectedShipping ? getShippingCost(selectedShipping, totalCajas) : 0
   const shippingIVA  = Math.round(shippingCost * IVA)
-  const grandTotal   = total + shippingCost + shippingIVA
+  const grandTotal   = totalConIVA + shippingCost + shippingIVA
 
   const hasItems       = totalCajas > 0
   const belowMinimum   = minTotalCajas > 1 && totalFrascoCajas > 0 && totalFrascoCajas < minTotalCajas
@@ -251,7 +253,7 @@ export default function NuevoPedidoForm({ productos, initialQtys, minTotalCajas,
         <div className="mb-6 bg-paper border border-ink/8">
           <div className="px-5 py-3 border-b border-ink/8 flex items-center justify-between">
             <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-ink/50">── Precios por volumen</p>
-            <p className="font-mono text-[9px] tracking-[0.1em] text-ink/30 uppercase">Sin IVA</p>
+            <p className="font-mono text-[9px] tracking-[0.1em] text-ink/30 uppercase">Base imponible · IVA 21% se suma al total</p>
           </div>
 
           {tierGroups.map((group) => {
@@ -425,15 +427,36 @@ export default function NuevoPedidoForm({ productos, initialQtys, minTotalCajas,
           )
         })}
 
-        {/* Total productos */}
-        <div className="px-5 py-4 bg-paper-2 border-t border-ink/8 flex justify-between items-center">
-          <span className="font-mono text-[10px] tracking-[0.15em] uppercase text-ink/40">
-            Subtotal productos (sin IVA)
-          </span>
-          <span className={`font-heading text-[22px] font-medium ${total > 0 ? 'text-ink' : 'text-ink/20'}`}>
-            {total > 0 ? formatARS(total) : '$0'}
-          </span>
-        </div>
+        {/* Total productos con IVA */}
+        {total > 0 ? (
+          <div className="border-t border-ink/8">
+            <div className="px-5 py-2 bg-paper-2 flex justify-between items-center">
+              <span className="font-mono text-[9px] tracking-[0.12em] uppercase text-ink/35">
+                Subtotal sin IVA
+              </span>
+              <span className="font-mono text-[12px] text-ink/50">{formatARS(total)}</span>
+            </div>
+            <div className="px-5 py-2 bg-paper-2 flex justify-between items-center border-t border-ink/5">
+              <span className="font-mono text-[9px] tracking-[0.12em] uppercase text-ink/35">
+                IVA 21%
+              </span>
+              <span className="font-mono text-[12px] text-ink/50">{formatARS(productIVA)}</span>
+            </div>
+            <div className="px-5 py-4 bg-paper-2 flex justify-between items-center border-t border-ink/10">
+              <span className="font-mono text-[10px] tracking-[0.15em] uppercase text-ink/60 font-semibold">
+                Total productos
+              </span>
+              <span className="font-heading text-[22px] font-medium text-ink">
+                {formatARS(totalConIVA)}
+              </span>
+            </div>
+          </div>
+        ) : (
+          <div className="px-5 py-4 bg-paper-2 border-t border-ink/8 flex justify-between items-center">
+            <span className="font-mono text-[10px] tracking-[0.15em] uppercase text-ink/40">Total</span>
+            <span className="font-heading text-[22px] font-medium text-ink/20">$0</span>
+          </div>
+        )}
       </div>
 
       {/* ── Envío ────────────────────────────────────────────────────── */}
@@ -493,18 +516,26 @@ export default function NuevoPedidoForm({ productos, initialQtys, minTotalCajas,
         </div>
       </div>
 
-      {/* ── Total con envío ──────────────────────────────────────────── */}
+      {/* ── Resumen total con IVA ────────────────────────────────────── */}
       {selectedShipping && total > 0 && (
         <div className="mb-6 bg-ink text-paper px-5 py-5">
           <p className="font-mono text-[9px] tracking-[0.25em] uppercase text-red mb-4">── Resumen del pedido</p>
-          <div className="space-y-3">
+          <div className="space-y-2">
+
+            {/* Productos */}
             <div className="flex justify-between">
-              <span className="font-mono text-[10px] tracking-[0.1em] text-paper/50 uppercase">Subtotal productos</span>
+              <span className="font-mono text-[10px] tracking-[0.1em] text-paper/50 uppercase">Productos (sin IVA)</span>
               <span className="font-mono text-[13px] text-paper">{formatARS(total)}</span>
             </div>
-            {shippingCost > 0 ? (
+            <div className="flex justify-between">
+              <span className="font-mono text-[10px] tracking-[0.1em] text-paper/50 uppercase">IVA productos (21%)</span>
+              <span className="font-mono text-[13px] text-paper">{formatARS(productIVA)}</span>
+            </div>
+
+            {/* Envío */}
+            {shippingCost > 0 && (
               <>
-                <div className="flex justify-between">
+                <div className="flex justify-between pt-2 border-t border-paper/10">
                   <span className="font-mono text-[10px] tracking-[0.1em] text-paper/50 uppercase">Envío (sin IVA)</span>
                   <span className="font-mono text-[13px] text-paper">{formatARS(shippingCost)}</span>
                 </div>
@@ -512,22 +543,19 @@ export default function NuevoPedidoForm({ productos, initialQtys, minTotalCajas,
                   <span className="font-mono text-[10px] tracking-[0.1em] text-paper/50 uppercase">IVA envío (21%)</span>
                   <span className="font-mono text-[13px] text-paper">{formatARS(shippingIVA)}</span>
                 </div>
-                <div className="pt-3 border-t border-paper/15 flex justify-between items-baseline">
-                  <span className="font-mono text-[11px] tracking-[0.15em] text-paper/70 uppercase">Total estimado</span>
-                  <span className="font-heading text-[28px] font-medium text-paper">{formatARS(grandTotal)}</span>
-                </div>
               </>
-            ) : (
-              <div className="pt-3 border-t border-paper/15 flex justify-between items-baseline">
-                <span className="font-mono text-[11px] tracking-[0.15em] text-paper/70 uppercase">
-                  Total · Retiro sin cargo
-                </span>
-                <span className="font-heading text-[28px] font-medium text-paper">{formatARS(total)}</span>
-              </div>
             )}
+
+            {/* Grand total */}
+            <div className="pt-3 border-t border-paper/15 flex justify-between items-baseline">
+              <span className="font-mono text-[11px] tracking-[0.15em] text-paper/70 uppercase">
+                Total{shippingCost === 0 ? ' · Retiro sin cargo' : ''}
+              </span>
+              <span className="font-heading text-[32px] font-medium text-paper">{formatARS(grandTotal)}</span>
+            </div>
           </div>
           <p className="font-mono text-[8px] text-paper/30 mt-4 tracking-[0.05em]">
-            Los precios de productos no incluyen IVA · El IVA del envío se suma al total
+            IVA 21% incluido en productos y envío
           </p>
         </div>
       )}
@@ -615,7 +643,7 @@ export default function NuevoPedidoForm({ productos, initialQtys, minTotalCajas,
         {isPending
           ? 'Confirmando pedido...'
           : canSubmit
-            ? `Confirmar pedido${total > 0 ? ` — ${formatARS(selectedShipping ? grandTotal : total)}` : ''} →`
+            ? `Confirmar pedido${total > 0 ? ` — ${formatARS(selectedShipping ? grandTotal : totalConIVA)} c/IVA` : ''} →`
             : `Pedido mínimo: ${minTotalCajas} cajas`
         }
       </button>
