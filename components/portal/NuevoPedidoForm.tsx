@@ -17,7 +17,8 @@ export interface ProductOrden {
 }
 
 interface Props {
-  productos: ProductOrden[]
+  productos:    ProductOrden[]
+  initialQtys?: Record<string, number>
 }
 
 const SHIPPING_OPTIONS = [
@@ -35,14 +36,14 @@ const PAYMENT_OPTIONS = [
   { value: 'cheque',        label: 'Cheque',                sub: 'Coordinar con el equipo de ventas' },
 ]
 
-export default function NuevoPedidoForm({ productos }: Props) {
+export default function NuevoPedidoForm({ productos, initialQtys }: Props) {
   const [state, action, isPending] = useActionState<CreateOrderState, FormData>(
     createPortalOrder,
     undefined,
   )
 
   const [qtys, setQtys] = useState<Record<string, number>>(
-    Object.fromEntries(productos.map((p) => [p.id, 0]))
+    Object.fromEntries(productos.map((p) => [p.id, initialQtys?.[p.id] ?? 0]))
   )
 
   const total = useMemo(

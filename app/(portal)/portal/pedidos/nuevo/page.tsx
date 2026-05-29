@@ -2,17 +2,23 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { db } from '@/lib/db'
-import { profiles, priceOverrides } from '@/drizzle/schema'
+import { profiles, priceOverrides, orders, orderItems } from '@/drizzle/schema'
 import { and, eq } from 'drizzle-orm'
 import { getProducts } from '@/lib/products'
 import { ROLE_LABELS } from '@/lib/roles'
 import NuevoPedidoForm from '@/components/portal/NuevoPedidoForm'
 import type { ProductOrden } from '@/components/portal/NuevoPedidoForm'
 
-export default async function NuevoPedidoPage() {
+interface Props {
+  searchParams: Promise<{ repeat?: string }>
+}
+
+export default async function NuevoPedidoPage({ searchParams }: Props) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
+
+  const { repeat: repeatOrderId } = await searchParams
 
   const [profile, overrides] = await Promise.all([
     db.query.profiles.findFirst({
@@ -45,26 +51,60 @@ export default async function NuevoPedidoPage() {
     }
   })
 
+  // Load previous order items if ?repeat= is present
+  let initialQtys: Record<string, number> | undefined
+  let isRepeatOrder = false
+
+  if (repeatOrderId) {
+    const prevOrder = await db.query.orders.findFirst({
+      where: and(
+        eq(orders.id, repeatOrderId),
+        eq(orders.userId, user.id),
+        eq(orders.isDeleted, false),
+      ),
+      with: {
+        items: { where: eq(orderItems.isDeleted, false) },
+      },
+    })
+
+    if (prevOrder?.items?.length) {
+      initialQtys = Object.fromEntries(
+        prevOrder.items.map((item) => [item.productId, item.qty])
+      )
+      isRepeatOrder = true
+    }
+  }
+
   return (
     <div className="max-w-[860px]">
       <Link
-        href="/portal/catalogo"
+        href="/portal/pedidos"
         className="font-mono text-[10px] tracking-[0.12em] uppercase text-ink/40 hover:text-ink transition-colors mb-6 block"
       >
-        ← Ver catálogo
+        ← Mis pedidos
       </Link>
 
       <p className="font-mono text-[11px] tracking-[0.25em] text-red uppercase mb-2">
-        ── Nuevo pedido
+        ── {isRepeatOrder ? 'Repetir pedido' : 'Nuevo pedido'}
       </p>
       <h1 className="font-heading text-[clamp(26px,3vw,38px)] font-medium leading-[1.1] tracking-[-0.02em] mb-1">
-        Armá tu pedido
+        {isRepeatOrder ? 'Repetí tu último pedido' : 'Armá tu pedido'}
       </h1>
       <p className="font-body text-[14px] text-ink/50 mb-8">
         Segmento: {ROLE_LABELS[role]} · Precios en ARS sin IVA
+        {isRepeatOrder && ' · Cantidades pre-cargadas del pedido anterior'}
       </p>
 
-      <NuevoPedidoForm productos={productosOrden} />
+      {isRepeatOrder && (
+        <div className="bg-[#f0f7f0] border border-[#c6dfc7] px-5 py-4 mb-6 flex items-center gap-3">
+          <span className="text-[#2d6a35] text-[18px]">↺</span>
+          <p className="font-mono text-[11px] tracking-[0.08em] text-[#2d6a35]">
+            Cantidades pre-cargadas del pedido anterior. Modificá lo que necesites antes de confirmar.
+          </p>
+        </div>
+      )}
+
+      <NuevoPedidoForm productos={productosOrden} initialQtys={initialQtys} />
     </div>
   )
 }

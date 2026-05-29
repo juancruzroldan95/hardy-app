@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { db } from '@/lib/db'
-import { orderItems, orders } from '@/drizzle/schema'
+import { orderItems, orders, profiles } from '@/drizzle/schema'
 import { eq, desc, and } from 'drizzle-orm'
 import OrderStatusBadge from '@/components/portal/OrderStatusBadge'
 import { formatARS } from '@/lib/products'
@@ -30,6 +30,9 @@ interface Props {
   searchParams: Promise<{ status?: string }>
 }
 
+const VOLUME_ROLES = ['mayorista', 'distribuidor', 'productor', 'gastronomico'] as const
+type VolumeRole = typeof VOLUME_ROLES[number]
+
 export default async function PedidosPage({ searchParams }: Props) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -38,22 +41,68 @@ export default async function PedidosPage({ searchParams }: Props) {
   const { status: rawStatus } = await searchParams
   const statusFilter = rawStatus && isValidStatus(rawStatus) ? rawStatus : null
 
-  const userOrders = await db.query.orders.findMany({
-    where: statusFilter
-      ? and(eq(orders.userId, user.id), eq(orders.status, statusFilter), eq(orders.isDeleted, false))
-      : and(eq(orders.userId, user.id), eq(orders.isDeleted, false)),
-    orderBy: [desc(orders.createdAt)],
-    with: { items: { where: eq(orderItems.isDeleted, false) } },
-  })
+  const [profile, userOrders] = await Promise.all([
+    db.query.profiles.findFirst({
+      where: and(eq(profiles.userId, user.id), eq(profiles.isDeleted, false)),
+    }),
+    db.query.orders.findMany({
+      where: statusFilter
+        ? and(eq(orders.userId, user.id), eq(orders.status, statusFilter), eq(orders.isDeleted, false))
+        : and(eq(orders.userId, user.id), eq(orders.isDeleted, false)),
+      orderBy: [desc(orders.createdAt)],
+      with: { items: { where: eq(orderItems.isDeleted, false) } },
+    }),
+  ])
+
+  const role = profile?.role ?? 'consumer'
+  const isVolumeRole = (VOLUME_ROLES as readonly string[]).includes(role)
+
+  // Volume suggestion: show banner if last order is between 30 and 90 days ago
+  const lastOrder = userOrders[0] ?? null
+  const daysSinceLast = lastOrder
+    ? Math.floor((Date.now() - new Date(lastOrder.createdAt).getTime()) / 86_400_000)
+    : null
+  const showRepeatBanner = isVolumeRole && lastOrder && daysSinceLast !== null && daysSinceLast >= 30 && daysSinceLast <= 90
 
   return (
     <div className="max-w-[900px]">
       <p className="font-mono text-[11px] tracking-[0.25em] text-red uppercase mb-3">
         ── Pedidos
       </p>
-      <h1 className="font-heading text-[clamp(24px,3vw,36px)] font-medium leading-[1.1] tracking-[-0.02em] mb-8">
-        Mis pedidos
-      </h1>
+      <div className="flex items-start justify-between gap-4 mb-8 flex-wrap">
+        <h1 className="font-heading text-[clamp(24px,3vw,36px)] font-medium leading-[1.1] tracking-[-0.02em]">
+          Mis pedidos
+        </h1>
+        <Link
+          href="/portal/pedidos/nuevo"
+          className="bg-red text-paper font-mono text-[11px] tracking-[0.15em] uppercase px-5 py-[11px] hover:bg-red/90 transition-colors shrink-0"
+        >
+          + Nuevo pedido
+        </Link>
+      </div>
+
+      {/* Volume reorder suggestion banner */}
+      {showRepeatBanner && lastOrder && (
+        <div className="bg-[#f0f7f0] border border-[#c6dfc7] px-5 py-4 mb-6 flex items-center justify-between gap-4 flex-wrap">
+          <div className="flex items-center gap-3">
+            <span className="text-[#2d6a35] text-[20px]">↺</span>
+            <div>
+              <p className="font-body font-semibold text-[14px] text-[#2d6a35]">
+                ¿Repetimos el pedido?
+              </p>
+              <p className="font-mono text-[10px] tracking-[0.08em] text-[#2d6a35]/70">
+                Tu último pedido fue hace {daysSinceLast} días · {lastOrder.items.length} producto{lastOrder.items.length !== 1 ? 's' : ''} · {formatARS(Number(lastOrder.totalArs))}
+              </p>
+            </div>
+          </div>
+          <Link
+            href={`/portal/pedidos/nuevo?repeat=${lastOrder.id}`}
+            className="bg-[#2d6a35] text-paper font-mono text-[10px] tracking-[0.12em] uppercase px-5 py-[10px] hover:bg-[#2d6a35]/80 transition-colors shrink-0"
+          >
+            Repetir pedido →
+          </Link>
+        </div>
+      )}
 
       {/* Status filter */}
       <div className="flex flex-wrap gap-2 mb-6">
@@ -85,20 +134,23 @@ export default async function PedidosPage({ searchParams }: Props) {
       ) : (
         <div className="bg-paper border border-ink/8 divide-y divide-ink/8">
           {/* Header */}
-          <div className="hidden md:grid grid-cols-[1fr_auto_auto_auto] gap-6 px-5 py-3 bg-paper-2">
+          <div className="hidden md:grid grid-cols-[1fr_auto_auto_auto_auto] gap-6 px-5 py-3 bg-paper-2">
             <span className="font-mono text-[9px] tracking-[0.15em] uppercase text-ink/40">Fecha</span>
             <span className="font-mono text-[9px] tracking-[0.15em] uppercase text-ink/40">Estado</span>
             <span className="font-mono text-[9px] tracking-[0.15em] uppercase text-ink/40">Total</span>
+            <span className="font-mono text-[9px] tracking-[0.15em] uppercase text-ink/40 sr-only">Repetir</span>
             <span className="font-mono text-[9px] tracking-[0.15em] uppercase text-ink/40 sr-only">Ver</span>
           </div>
 
           {userOrders.map((order) => (
-            <Link
+            <div
               key={order.id}
-              href={`/portal/pedidos/${order.id}`}
-              className="flex md:grid md:grid-cols-[1fr_auto_auto_auto] items-center gap-4 md:gap-6 px-5 py-4 hover:bg-paper-2 transition-colors group"
+              className="flex md:grid md:grid-cols-[1fr_auto_auto_auto_auto] items-center gap-4 md:gap-6 px-5 py-4 hover:bg-paper-2 transition-colors group"
             >
-              <div className="flex-1 flex flex-col gap-1">
+              <Link
+                href={`/portal/pedidos/${order.id}`}
+                className="flex-1 flex flex-col gap-1 min-w-0"
+              >
                 <span className="font-body text-[14px] text-ink">
                   {new Date(order.createdAt).toLocaleDateString('es-AR', {
                     day:   '2-digit',
@@ -109,15 +161,25 @@ export default async function PedidosPage({ searchParams }: Props) {
                 <span className="font-mono text-[10px] tracking-[0.08em] text-ink/40">
                   {order.items.length} {order.items.length === 1 ? 'producto' : 'productos'}
                 </span>
-              </div>
+              </Link>
               <OrderStatusBadge status={order.status} />
               <span className="font-mono text-[13px] text-ink">
                 {formatARS(Number(order.totalArs))}
               </span>
-              <span className="font-mono text-[11px] text-ink/30 group-hover:text-red transition-colors">
+              <Link
+                href={`/portal/pedidos/nuevo?repeat=${order.id}`}
+                className="font-mono text-[9px] tracking-[0.1em] uppercase text-ink/30 hover:text-[#2d6a35] border border-ink/10 hover:border-[#c6dfc7] px-3 py-[6px] transition-colors hidden md:block"
+                title="Repetir este pedido"
+              >
+                ↺ Repetir
+              </Link>
+              <Link
+                href={`/portal/pedidos/${order.id}`}
+                className="font-mono text-[11px] text-ink/30 group-hover:text-red transition-colors"
+              >
                 →
-              </span>
-            </Link>
+              </Link>
+            </div>
           ))}
         </div>
       )}

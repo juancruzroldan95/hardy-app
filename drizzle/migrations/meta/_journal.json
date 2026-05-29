@@ -29,6 +29,13 @@
       "when": 1779934315966,
       "tag": "0003_groovy_korg",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1780019476538,
+      "tag": "0004_add_client_alerts",
+      "breakpoints": true
     }
   ]
 }

@@ -7,6 +7,7 @@ import { orders, orderItems, profiles, priceOverrides } from '@/drizzle/schema'
 import { and, eq } from 'drizzle-orm'
 import { createClient } from '@/lib/supabase/server'
 import { getProductById } from '@/lib/products'
+import { sendOrderConfirmation } from '@/lib/email'
 import type { ShippingMethod, PaymentMethod } from '@/drizzle/schema'
 
 export type CreateOrderState =
@@ -99,10 +100,32 @@ export async function createPortalOrder(
   }).returning({ id: orders.id })
 
   // Insertar los items
-  await db.insert(orderItems).values(
+  const insertedItems = await db.insert(orderItems).values(
     itemsToInsert.map((item) => ({ ...item, orderId: newOrder.id }))
-  )
+  ).returning()
 
   revalidatePath('/portal/pedidos')
+
+  // Send order confirmation email (fire-and-forget — don't block redirect)
+  try {
+    const { data: { user: currentUser } } = await (await createClient()).auth.getUser()
+    if (currentUser?.email) {
+      await sendOrderConfirmation({
+        orderId:        newOrder.id,
+        orderDate:      new Date(),
+        clientName:     profile.displayName ?? profile.company ?? currentUser.email,
+        clientEmail:    currentUser.email,
+        shippingMethod: shippingMethod,
+        paymentMethod:  paymentMethod,
+        notes,
+        totalArs,
+        items:          insertedItems,
+      })
+    }
+  } catch (e) {
+    // Email errors should never block the order flow
+    console.error('[email] Failed to send order confirmation:', e)
+  }
+
   redirect(`/portal/pedidos/${newOrder.id}`)
 }

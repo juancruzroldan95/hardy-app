@@ -71,6 +71,13 @@ export const estadoSolicitudEnum = pgEnum('estado_solicitud', [
   'rechazada',
 ])
 
+export const alertTipoEnum = pgEnum('alert_tipo', [
+  'reorder',
+  'payment',
+  'inactivity',
+  'custom',
+])
+
 // ─── profiles ─────────────────────────────────────────────────────────────────
 
 export const profiles = pgTable('profiles', {
@@ -190,10 +197,31 @@ export const novedades = pgTable('novedades', {
   index('novedades_created_at_idx').on(table.createdAt),
 ])
 
+// ─── client_alerts ────────────────────────────────────────────────────────────
+// Alertas internas por cliente, creadas por admins.
+
+export const clientAlerts = pgTable('client_alerts', {
+  id:              uuid('id').primaryKey().defaultRandom(),
+  profileId:       uuid('profile_id').notNull(),
+  tipo:            alertTipoEnum('tipo').notNull().default('custom'),
+  mensaje:         text('mensaje').notNull(),
+  isResolved:      boolean('is_resolved').notNull().default(false),
+  resolvedAt:      timestamp('resolved_at', { withTimezone: true }),
+  createdByUserId: uuid('created_by_user_id').notNull(),
+  isActive:        boolean('is_active').notNull().default(true),
+  isDeleted:       boolean('is_deleted').notNull().default(false),
+  createdAt:       timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt:       timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+}, (table) => [
+  index('client_alerts_profile_id_idx').on(table.profileId),
+  index('client_alerts_is_resolved_idx').on(table.isResolved),
+])
+
 // ─── Relations ────────────────────────────────────────────────────────────────
 
 export const profilesRelations = relations(profiles, ({ many }) => ({
   orders: many(orders),
+  alerts: many(clientAlerts),
 }))
 
 export const ordersRelations = relations(orders, ({ one, many }) => ({
@@ -208,6 +236,13 @@ export const orderItemsRelations = relations(orderItems, ({ one }) => ({
   order: one(orders, {
     fields:     [orderItems.orderId],
     references: [orders.id],
+  }),
+}))
+
+export const clientAlertsRelations = relations(clientAlerts, ({ one }) => ({
+  profile: one(profiles, {
+    fields:     [clientAlerts.profileId],
+    references: [profiles.id],
   }),
 }))
 
@@ -231,4 +266,7 @@ export type ShippingMethod   = (typeof shippingMethodEnum.enumValues)[number]
 export type PaymentMethod    = (typeof paymentMethodEnum.enumValues)[number]
 export type TipoNegocio      = (typeof tipoNegocioEnum.enumValues)[number]
 export type EstadoSolicitud  = (typeof estadoSolicitudEnum.enumValues)[number]
+export type AlertTipo        = (typeof alertTipoEnum.enumValues)[number]
+export type ClientAlert      = typeof clientAlerts.$inferSelect
+export type NewClientAlert   = typeof clientAlerts.$inferInsert
 export type OrderWithItems   = Order & { items: OrderItem[] }

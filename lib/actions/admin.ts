@@ -4,9 +4,9 @@ import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { db } from '@/lib/db'
-import { profiles, orders, solicitudes, novedades } from '@/drizzle/schema'
+import { profiles, orders, solicitudes, novedades, clientAlerts } from '@/drizzle/schema'
 import { and, eq } from 'drizzle-orm'
-import type { EstadoSolicitud, OrderStatus, PaymentStatus } from '@/drizzle/schema'
+import type { EstadoSolicitud, OrderStatus, PaymentStatus, AlertTipo } from '@/drizzle/schema'
 
 // ─── Guard ─────────────────────────────────────────────────────────────────────
 
@@ -121,4 +121,49 @@ export async function softDeleteNovedad(id: string) {
     .where(eq(novedades.id, id))
   revalidatePath('/portal/novedades')
   revalidatePath('/portal/admin/novedades')
+}
+
+// ─── Client Alerts ─────────────────────────────────────────────────────────────
+
+export async function createClientAlert(
+  profileId:  string,
+  tipo:       AlertTipo,
+  mensaje:    string,
+) {
+  const { user } = await getAdminUser()
+  if (!mensaje.trim()) return
+
+  await db.insert(clientAlerts).values({
+    profileId,
+    tipo,
+    mensaje: mensaje.trim(),
+    createdByUserId: user.id,
+  })
+  revalidatePath('/portal/admin/clientes')
+}
+
+export async function resolveClientAlert(alertId: string) {
+  await getAdminUser()
+  await db.update(clientAlerts)
+    .set({ isResolved: true, resolvedAt: new Date(), updatedAt: new Date() })
+    .where(eq(clientAlerts.id, alertId))
+  revalidatePath('/portal/admin/clientes')
+}
+
+export async function deleteClientAlert(alertId: string) {
+  await getAdminUser()
+  await db.update(clientAlerts)
+    .set({ isDeleted: true, updatedAt: new Date() })
+    .where(eq(clientAlerts.id, alertId))
+  revalidatePath('/portal/admin/clientes')
+}
+
+// ─── Client Notes ──────────────────────────────────────────────────────────────
+
+export async function updateClientNotes(profileId: string, notes: string) {
+  await getAdminUser()
+  await db.update(profiles)
+    .set({ notes: notes.trim() || null, updatedAt: new Date() })
+    .where(eq(profiles.id, profileId))
+  revalidatePath('/portal/admin/clientes')
 }
