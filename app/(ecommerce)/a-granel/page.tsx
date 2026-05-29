@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
+import { MessageCircle } from 'lucide-react'
 import { WA_NUMBER } from '@/lib/products'
 
 export const metadata: Metadata = {
@@ -107,7 +108,7 @@ export default function AGranelPage() {
           <p className="text-[16px] text-[#bbb] max-w-[560px] leading-[1.7] mb-9">
             Crema de maní y miel en volumen para gastronomía, repostería, cafeterías, producción e industria.
           </p>
-          <div className="flex gap-3 flex-wrap">
+          <div className="flex gap-3 flex-wrap items-center">
             <Link
               href="/portal"
               className="inline-block bg-red text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-7 py-[13px]"
@@ -118,9 +119,10 @@ export default function AGranelPage() {
               href={`${WA_NUMBER}?text=Hola%20Hardy,%20quiero%20información%20de%20productos%20a%20granel`}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-block bg-paper/10 border border-white/20 text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-7 py-[13px]"
+              className="bg-paper/10 border border-white/20 text-paper w-[50px] h-[50px] flex items-center justify-center"
+              aria-label="Consultar por WhatsApp"
             >
-              Consultar por WhatsApp →
+              <MessageCircle size={20} />
             </a>
           </div>
         </div>
@@ -199,9 +201,10 @@ export default function AGranelPage() {
             href={`${WA_NUMBER}?text=Hola%20Hardy,%20quiero%20consultar%20por%20volumen%20a%20granel`}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-block bg-red text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-7 py-[13px]"
+            className="bg-red text-paper w-[60px] h-[60px] flex items-center justify-center mx-auto"
+            aria-label="Consultar por WhatsApp"
           >
-            Consultar por WhatsApp →
+            <MessageCircle size={26} />
           </a>
         </div>
       </section>

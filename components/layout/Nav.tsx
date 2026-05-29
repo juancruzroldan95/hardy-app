@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
-import { ShoppingBag, Menu, X } from 'lucide-react'
+import { ShoppingBag, Menu, X, MessageCircle } from 'lucide-react'
 import { WA_NUMBER } from '@/lib/products'
 
 interface NavProps {
@@ -66,9 +66,10 @@ export default function Nav({ cartCount = 0, onCartOpen }: NavProps) {
             href={`${WA_NUMBER}?text=Hola%21%20Quiero%20lista%20de%20precios%20y%20condiciones%20mayoristas.`}
             target="_blank"
             rel="noopener noreferrer"
-            className="bg-red text-paper font-mono text-[11px] tracking-[0.12em] uppercase px-5 py-[10px] max-md:hidden"
+            className="bg-red text-paper w-[42px] h-[42px] flex items-center justify-center max-md:hidden"
+            aria-label="Contactar por WhatsApp"
           >
-            Contactanos por WhatsApp
+            <MessageCircle size={18} />
           </a>
 
           {onCartOpen && (

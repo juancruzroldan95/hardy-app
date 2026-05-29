@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { MessageCircle } from 'lucide-react'
 import { WA_NUMBER, ESCALAS } from '@/lib/products'
 import SolicitudForm from '@/components/mayoristas/SolicitudForm'
 
@@ -162,9 +163,10 @@ export default function MayoristasPage() {
                 href={`${WA_NUMBER}?text=Hola%20Hardy,%20quiero%20información%20mayorista`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-block bg-paper/10 border border-white/20 text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-6 py-[14px]"
+                className="bg-paper/10 border border-white/20 text-paper w-[52px] h-[52px] flex items-center justify-center"
+                aria-label="WhatsApp"
               >
-                WhatsApp →
+                <MessageCircle size={20} />
               </a>
             </div>
           </div>
@@ -234,9 +236,10 @@ export default function MayoristasPage() {
                 href={`${WA_NUMBER}?text=Hola%20Hardy,%20quiero%20acceso%20al%20portal%20mayorista`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-ink border-b border-ink"
+                className="text-ink inline-flex items-center align-middle"
+                aria-label="WhatsApp"
               >
-                WhatsApp →
+                <MessageCircle size={14} />
               </a>
             </p>
           </div>

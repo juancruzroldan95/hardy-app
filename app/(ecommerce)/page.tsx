@@ -1,6 +1,8 @@
 import Image from 'next/image'
 import Link from 'next/link'
+import { MessageCircle } from 'lucide-react'
 import { getRecetas } from '@/lib/recetas'
+import { WA_NUMBER } from '@/lib/products'
 import RevealSection from '@/components/ui/RevealSection'
 
 // ── Quick pillars bar (no "+500" — that number lives only in stats)
@@ -392,15 +394,18 @@ export default function HomePage() {
           {/* Layout: imagen genérica izquierda + listado de todos los formatos derecha */}
           {/* NOTA: guardar la foto de los baldes en /public/lifestyle/baldes-duo.png */}
           <RevealSection className="grid grid-cols-2 gap-[2px] max-md:grid-cols-1">
-            {/* Imagen genérica — reemplazar con duo shot cuando esté disponible */}
-            <div className="relative bg-ink overflow-hidden" style={{ minHeight: '420px' }}>
-              <Image
-                src="/products/balde-23-front.png"
-                alt="Baldes Hardy a granel"
-                fill
-                className="object-contain p-8"
-              />
-            </div>
+            {/* Imagen — background-blend-mode:multiply para mimetizar con bg-paper-2 */}
+            <div
+              style={{
+                minHeight: '420px',
+                backgroundImage: "url('/products/balde-23-front.png')",
+                backgroundSize: 'contain',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat',
+                backgroundBlendMode: 'multiply',
+                backgroundColor: '#F1EFE9',
+              }}
+            />
 
             {/* Todos los formatos */}
             <div className="bg-paper px-10 py-10 flex flex-col justify-between max-md:px-6 max-md:py-8">
@@ -440,12 +445,23 @@ export default function HomePage() {
                 </div>
               </div>
 
-              <Link
-                href="/portal"
-                className="bg-ink text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-7 py-[14px] self-start inline-block hover:bg-red transition-colors"
-              >
-                Consultar precios →
-              </Link>
+              <div className="flex gap-3 flex-wrap items-center">
+                <Link
+                  href="/portal"
+                  className="bg-ink text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-7 py-[14px] inline-block hover:bg-red transition-colors"
+                >
+                  Portal Cliente →
+                </Link>
+                <a
+                  href={`${WA_NUMBER}?text=Hola%20Hardy,%20quiero%20consultar%20por%20volumen%20a%20granel`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-ink text-paper w-[52px] h-[52px] flex items-center justify-center hover:bg-red transition-colors flex-shrink-0"
+                  aria-label="Consultar por WhatsApp"
+                >
+                  <MessageCircle size={20} />
+                </a>
+              </div>
             </div>
           </RevealSection>
         </div>

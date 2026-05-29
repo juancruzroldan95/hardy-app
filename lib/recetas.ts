@@ -19,7 +19,7 @@ export const RECETAS: Receta[] = [
     porciones: '1 porción',
     dificultad: 'Fácil',
     categoria: 'Desayuno',
-    imagen: '/lifestyle/recetas/receta-01.png',
+    imagen: '/lifestyle/recetas/receta-16.png',
     productos: ['Crema de Maní Natural 380g'],
     ingredientes: [
       '2 rodajas de pan integral',
@@ -43,7 +43,7 @@ export const RECETAS: Receta[] = [
     porciones: '1 porción',
     dificultad: 'Fácil',
     categoria: 'Fit',
-    imagen: '/lifestyle/recetas/receta-02.png',
+    imagen: '/lifestyle/recetas/receta-15.png',
     productos: ['Crema de Maní Crunchy 380g'],
     ingredientes: [
       '1 taza de yogur natural',
@@ -68,7 +68,7 @@ export const RECETAS: Receta[] = [
     porciones: '1 porción',
     dificultad: 'Fácil',
     categoria: 'Desayuno',
-    imagen: '/lifestyle/recetas/receta-03.png',
+    imagen: '/lifestyle/recetas/receta-14.png',
     productos: ['Miel Líquida 500g'],
     ingredientes: [
       '2 rodajas de pan artesanal',
@@ -92,7 +92,7 @@ export const RECETAS: Receta[] = [
     porciones: '6-8 cookies',
     dificultad: 'Fácil',
     categoria: 'Snacks',
-    imagen: '/lifestyle/recetas/receta-04.png',
+    imagen: '/lifestyle/recetas/receta-12.png',
     productos: ['Crema de Maní Natural 380g', 'Miel Líquida 500g'],
     ingredientes: [
       '1 huevo',
@@ -118,7 +118,7 @@ export const RECETAS: Receta[] = [
     porciones: '8-10 bocados',
     dificultad: 'Fácil',
     categoria: 'Snacks',
-    imagen: '/lifestyle/recetas/receta-05.png',
+    imagen: '/lifestyle/recetas/receta-11.png',
     productos: ['Crema de Maní Natural 380g', 'Miel Líquida 500g'],
     ingredientes: [
       '2 bananas maduras',
@@ -144,7 +144,7 @@ export const RECETAS: Receta[] = [
     porciones: '6-8 pancakes',
     dificultad: 'Fácil',
     categoria: 'Desayuno',
-    imagen: '/lifestyle/recetas/receta-06.png',
+    imagen: '/lifestyle/recetas/receta-10.png',
     productos: ['Crema de Maní Crunchy 380g', 'Miel Líquida 500g'],
     ingredientes: [
       '1 huevo',
@@ -168,7 +168,7 @@ export const RECETAS: Receta[] = [
     porciones: '12-15 bolitas',
     dificultad: 'Fácil',
     categoria: 'Snacks',
-    imagen: '/lifestyle/recetas/receta-07.png',
+    imagen: '/lifestyle/recetas/receta-09.png',
     productos: ['Crema de Maní Natural 380g', 'Miel Sólida 500g'],
     ingredientes: [
       '1 taza de avena',
@@ -194,7 +194,7 @@ export const RECETAS: Receta[] = [
     porciones: '1 frasco grande',
     dificultad: 'Fácil',
     categoria: 'Desayuno',
-    imagen: '/lifestyle/recetas/receta-08.png',
+    imagen: '/lifestyle/recetas/receta-07.png',
     productos: ['Crema de Maní Crunchy 380g', 'Miel Sólida 500g'],
     ingredientes: [
       '2 tazas de avena',
@@ -220,7 +220,7 @@ export const RECETAS: Receta[] = [
     porciones: '1 porción',
     dificultad: 'Fácil',
     categoria: 'Fit',
-    imagen: '/lifestyle/recetas/receta-09.png',
+    imagen: '/lifestyle/recetas/receta-08.png',
     productos: ['Crema de Maní Natural 380g', 'Miel Líquida 500g'],
     ingredientes: [
       '1 cda de Crema de Maní Natural HARDY',
@@ -242,7 +242,7 @@ export const RECETAS: Receta[] = [
     porciones: '8-10 barritas',
     dificultad: 'Fácil',
     categoria: 'Snacks',
-    imagen: '/lifestyle/recetas/receta-10.png',
+    imagen: '/lifestyle/recetas/receta-06.png',
     productos: ['Crema de Maní Natural 380g', 'Miel Sólida 500g'],
     ingredientes: [
       '2 tazas de avena',
@@ -269,7 +269,7 @@ export const RECETAS: Receta[] = [
     porciones: '1 vaso grande',
     dificultad: 'Fácil',
     categoria: 'Fit',
-    imagen: '/lifestyle/recetas/receta-11.png',
+    imagen: '/lifestyle/recetas/receta-05.png',
     productos: ['Crema de Maní Crunchy 380g'],
     ingredientes: [
       '1 banana congelada',
@@ -294,7 +294,7 @@ export const RECETAS: Receta[] = [
     porciones: '1 frasco',
     dificultad: 'Fácil',
     categoria: 'Desayuno',
-    imagen: '/lifestyle/recetas/receta-12.png',
+    imagen: '/lifestyle/recetas/receta-04.png',
     productos: ['Crema de Maní Natural 380g', 'Miel Líquida 500g'],
     ingredientes: [
       '1 taza de yogur griego',
@@ -320,7 +320,7 @@ export const RECETAS: Receta[] = [
     porciones: '1 porción',
     dificultad: 'Fácil',
     categoria: 'Desayuno',
-    imagen: '/lifestyle/recetas/receta-13.png',
+    imagen: '/lifestyle/recetas/receta-03.png',
     productos: ['Crema de Maní Crunchy 380g', 'Miel Líquida 500g'],
     ingredientes: [
       '½ taza de avena',
@@ -345,7 +345,7 @@ export const RECETAS: Receta[] = [
     porciones: '2 porciones',
     dificultad: 'Medio',
     categoria: 'Desayuno',
-    imagen: '/lifestyle/recetas/receta-14.png',
+    imagen: '/lifestyle/recetas/receta-02.png',
     productos: ['Crema de Maní Natural 380g', 'Miel Sólida 500g'],
     ingredientes: [
       '1 taza de harina integral',
@@ -370,7 +370,7 @@ export const RECETAS: Receta[] = [
     porciones: '1 porción',
     dificultad: 'Fácil',
     categoria: 'Desayuno',
-    imagen: '/lifestyle/recetas/receta-15.png',
+    imagen: '/lifestyle/recetas/receta-01.png',
     productos: ['Crema de Maní Crunchy 380g', 'Miel Líquida 500g'],
     ingredientes: [
       '1 taza de yogur natural',
