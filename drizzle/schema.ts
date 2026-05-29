@@ -127,8 +127,10 @@ export const orders = pgTable('orders', {
   paymentMethod:   paymentMethodEnum('payment_method'),
   notes:           text('notes'),
   shippingAddress: text('shipping_address'),
-  trackingNumber:  text('tracking_number'),
-  isActive:        boolean('is_active').notNull().default(true),
+  trackingNumber:       text('tracking_number'),
+  purchaseOrderNumber:  text('purchase_order_number'),
+  requestedDeliveryDate: text('requested_delivery_date'), // 'YYYY-MM-DD'
+  isActive:             boolean('is_active').notNull().default(true),
   isDeleted:       boolean('is_deleted').notNull().default(false),
   createdAt:       timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt:       timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),

@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { db } from '@/lib/db'
-import { profiles, priceOverrides, orders, orderItems } from '@/drizzle/schema'
+import { profiles, priceOverrides, orders, orderItems, deliveryAddresses, productAvailability } from '@/drizzle/schema'
 import { and, eq } from 'drizzle-orm'
 import { getProducts } from '@/lib/products'
 import { ROLE_LABELS } from '@/lib/roles'
@@ -17,8 +17,6 @@ const ROLE_VISIBLE: Record<string, Set<string>> = {
   gastronomico: BALDE_IDS,
   distribuidor: new Set([...FRASCO_IDS, ...BALDE_IDS]),
 }
-
-// Minimum total cajas per role (for frasco products)
 const MIN_ORDER_CAJAS: Record<string, number> = {
   mayorista:    3,
   distribuidor: 20,
@@ -35,18 +33,23 @@ export default async function NuevoPedidoPage({ searchParams }: Props) {
 
   const { repeat: repeatOrderId } = await searchParams
 
-  const [profile, allOverrides] = await Promise.all([
+  const [profile, allOverrides, stockRecords] = await Promise.all([
     db.query.profiles.findFirst({
       where: and(eq(profiles.userId, user.id), eq(profiles.isDeleted, false)),
     }),
     db.query.priceOverrides.findMany({
       where: and(eq(priceOverrides.isDeleted, false), eq(priceOverrides.isActive, true)),
     }),
+    db.query.productAvailability.findMany(),
   ])
 
   const role = profile?.role ?? 'consumer'
 
-  // Group all tiers for this role by productId, sorted by minQty ascending
+  // Stock map productId → status
+  const stockByProduct: Record<string, string> = {}
+  stockRecords.forEach((r) => { stockByProduct[r.productId] = r.status })
+
+  // Build tier map
   const tiersByProduct = new Map<string, Array<{ minQty: number; pricePerUnit: number; pricePerCaja: number }>>()
   const products = getProducts()
 
@@ -71,10 +74,9 @@ export default async function NuevoPedidoPage({ searchParams }: Props) {
   const productosOrden: ProductOrden[] = products
     .filter((p) => !visibleIds || visibleIds.has(p.id))
     .map((p) => {
-      const tiers      = tiersByProduct.get(p.id) ?? []
-      const firstTier  = tiers[0]
-      const upb        = p.unitsPerBox ?? 1
-      const baseUnit   = firstTier?.pricePerUnit ?? p.price
+      const tiers    = tiersByProduct.get(p.id) ?? []
+      const upb      = p.unitsPerBox ?? 1
+      const baseUnit = tiers[0]?.pricePerUnit ?? p.price
       return {
         id:           p.id,
         name:         p.name,
@@ -89,26 +91,28 @@ export default async function NuevoPedidoPage({ searchParams }: Props) {
       }
     })
 
-  // Load previous order items if ?repeat= is present
+  // Load delivery addresses for this profile
+  const clientAddresses = profile
+    ? await db.query.deliveryAddresses.findMany({
+        where: and(
+          eq(deliveryAddresses.profileId, profile.id),
+          eq(deliveryAddresses.isDeleted, false),
+          eq(deliveryAddresses.isActive, true),
+        ),
+      })
+    : []
+
+  // Load previous order for repeat
   let initialQtys: Record<string, number> | undefined
   let isRepeatOrder = false
 
   if (repeatOrderId) {
     const prevOrder = await db.query.orders.findFirst({
-      where: and(
-        eq(orders.id, repeatOrderId),
-        eq(orders.userId, user.id),
-        eq(orders.isDeleted, false),
-      ),
-      with: {
-        items: { where: eq(orderItems.isDeleted, false) },
-      },
+      where: and(eq(orders.id, repeatOrderId), eq(orders.userId, user.id), eq(orders.isDeleted, false)),
+      with:  { items: { where: eq(orderItems.isDeleted, false) } },
     })
-
     if (prevOrder?.items?.length) {
-      initialQtys = Object.fromEntries(
-        prevOrder.items.map((item) => [item.productId, item.qty])
-      )
+      initialQtys  = Object.fromEntries(prevOrder.items.map((i) => [i.productId, i.qty]))
       isRepeatOrder = true
     }
   }
@@ -129,7 +133,7 @@ export default async function NuevoPedidoPage({ searchParams }: Props) {
         {isRepeatOrder ? 'Repetí tu último pedido' : 'Armá tu pedido'}
       </h1>
       <p className="font-body text-[14px] text-ink/50 mb-8">
-        Segmento: {ROLE_LABELS[role]} · Precios en ARS sin IVA
+        Segmento: {ROLE_LABELS[role]} · IVA 21% incluido en el total
         {isRepeatOrder && ' · Cantidades pre-cargadas del pedido anterior'}
       </p>
 
@@ -147,6 +151,16 @@ export default async function NuevoPedidoPage({ searchParams }: Props) {
         initialQtys={initialQtys}
         minTotalCajas={minTotalCajas}
         roleName={ROLE_LABELS[role] ?? role}
+        deliveryAddresses={clientAddresses.map((a) => ({
+          id:        a.id,
+          label:     a.label,
+          address:   a.address,
+          city:      a.city,
+          province:  a.province,
+          isDefault: a.isDefault,
+        }))}
+        stockByProduct={stockByProduct}
+        userId={user.id}
       />
     </div>
   )

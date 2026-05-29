@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState, useMemo, useState } from 'react'
+import { useActionState, useEffect, useMemo, useState } from 'react'
 import Image from 'next/image'
 import { createPortalOrder } from '@/lib/actions/orders'
 import type { CreateOrderState } from '@/lib/actions/orders'
@@ -28,13 +28,24 @@ export interface ProductOrden {
   isBalde:      boolean
 }
 
+interface DeliveryAddressProp {
+  id:        string
+  label:     string
+  address:   string
+  city:      string | null
+  province:  string | null
+  isDefault: boolean
+}
+
 interface Props {
-  productos:      ProductOrden[]
-  initialQtys?:   Record<string, number>
-  minTotalCajas:  number   // 3 for mayorista, 20 for distribuidor, 1 otherwise
-  roleName:       string
-  // Admin can pass a bound action (createPortalOrderForClient.bind(null, clientUserId))
-  overrideAction?: (prev: CreateOrderState, formData: FormData) => Promise<CreateOrderState>
+  productos:          ProductOrden[]
+  initialQtys?:       Record<string, number>
+  minTotalCajas:      number
+  roleName:           string
+  overrideAction?:    (prev: CreateOrderState, formData: FormData) => Promise<CreateOrderState>
+  deliveryAddresses?: DeliveryAddressProp[]
+  stockByProduct?:    Record<string, string>   // productId → 'available'|'low_stock'|'out_of_stock'|'preorder'
+  userId?:            string                    // for localStorage draft key
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -59,6 +70,29 @@ function getActiveTier(tiers: PriceTier[], counter: number): PriceTier | null {
     if (counter >= tier.minQty) active = tier
   }
   return active
+}
+
+function StockBadge({ status }: { status: string | undefined }) {
+  if (!status || status === 'available') return null
+  const map: Record<string, { label: string; cls: string }> = {
+    low_stock:    { label: 'Stock bajo',  cls: 'bg-amber-100 text-amber-700 border-amber-200' },
+    out_of_stock: { label: 'Sin stock',   cls: 'bg-red/10 text-red border-red/20'             },
+    preorder:     { label: 'Pre-venta',   cls: 'bg-blue-100 text-blue-700 border-blue-200'    },
+  }
+  const s = map[status]
+  if (!s) return null
+  return (
+    <span className={`font-mono text-[7px] tracking-[0.12em] uppercase px-1.5 py-0.5 border ${s.cls}`}>
+      {s.label}
+    </span>
+  )
+}
+
+// Minimum date = tomorrow
+function getTomorrow(): string {
+  const d = new Date()
+  d.setDate(d.getDate() + 1)
+  return d.toISOString().split('T')[0]
 }
 
 // ─── Options ──────────────────────────────────────────────────────────────────
@@ -169,17 +203,74 @@ function buildTierGroups(productos: ProductOrden[]): TierGroup[] {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export default function NuevoPedidoForm({ productos, initialQtys, minTotalCajas, roleName, overrideAction }: Props) {
+export default function NuevoPedidoForm({
+  productos,
+  initialQtys,
+  minTotalCajas,
+  roleName,
+  overrideAction,
+  deliveryAddresses = [],
+  stockByProduct = {},
+  userId,
+}: Props) {
   const [state, action, isPending] = useActionState<CreateOrderState, FormData>(
     overrideAction ?? createPortalOrder,
     undefined,
   )
 
+  const draftKey = userId ? `hardy-order-draft-${userId}` : null
+
   const [qtys, setQtys] = useState<Record<string, number>>(
     Object.fromEntries(productos.map((p) => [p.id, initialQtys?.[p.id] ?? 0]))
   )
-  const [selectedPayment,  setSelectedPayment]  = useState<string | null>(null)
-  const [selectedShipping, setSelectedShipping] = useState<string | null>(null)
+  const [selectedPayment,   setSelectedPayment]   = useState<string | null>(null)
+  const [selectedShipping,  setSelectedShipping]  = useState<string | null>(null)
+  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(
+    deliveryAddresses.find((a) => a.isDefault)?.id ?? null
+  )
+  const [hasDraft, setHasDraft] = useState(false)
+
+  // ── localStorage draft ───────────────────────────────────────────────────────
+
+  // On mount: check if there's a draft (only when no initialQtys / repeat order)
+  useEffect(() => {
+    if (!draftKey || initialQtys) return
+    try {
+      const raw = localStorage.getItem(draftKey)
+      if (!raw) return
+      const draft = JSON.parse(raw) as Record<string, number>
+      const hasContent = Object.values(draft).some((v) => v > 0)
+      if (hasContent) setHasDraft(true)
+    } catch {}
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Save draft on every qty change
+  useEffect(() => {
+    if (!draftKey || initialQtys) return
+    try {
+      localStorage.setItem(draftKey, JSON.stringify(qtys))
+    } catch {}
+  }, [qtys, draftKey]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  function restoreDraft() {
+    if (!draftKey) return
+    try {
+      const raw = localStorage.getItem(draftKey)
+      if (!raw) return
+      const draft = JSON.parse(raw) as Record<string, number>
+      setQtys((prev) => ({ ...prev, ...draft }))
+    } catch {}
+    setHasDraft(false)
+  }
+
+  function discardDraft() {
+    if (draftKey) localStorage.removeItem(draftKey)
+    setHasDraft(false)
+  }
+
+  function clearDraftOnSubmit() {
+    if (draftKey) localStorage.removeItem(draftKey)
+  }
 
   // ── Totals ──────────────────────────────────────────────────────────────────
 
@@ -239,14 +330,64 @@ export default function NuevoPedidoForm({ productos, initialQtys, minTotalCajas,
   const showBankDetails      = selectedPayment && BANK_PAYMENT_VALUES.has(selectedPayment)
   const selectedShippingOpt  = SHIPPING_OPTIONS.find((o) => o.value === selectedShipping)
 
-  // ── WA message ──────────────────────────────────────────────────────────────
+  // ── WA contact (consulta) ────────────────────────────────────────────────────
 
-  const waText = encodeURIComponent(
+  const waContactText = encodeURIComponent(
     `Hola Hardy! Soy cliente ${roleName} y tengo una consulta sobre mi pedido.`
   )
 
+  // ── WA share (resumen del pedido) ────────────────────────────────────────────
+
+  const waShareText = useMemo(() => {
+    const lines: string[] = [`Hola Hardy! 👋 Quiero realizar el siguiente pedido (${roleName}):\n`]
+    let hasItems = false
+    for (const p of productos) {
+      const qty = qtys[p.id] ?? 0
+      if (qty > 0) {
+        hasItems = true
+        const pricePerCaja = activePrices.get(p.id) ?? p.b2bPriceCaja
+        lines.push(`• ${p.name} ${p.size} × ${qty} ${p.isBalde ? 'unidades' : 'cajas'} — ${formatARS(pricePerCaja)}/caja`)
+      }
+    }
+    if (!hasItems) return null
+    lines.push(`\n*Total estimado (c/IVA 21%):* ${formatARS(totalConIVA)}`)
+    lines.push(`\n¿Pueden confirmar disponibilidad y coordinar el envío?`)
+    return encodeURIComponent(lines.join('\n'))
+  }, [qtys, productos, activePrices, totalConIVA, roleName])
+
+  // Selected delivery address details
+  const selectedAddress = deliveryAddresses.find((a) => a.id === selectedAddressId)
+
   return (
-    <form action={action}>
+    <form action={action} onSubmit={clearDraftOnSubmit}>
+
+      {/* ── Banner: borrador guardado ─────────────────────────────────── */}
+      {hasDraft && (
+        <div className="bg-amber-50 border border-amber-200 px-5 py-4 mb-6 flex items-center justify-between gap-4 flex-wrap">
+          <div className="flex items-center gap-3">
+            <span className="text-[16px]">📋</span>
+            <p className="font-mono text-[10px] tracking-[0.08em] text-amber-800">
+              Tenés un borrador guardado de tu último pedido. ¿Lo restauramos?
+            </p>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={restoreDraft}
+              className="font-mono text-[10px] tracking-[0.12em] uppercase bg-ink text-paper px-4 py-2 hover:bg-ink/80 transition-colors"
+            >
+              Restaurar →
+            </button>
+            <button
+              type="button"
+              onClick={discardDraft}
+              className="font-mono text-[10px] tracking-[0.1em] uppercase text-ink/40 hover:text-ink transition-colors px-2 py-2"
+            >
+              Descartar
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* ── Tabla de precios por volumen ──────────────────────────────── */}
       {tierGroups.length > 0 && (
@@ -369,20 +510,28 @@ export default function NuevoPedidoForm({ productos, initialQtys, minTotalCajas,
           const activeTier    = getActiveTier(p.priceTiers, counter)
           const baseTier      = p.priceTiers[0]
           const priceChanged  = activeTier && baseTier && activeTier.minQty !== baseTier.minQty
+          const stockStatus   = stockByProduct[p.id]
+          const isOutOfStock  = stockStatus === 'out_of_stock'
 
           return (
             <div
               key={p.id}
-              className="px-5 py-4 border-b border-ink/8 grid gap-4 items-center last:border-0"
+              className={[
+                'px-5 py-4 border-b border-ink/8 grid gap-4 items-center last:border-0',
+                isOutOfStock ? 'opacity-50' : '',
+              ].join(' ')}
               style={{ gridTemplateColumns: '1fr 120px 90px 80px' }}
             >
-              <input type="hidden" name={`qty-${p.id}`} value={qty} />
+              <input type="hidden" name={`qty-${p.id}`} value={isOutOfStock ? 0 : qty} />
               <input type="hidden" name={`upb-${p.id}`} value={p.unitsPerBox} />
 
               <div className="flex items-center gap-3 min-w-0">
                 <Image src={p.image} alt={p.name} width={40} height={40} className="object-contain shrink-0" />
                 <div className="min-w-0">
-                  <div className="font-body font-semibold text-[13px] truncate">{p.name}</div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <div className="font-body font-semibold text-[13px]">{p.name}</div>
+                    <StockBadge status={stockStatus} />
+                  </div>
                   <div className="font-mono text-[9px] tracking-[0.12em] text-red uppercase">
                     {p.variant} · {p.size}
                     {!p.isBalde && <span className="text-ink/40 ml-2">· caja {p.unitsPerBox}u</span>}
@@ -403,21 +552,25 @@ export default function NuevoPedidoForm({ productos, initialQtys, minTotalCajas,
               </div>
 
               <div className="flex items-center justify-center">
-                <div className="relative">
-                  <input
-                    type="number"
-                    min={0}
-                    value={qty || ''}
-                    placeholder="0"
-                    onChange={(e) => setQty(p.id, e.target.value)}
-                    className="w-[70px] text-center bg-paper-2 border border-ink/15 font-mono text-[13px] py-2 outline-none focus:border-ink transition-colors"
-                  />
-                  {!p.isBalde && qty > 0 && (
-                    <div className="absolute -bottom-[16px] left-0 right-0 text-center font-mono text-[8px] text-ink/30 whitespace-nowrap">
-                      {qty * p.unitsPerBox}u
-                    </div>
-                  )}
-                </div>
+                {isOutOfStock ? (
+                  <span className="font-mono text-[9px] text-ink/30 uppercase tracking-[0.08em]">No disp.</span>
+                ) : (
+                  <div className="relative">
+                    <input
+                      type="number"
+                      min={0}
+                      value={qty || ''}
+                      placeholder="0"
+                      onChange={(e) => setQty(p.id, e.target.value)}
+                      className="w-[70px] text-center bg-paper-2 border border-ink/15 font-mono text-[13px] py-2 outline-none focus:border-ink transition-colors"
+                    />
+                    {!p.isBalde && qty > 0 && (
+                      <div className="absolute -bottom-[16px] left-0 right-0 text-center font-mono text-[8px] text-ink/30 whitespace-nowrap">
+                        {qty * p.unitsPerBox}u
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               <div className={`font-heading text-[16px] font-medium text-right ${subtotal > 0 ? 'text-ink' : 'text-ink/20'}`}>
@@ -613,6 +766,88 @@ export default function NuevoPedidoForm({ productos, initialQtys, minTotalCajas,
         )}
       </div>
 
+      {/* ── Dirección de entrega ─────────────────────────────────────── */}
+      {deliveryAddresses.length > 0 && (
+        <div className="mb-6">
+          <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-ink/50 mb-3">── Dirección de entrega</p>
+          <div className="bg-paper border border-ink/8 divide-y divide-ink/8">
+            {deliveryAddresses.map((addr) => (
+              <label
+                key={addr.id}
+                className={[
+                  'flex items-start gap-4 px-5 py-4 cursor-pointer transition-colors',
+                  selectedAddressId === addr.id ? 'bg-paper-2' : 'hover:bg-paper-2/60',
+                ].join(' ')}
+              >
+                <input
+                  type="radio"
+                  name="_addressId"
+                  value={addr.id}
+                  checked={selectedAddressId === addr.id}
+                  onChange={() => setSelectedAddressId(addr.id)}
+                  className="mt-1 shrink-0 accent-[#C0171E]"
+                />
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="font-body font-semibold text-[14px]">{addr.label}</span>
+                    {addr.isDefault && (
+                      <span className="font-mono text-[7px] tracking-[0.12em] uppercase bg-ink text-paper px-1.5 py-0.5">
+                        Principal
+                      </span>
+                    )}
+                  </div>
+                  <div className="font-body text-[12px] text-ink/50 mt-[2px]">
+                    {addr.address}{addr.city ? `, ${addr.city}` : ''}{addr.province ? `, ${addr.province}` : ''}
+                  </div>
+                </div>
+              </label>
+            ))}
+          </div>
+          {/* Hidden field sends selected address text to the action */}
+          <input
+            type="hidden"
+            name="shippingAddress"
+            value={selectedAddress
+              ? `${selectedAddress.label}: ${selectedAddress.address}${selectedAddress.city ? `, ${selectedAddress.city}` : ''}${selectedAddress.province ? `, ${selectedAddress.province}` : ''}`
+              : ''}
+          />
+        </div>
+      )}
+
+      {/* ── OC + Fecha de entrega ─────────────────────────────────────── */}
+      <div className="grid grid-cols-2 gap-4 mb-6 max-md:grid-cols-1">
+        <div>
+          <label htmlFor="purchaseOrderNumber" className="font-mono text-[10px] tracking-[0.2em] uppercase text-ink/50 block mb-3">
+            ── N° de Orden de Compra (opcional)
+          </label>
+          <input
+            id="purchaseOrderNumber"
+            name="purchaseOrderNumber"
+            type="text"
+            placeholder="Ej: OC-2025-0047"
+            className="w-full bg-paper border border-ink/15 text-ink font-mono text-[13px] px-4 py-3 outline-none focus:border-ink transition-colors"
+          />
+          <p className="font-mono text-[9px] text-ink/30 mt-1 tracking-[0.06em]">
+            Aparece en el remito y en el detalle del pedido.
+          </p>
+        </div>
+        <div>
+          <label htmlFor="requestedDeliveryDate" className="font-mono text-[10px] tracking-[0.2em] uppercase text-ink/50 block mb-3">
+            ── Fecha de entrega deseada (opcional)
+          </label>
+          <input
+            id="requestedDeliveryDate"
+            name="requestedDeliveryDate"
+            type="date"
+            min={getTomorrow()}
+            className="w-full bg-paper border border-ink/15 text-ink font-body text-[14px] px-4 py-3 outline-none focus:border-ink transition-colors"
+          />
+          <p className="font-mono text-[9px] text-ink/30 mt-1 tracking-[0.06em]">
+            Nos ayuda a planificar la logística.
+          </p>
+        </div>
+      </div>
+
       {/* ── Notas ────────────────────────────────────────────────────── */}
       <div className="mb-6">
         <label htmlFor="notes" className="font-mono text-[10px] tracking-[0.2em] uppercase text-ink/50 block mb-3">
@@ -622,7 +857,7 @@ export default function NuevoPedidoForm({ productos, initialQtys, minTotalCajas,
           id="notes"
           name="notes"
           rows={3}
-          placeholder="Indicaciones especiales, dirección de entrega, horarios, etc."
+          placeholder="Indicaciones especiales, horarios, referencias adicionales, etc."
           className="w-full bg-paper border border-ink/15 text-ink font-body text-[14px] px-4 py-3 outline-none focus:border-ink transition-colors resize-none"
         />
       </div>
@@ -654,21 +889,50 @@ export default function NuevoPedidoForm({ productos, initialQtys, minTotalCajas,
         </p>
       )}
 
-      {/* ── Contacto WA ──────────────────────────────────────────────── */}
-      <div className="mt-4 flex items-center justify-center gap-3 border border-ink/8 bg-paper px-5 py-4">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="#25D366" className="shrink-0">
-          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-        </svg>
-        <div>
-          <p className="font-mono text-[10px] tracking-[0.08em] text-ink/60">¿Dudas sobre tu pedido o envío?</p>
-        </div>
+      {/* ── Botones WA ───────────────────────────────────────────────── */}
+      <div className="mt-4 grid grid-cols-2 gap-3 max-md:grid-cols-1">
+
+        {/* Compartir resumen del pedido */}
+        {waShareText ? (
+          <a
+            href={`${WA_NUMBER}?text=${waShareText}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-3 px-5 py-4 bg-[#f0faf0] border border-[#25D366]/30 hover:bg-[#e6f7e6] transition-colors"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="#25D366" className="shrink-0">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+            </svg>
+            <div className="flex-1 min-w-0">
+              <p className="font-mono text-[10px] tracking-[0.1em] uppercase text-ink/80 font-semibold">Enviar resumen</p>
+              <p className="font-mono text-[8px] text-ink/40 mt-[2px]">Coordiná antes de confirmar</p>
+            </div>
+            <span className="font-mono text-[11px] text-ink/40 shrink-0">→</span>
+          </a>
+        ) : (
+          <div className="flex items-center gap-3 px-5 py-4 bg-paper-2 border border-ink/8 opacity-40">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="#25D366" className="shrink-0">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+            </svg>
+            <p className="font-mono text-[10px] tracking-[0.1em] uppercase text-ink/50">Agregá productos para compartir</p>
+          </div>
+        )}
+
+        {/* Consultar */}
         <a
-          href={`${WA_NUMBER}?text=${waText}`}
+          href={`${WA_NUMBER}?text=${waContactText}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="ml-auto font-mono text-[10px] tracking-[0.12em] uppercase text-ink border border-ink/20 px-4 py-2 hover:bg-ink hover:text-paper transition-colors shrink-0"
+          className="flex items-center gap-3 px-5 py-4 border border-ink/8 bg-paper hover:bg-paper-2 transition-colors"
         >
-          Consultar →
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="#25D366" className="shrink-0">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+          </svg>
+          <div className="flex-1 min-w-0">
+            <p className="font-mono text-[10px] tracking-[0.1em] uppercase text-ink/60">Consultar a Hardy</p>
+            <p className="font-mono text-[8px] text-ink/30 mt-[2px]">Dudas sobre envío o pago</p>
+          </div>
+          <span className="font-mono text-[11px] text-ink/30 shrink-0">→</span>
         </a>
       </div>
     </form>

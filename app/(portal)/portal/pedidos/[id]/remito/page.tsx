@@ -203,6 +203,28 @@ export default async function RemitoPage({ params }: Props) {
             </tfoot>
           </table>
 
+          {/* PO Number + Requested date */}
+          {(order.purchaseOrderNumber || order.requestedDeliveryDate) && (
+            <div className="grid grid-cols-2 gap-8 mb-6 pb-6 border-b border-gray-200">
+              {order.purchaseOrderNumber && (
+                <div>
+                  <div className="font-mono text-[8px] tracking-[0.25em] uppercase text-gray-400 mb-1">Orden de Compra</div>
+                  <div className="font-mono text-[15px] font-bold text-gray-800">{order.purchaseOrderNumber}</div>
+                </div>
+              )}
+              {order.requestedDeliveryDate && (
+                <div>
+                  <div className="font-mono text-[8px] tracking-[0.25em] uppercase text-gray-400 mb-1">Entrega solicitada</div>
+                  <div className="text-[13px] text-gray-700">
+                    {new Date(order.requestedDeliveryDate + 'T12:00:00').toLocaleDateString('es-AR', {
+                      weekday: 'long', day: '2-digit', month: 'long', year: 'numeric',
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Shipping + Payment */}
           <div className="grid grid-cols-2 gap-8 mb-10 pt-6 border-t border-gray-200">
             <div>

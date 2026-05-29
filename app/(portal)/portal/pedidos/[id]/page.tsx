@@ -175,6 +175,28 @@ export default async function PedidoDetailPage({ params }: Props) {
         </div>
       </div>
 
+      {/* PO Number + Fecha deseada */}
+      {(order.purchaseOrderNumber || order.requestedDeliveryDate) && (
+        <div className="grid grid-cols-2 gap-4 mb-4 max-md:grid-cols-1">
+          {order.purchaseOrderNumber && (
+            <div className="bg-paper border border-ink/8 px-5 py-4">
+              <p className="font-mono text-[9px] tracking-[0.2em] uppercase text-ink/40 mb-2">N° Orden de Compra</p>
+              <p className="font-mono text-[14px] font-semibold text-ink">{order.purchaseOrderNumber}</p>
+            </div>
+          )}
+          {order.requestedDeliveryDate && (
+            <div className="bg-paper border border-ink/8 px-5 py-4">
+              <p className="font-mono text-[9px] tracking-[0.2em] uppercase text-ink/40 mb-2">Entrega deseada</p>
+              <p className="font-body text-[13px] text-ink/70">
+                {new Date(order.requestedDeliveryDate + 'T12:00:00').toLocaleDateString('es-AR', {
+                  weekday: 'long', day: '2-digit', month: 'long', year: 'numeric',
+                })}
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Shipping + Payment */}
       <div className="grid grid-cols-2 gap-4 mb-6 max-md:grid-cols-1">
         <div className="bg-paper border border-ink/8 px-5 py-4">

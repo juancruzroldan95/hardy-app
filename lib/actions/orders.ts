@@ -117,9 +117,12 @@ async function _createOrderForUser({
   role:      UserRole
   isAdmin?:  boolean
 }): Promise<CreateOrderState> {
-  const shippingMethod = formData.get('shippingMethod') as ShippingMethod | null
-  const paymentMethod  = formData.get('paymentMethod')  as PaymentMethod  | null
-  const notes          = (formData.get('notes') as string)?.trim() || null
+  const shippingMethod       = formData.get('shippingMethod') as ShippingMethod | null
+  const paymentMethod        = formData.get('paymentMethod')  as PaymentMethod  | null
+  const notes                = (formData.get('notes')                as string)?.trim() || null
+  const purchaseOrderNumber  = (formData.get('purchaseOrderNumber')  as string)?.trim() || null
+  const requestedDeliveryDate = (formData.get('requestedDeliveryDate') as string)?.trim() || null
+  const shippingAddress      = (formData.get('shippingAddress')      as string)?.trim() || null
 
   if (!shippingMethod) return { error: 'Seleccioná un método de envío.' }
   if (!paymentMethod)  return { error: 'Seleccioná un método de pago.' }
@@ -197,12 +200,15 @@ async function _createOrderForUser({
   // Insert order
   const [newOrder] = await db.insert(orders).values({
     userId,
-    status:        'pending',
-    paymentStatus: 'unpaid',
-    totalArs:      totalArs.toFixed(2),
+    status:               'pending',
+    paymentStatus:        'unpaid',
+    totalArs:             totalArs.toFixed(2),
     shippingMethod,
     paymentMethod,
     notes,
+    purchaseOrderNumber,
+    requestedDeliveryDate,
+    shippingAddress,
   }).returning({ id: orders.id })
 
   await db.insert(orderItems).values(
