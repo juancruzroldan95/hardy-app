@@ -50,6 +50,13 @@
       "when": 1780023157779,
       "tag": "0006_add_alert_schedule",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1780057493226,
+      "tag": "0007_mature_james_howlett",
+      "breakpoints": true
     }
   ]
 }

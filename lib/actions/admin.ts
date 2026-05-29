@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { db } from '@/lib/db'
-import { profiles, orders, orderItems, solicitudes, novedades, clientAlerts } from '@/drizzle/schema'
+import { profiles, orders, orderItems, solicitudes, novedades, clientAlerts, orderMessages } from '@/drizzle/schema'
 import { and, eq, sql as drizzleSql } from 'drizzle-orm'
 import type { EstadoSolicitud, OrderStatus, PaymentStatus, AlertTipo, UserRole } from '@/drizzle/schema'
 import { sendOrderStatusUpdate } from '@/lib/email'
@@ -278,6 +278,51 @@ export async function createClientProfile(
 
   revalidatePath('/portal/admin/clientes')
   return { success: true, displayName }
+}
+
+// ─── Tracking number ──────────────────────────────────────────────────────────
+
+export async function updateTrackingNumber(orderId: string, trackingNumber: string) {
+  await getAdminUser()
+  await db.update(orders)
+    .set({ trackingNumber: trackingNumber.trim() || null, updatedAt: new Date() })
+    .where(eq(orders.id, orderId))
+  revalidatePath(`/portal/admin/pedidos/${orderId}`)
+  revalidatePath(`/portal/pedidos/${orderId}`)
+}
+
+// ─── Order messages ───────────────────────────────────────────────────────────
+
+export async function sendOrderMessage(orderId: string, message: string, isAdmin: boolean) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
+
+  const profile = await db.query.profiles.findFirst({
+    where: and(eq(profiles.userId, user.id), eq(profiles.isDeleted, false)),
+  })
+  if (!profile) redirect('/login')
+
+  const msgText = message.trim()
+  if (!msgText) return
+
+  await db.insert(orderMessages).values({
+    orderId,
+    senderUserId: user.id,
+    isAdmin:      profile.role === 'admin',
+    message:      msgText,
+  })
+
+  revalidatePath(`/portal/pedidos/${orderId}`)
+  revalidatePath(`/portal/admin/pedidos/${orderId}`)
+}
+
+export async function deleteOrderMessage(messageId: string) {
+  await getAdminUser()
+  await db.update(orderMessages)
+    .set({ isDeleted: true })
+    .where(eq(orderMessages.id, messageId))
+  revalidatePath('/portal/admin/pedidos')
 }
 
 // ─── Update Alert Scheduled Date ─────────────────────────────────────────────

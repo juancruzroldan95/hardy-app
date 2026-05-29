@@ -49,12 +49,20 @@ export default async function AdminPedidosPage() {
             Todos los pedidos
           </h1>
         </div>
-        <Link
-          href="/portal/admin/pedidos/nuevo"
-          className="bg-red text-paper font-mono text-[11px] tracking-[0.15em] uppercase px-5 py-3 hover:bg-red/90 transition-colors shrink-0"
-        >
-          + Crear pedido para cliente
-        </Link>
+        <div className="flex items-center gap-2 flex-wrap">
+          <a
+            href="/api/admin/export?type=pedidos"
+            className="border border-ink/20 text-ink font-mono text-[11px] tracking-[0.12em] uppercase px-4 py-3 hover:bg-paper-2 transition-colors"
+          >
+            ↓ Exportar CSV
+          </a>
+          <Link
+            href="/portal/admin/pedidos/nuevo"
+            className="bg-red text-paper font-mono text-[11px] tracking-[0.15em] uppercase px-5 py-3 hover:bg-red/90 transition-colors"
+          >
+            + Crear pedido
+          </Link>
+        </div>
       </div>
 
       {/* Stats */}

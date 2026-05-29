@@ -12,10 +12,11 @@ interface NavProps {
 }
 
 const links = [
-  { href: '/tienda', label: 'Tienda' },
-  { href: '/mayoristas', label: 'Mayoristas' },
-  { href: '/a-granel', label: 'A granel' },
-  { href: '/recetas', label: 'Recetas' },
+  { href: '/tienda',          label: 'Tienda'         },
+  { href: '/mayoristas',      label: 'Mayoristas'     },
+  { href: '/a-granel',        label: 'A granel'       },
+  { href: '/recetas',         label: 'Recetas'        },
+  { href: '/donde-comprar',   label: 'Dónde comprar'  },
 ]
 
 export default function Nav({ cartCount = 0, onCartOpen }: NavProps) {
