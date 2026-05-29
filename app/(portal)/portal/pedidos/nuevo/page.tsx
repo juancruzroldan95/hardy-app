@@ -9,6 +9,21 @@ import { ROLE_LABELS } from '@/lib/roles'
 import NuevoPedidoForm from '@/components/portal/NuevoPedidoForm'
 import type { ProductOrden } from '@/components/portal/NuevoPedidoForm'
 
+// Products visible per role
+const FRASCO_IDS  = new Set(['natural-380', 'crunchy-380', 'miel-liquida-500', 'miel-solida-500'])
+const BALDE_IDS   = new Set(['balde-45', 'balde-23', 'miel-balde-6', 'miel-balde-30'])
+const ROLE_VISIBLE: Record<string, Set<string>> = {
+  mayorista:    FRASCO_IDS,
+  gastronomico: BALDE_IDS,
+  distribuidor: new Set([...FRASCO_IDS, ...BALDE_IDS]),
+}
+
+// Minimum total cajas per role (for frasco products)
+const MIN_ORDER_CAJAS: Record<string, number> = {
+  mayorista:    3,
+  distribuidor: 20,
+}
+
 interface Props {
   searchParams: Promise<{ repeat?: string }>
 }
@@ -20,7 +35,7 @@ export default async function NuevoPedidoPage({ searchParams }: Props) {
 
   const { repeat: repeatOrderId } = await searchParams
 
-  const [profile, overrides] = await Promise.all([
+  const [profile, allOverrides] = await Promise.all([
     db.query.profiles.findFirst({
       where: and(eq(profiles.userId, user.id), eq(profiles.isDeleted, false)),
     }),
@@ -31,29 +46,48 @@ export default async function NuevoPedidoPage({ searchParams }: Props) {
 
   const role = profile?.role ?? 'consumer'
 
-  const overrideMap = new Map(
-    overrides
-      .filter((o) => o.role === role)
-      .map((o) => [o.productId, { price: Number(o.priceArs), minQty: o.minQty }])
-  )
+  // Group all tiers for this role by productId, sorted by minQty ascending
+  const tiersByProduct = new Map<string, Array<{ minQty: number; pricePerUnit: number; pricePerCaja: number }>>()
+  const products = getProducts()
 
-  const products     = getProducts()
-  const productosOrden: ProductOrden[] = products.map((p) => {
-    const override      = overrideMap.get(p.id)
-    const unitPrice     = override?.price ?? p.price
-    const unitsPerBox   = p.unitsPerBox ?? 1
-    return {
-      id:           p.id,
-      name:         p.name,
-      variant:      p.variant,
-      size:         p.size,
-      image:        p.image,
-      b2bPrice:     unitPrice,
-      b2bPriceCaja: unitPrice * unitsPerBox,
-      unitsPerBox,
-      minQty:       override?.minQty ?? 1,
-    }
-  })
+  allOverrides
+    .filter((o) => o.role === role)
+    .sort((a, b) => a.minQty - b.minQty)
+    .forEach((o) => {
+      const product    = products.find((p) => p.id === o.productId)
+      const upb        = product?.unitsPerBox ?? 1
+      const perUnit    = Number(o.priceArs)
+      if (!tiersByProduct.has(o.productId)) tiersByProduct.set(o.productId, [])
+      tiersByProduct.get(o.productId)!.push({
+        minQty:       o.minQty,
+        pricePerUnit: perUnit,
+        pricePerCaja: perUnit * upb,
+      })
+    })
+
+  const minTotalCajas = MIN_ORDER_CAJAS[role] ?? 1
+  const visibleIds    = ROLE_VISIBLE[role]
+
+  const productosOrden: ProductOrden[] = products
+    .filter((p) => !visibleIds || visibleIds.has(p.id))
+    .map((p) => {
+      const tiers      = tiersByProduct.get(p.id) ?? []
+      const firstTier  = tiers[0]
+      const upb        = p.unitsPerBox ?? 1
+      const baseUnit   = firstTier?.pricePerUnit ?? p.price
+      return {
+        id:           p.id,
+        name:         p.name,
+        variant:      p.variant,
+        size:         p.size,
+        image:        p.image,
+        b2bPrice:     baseUnit,
+        b2bPriceCaja: baseUnit * upb,
+        unitsPerBox:  upb,
+        priceTiers:   tiers,
+        isBalde:      BALDE_IDS.has(p.id),
+      }
+    })
 
   // Load previous order items if ?repeat= is present
   let initialQtys: Record<string, number> | undefined
@@ -108,7 +142,12 @@ export default async function NuevoPedidoPage({ searchParams }: Props) {
         </div>
       )}
 
-      <NuevoPedidoForm productos={productosOrden} initialQtys={initialQtys} />
+      <NuevoPedidoForm
+        productos={productosOrden}
+        initialQtys={initialQtys}
+        minTotalCajas={minTotalCajas}
+        roleName={ROLE_LABELS[role] ?? role}
+      />
     </div>
   )
 }

@@ -42,12 +42,20 @@ export default async function AdminPedidosPage() {
 
   return (
     <div className="max-w-[1100px]">
-      <p className="font-mono text-[11px] tracking-[0.25em] text-red uppercase mb-3">
-        ── Admin
-      </p>
-      <h1 className="font-heading text-[clamp(24px,3vw,36px)] font-medium leading-[1.1] tracking-[-0.02em] mb-8">
-        Todos los pedidos
-      </h1>
+      <div className="flex items-start justify-between gap-4 mb-8 flex-wrap">
+        <div>
+          <p className="font-mono text-[11px] tracking-[0.25em] text-red uppercase mb-3">── Admin</p>
+          <h1 className="font-heading text-[clamp(24px,3vw,36px)] font-medium leading-[1.1] tracking-[-0.02em]">
+            Todos los pedidos
+          </h1>
+        </div>
+        <Link
+          href="/portal/admin/pedidos/nuevo"
+          className="bg-red text-paper font-mono text-[11px] tracking-[0.15em] uppercase px-5 py-3 hover:bg-red/90 transition-colors shrink-0"
+        >
+          + Crear pedido para cliente
+        </Link>
+      </div>
 
       {/* Stats */}
       <div className="grid grid-cols-4 gap-3 mb-8 max-md:grid-cols-2">
