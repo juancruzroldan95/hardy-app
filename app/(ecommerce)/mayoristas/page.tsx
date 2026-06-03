@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
-import Image from 'next/image'
 import Link from 'next/link'
+import { MessageCircle } from 'lucide-react'
 import { WA_NUMBER, ESCALAS } from '@/lib/products'
 import SolicitudForm from '@/components/mayoristas/SolicitudForm'
 
@@ -39,42 +39,31 @@ export default function MayoristasPage() {
 
       {/* HERO */}
       <section className="bg-ink text-paper py-20 px-10 max-md:px-6">
-        <div className="max-w-[1100px] mx-auto grid grid-cols-2 gap-[60px] items-center max-md:grid-cols-1 max-md:gap-8">
-          <div>
-            <p className="font-mono text-[11px] tracking-[0.25em] text-red uppercase mb-5">── Mayoristas y distribuidores</p>
-            <h1
-              className="font-heading font-medium tracking-[-0.02em] leading-[1.05] m-0 mb-6"
-              style={{ fontSize: 'clamp(42px,6vw,72px)' }}
+        <div className="max-w-[1100px] mx-auto">
+          <p className="font-mono text-[11px] tracking-[0.25em] text-red uppercase mb-5">── Mayoristas y distribuidores</p>
+          <h1
+            className="font-heading font-medium tracking-[-0.02em] leading-[1.05] m-0 mb-6"
+            style={{ fontSize: 'clamp(42px,6vw,72px)' }}
+          >
+            Sumá Hardy<br /><em className="not-italic text-red">a tu negocio.</em>
+          </h1>
+          <p className="text-[16px] text-[#bbb] max-w-[560px] leading-[1.7] mb-9">
+            Cajas de crema de maní y miel para dietéticas, gimnasios, cafeterías, tiendas y distribuidores.
+            Precios escalonados desde 3 cajas.
+          </p>
+          <div className="flex gap-3 flex-wrap">
+            <a
+              href="#solicitar"
+              className="inline-block bg-red text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-7 py-[14px]"
             >
-              Sumá Hardy<br /><em className="not-italic text-red">a tu negocio.</em>
-            </h1>
-            <p className="text-[16px] text-[#bbb] max-w-[480px] leading-[1.7] mb-9">
-              Cajas de crema de maní y miel para dietéticas, gimnasios, cafeterías, tiendas y distribuidores.
-              Precios escalonados desde 3 cajas.
-            </p>
-            <div className="flex gap-3 flex-wrap">
-              <a
-                href="#solicitar"
-                className="inline-block bg-red text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-7 py-[14px]"
-              >
-                Solicitar acceso al portal →
-              </a>
-              <Link
-                href="/login"
-                className="inline-block bg-paper/10 border border-white/20 text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-7 py-[14px]"
-              >
-                Ya tengo acceso →
-              </Link>
-            </div>
-          </div>
-          <div className="overflow-hidden max-md:hidden">
-            <Image
-              src="/lifestyle/caja-mayoristas.png"
-              alt="Caja HARDY"
-              width={600}
-              height={480}
-              className="w-full block object-cover"
-            />
+              Solicitar acceso a Portal Cliente →
+            </a>
+            <Link
+              href="/portal"
+              className="inline-block bg-paper/10 border border-white/20 text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-7 py-[14px]"
+            >
+              Acceder a Portal Cliente →
+            </Link>
           </div>
         </div>
       </section>
@@ -161,16 +150,25 @@ export default function MayoristasPage() {
           <div className="bg-ink text-paper px-10 py-10 text-center">
             <p className="font-heading text-[24px] font-medium mb-3">¿Listo para vender Hardy?</p>
             <p className="text-[13px] text-[#bbb] mb-6 leading-[1.6]">
-              Escribinos y te enviamos lista de precios y condiciones mayoristas.
+              Solicitá tu acceso al portal de clientes y realizá tu compra o contactanos por WhatsApp.
             </p>
-            <a
-              href={`${WA_NUMBER}?text=Hola%20Hardy,%20quiero%20información%20mayorista`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block bg-red text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-6 py-[14px]"
-            >
-              Escribir por WhatsApp →
-            </a>
+            <div className="flex gap-3 flex-wrap justify-center">
+              <Link
+                href="/portal"
+                className="inline-block bg-red text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-6 py-[14px]"
+              >
+                Portal Cliente →
+              </Link>
+              <a
+                href={`${WA_NUMBER}?text=Hola%20Hardy,%20quiero%20información%20mayorista`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-paper/10 border border-white/20 text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-6 py-[14px] flex items-center gap-2"
+                aria-label="WhatsApp"
+              >
+                Contactanos <MessageCircle size={14} />
+              </a>
+            </div>
           </div>
         </div>
       </section>
@@ -238,9 +236,10 @@ export default function MayoristasPage() {
                 href={`${WA_NUMBER}?text=Hola%20Hardy,%20quiero%20acceso%20al%20portal%20mayorista`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-ink border-b border-ink"
+                className="text-ink inline-flex items-center gap-1 align-middle border-b border-ink"
+                aria-label="WhatsApp"
               >
-                WhatsApp →
+                Contactanos <MessageCircle size={12} className="inline" />
               </a>
             </p>
           </div>

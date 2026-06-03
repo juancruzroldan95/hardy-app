@@ -3,7 +3,8 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
-import { ShoppingBag, Menu, X } from 'lucide-react'
+import { ShoppingBag, Menu, X, MessageCircle } from 'lucide-react'
+import { WA_NUMBER } from '@/lib/products'
 
 interface NavProps {
   cartCount?: number
@@ -11,10 +12,11 @@ interface NavProps {
 }
 
 const links = [
-  { href: '/tienda', label: 'Tienda' },
-  { href: '/mayoristas', label: 'Mayoristas' },
-  { href: '/a-granel', label: 'A granel' },
-  { href: '/recetas', label: 'Recetas' },
+  { href: '/tienda',          label: 'Tienda'         },
+  { href: '/mayoristas',      label: 'Mayoristas'     },
+  { href: '/a-granel',        label: 'A granel'       },
+  { href: '/recetas',         label: 'Recetas'        },
+  { href: '/donde-comprar',   label: 'Dónde comprar'  },
 ]
 
 export default function Nav({ cartCount = 0, onCartOpen }: NavProps) {
@@ -56,11 +58,20 @@ export default function Nav({ cartCount = 0, onCartOpen }: NavProps) {
         {/* Actions */}
         <div className="flex gap-[10px] items-center flex-shrink-0">
           <Link
-            href="/tienda"
-            className="bg-red text-paper font-mono text-[11px] tracking-[0.12em] uppercase px-5 py-[10px] max-md:hidden"
+            href="/portal"
+            className="border border-paper/30 text-paper font-mono text-[11px] tracking-[0.12em] uppercase px-5 py-[10px] max-md:hidden hover:border-red hover:text-red transition-colors"
           >
-            Comprar ahora
+            Portal Cliente
           </Link>
+          <a
+            href={`${WA_NUMBER}?text=Hola%21%20Quiero%20lista%20de%20precios%20y%20condiciones%20mayoristas.`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-red text-paper font-mono text-[11px] tracking-[0.12em] uppercase px-5 py-[10px] flex items-center gap-2 max-md:hidden"
+            aria-label="Contactar por WhatsApp"
+          >
+            Contactanos <MessageCircle size={14} />
+          </a>
 
           {onCartOpen && (
             <button
@@ -92,6 +103,9 @@ export default function Nav({ cartCount = 0, onCartOpen }: NavProps) {
               {l.label}
             </Link>
           ))}
+          <Link href="/portal" className="text-red border-t border-paper/10 pt-4 mt-1" onClick={() => setMenuOpen(false)}>
+            Portal Cliente →
+          </Link>
         </div>
       )}
     </>

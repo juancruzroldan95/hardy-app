@@ -1,4 +1,3 @@
-import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { db } from '@/lib/db'
 import { profiles } from '@/drizzle/schema'
@@ -10,7 +9,16 @@ export default async function PortalLayout({ children }: { children: React.React
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  if (!user) redirect('/login')
+  // §5 — /portal es público: muestra landing de dos caminos cuando no hay sesión.
+  // Los subpages del portal (pedidos, perfil, admin, etc.) tienen su propio guard
+  // con redirect('/login') — este layout ya no bloquea a visitantes anónimos.
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-paper">
+        {children}
+      </div>
+    )
+  }
 
   const profile = await db.query.profiles.findFirst({
     where: and(eq(profiles.userId, user.id), eq(profiles.isDeleted, false)),

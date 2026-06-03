@@ -1,21 +1,38 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { db } from '@/lib/db'
-import { profiles } from '@/drizzle/schema'
+import { profiles, deliveryAddresses } from '@/drizzle/schema'
 import { and, eq } from 'drizzle-orm'
 import { ROLE_LABELS, ROLE_DESCRIPTIONS } from '@/lib/roles'
 import ProfileForm from '@/components/portal/ProfileForm'
+import DeliveryAddressesSection from '@/components/portal/DeliveryAddressesSection'
 
 export default async function PerfilPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const profile = await db.query.profiles.findFirst({
-    where: and(eq(profiles.userId, user.id), eq(profiles.isDeleted, false)),
-  })
+  const [profile, addresses] = await Promise.all([
+    db.query.profiles.findFirst({
+      where: and(eq(profiles.userId, user.id), eq(profiles.isDeleted, false)),
+    }),
+    db.query.deliveryAddresses.findMany({
+      where: (da, { and, eq }) => and(
+        eq(da.isDeleted, false),
+        eq(da.isActive, true),
+      ),
+    }).then((all) => all), // loaded after we know profile.id below
+  ])
 
   if (!profile) redirect('/portal')
+
+  const myAddresses = await db.query.deliveryAddresses.findMany({
+    where: and(
+      eq(deliveryAddresses.profileId, profile.id),
+      eq(deliveryAddresses.isDeleted, false),
+      eq(deliveryAddresses.isActive, true),
+    ),
+  })
 
   return (
     <div className="max-w-[640px]">
@@ -48,6 +65,15 @@ export default async function PerfilPage() {
       </div>
 
       <ProfileForm profile={profile} />
+
+      {/* Delivery addresses */}
+      <div className="mt-10">
+        <p className="font-mono text-[11px] tracking-[0.25em] text-red uppercase mb-3">── Direcciones de entrega</p>
+        <h2 className="font-heading text-[22px] font-medium tracking-[-0.02em] mb-6">
+          Mis direcciones
+        </h2>
+        <DeliveryAddressesSection addresses={myAddresses} />
+      </div>
     </div>
   )
 }

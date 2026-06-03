@@ -15,20 +15,25 @@ interface Props {
 }
 
 const CLIENT_LINKS = [
-  { href: '/portal',                label: 'Dashboard'     },
-  { href: '/portal/catalogo',       label: 'Catálogo'      },
-  { href: '/portal/pedidos/nuevo',  label: 'Nuevo Pedido'  },
-  { href: '/portal/pedidos',        label: 'Mis Pedidos'   },
-  { href: '/portal/cuenta',         label: 'Mi Cuenta'     },
-  { href: '/portal/novedades',      label: 'Novedades'     },
-  { href: '/portal/perfil',         label: 'Mi Perfil'     },
+  { href: '/portal',                 label: 'Dashboard'    },
+  { href: '/portal/catalogo',        label: 'Catálogo'     },
+  { href: '/portal/pedidos/nuevo',   label: 'Nuevo Pedido' },
+  { href: '/portal/pedidos',         label: 'Mis Pedidos'  },
+  { href: '/portal/cuenta',          label: 'Mi Cuenta'    },
+  { href: '/portal/materiales',      label: 'Materiales'   },
+  { href: '/portal/calculadora',     label: 'Calculadora'  },
+  { href: '/portal/novedades',       label: 'Novedades'    },
+  { href: '/portal/perfil',          label: 'Mi Perfil'    },
 ]
 
 const ADMIN_LINKS = [
-  { href: '/portal/admin/solicitudes', label: 'Solicitudes' },
-  { href: '/portal/admin/pedidos',     label: 'Pedidos'     },
-  { href: '/portal/admin/novedades',   label: 'Novedades'   },
-  { href: '/portal/admin/clientes',    label: 'Clientes'    },
+  { href: '/portal/admin',              label: 'Dashboard'   },
+  { href: '/portal/admin/solicitudes',  label: 'Solicitudes' },
+  { href: '/portal/admin/pedidos',      label: 'Pedidos'     },
+  { href: '/portal/admin/clientes',     label: 'Clientes'    },
+  { href: '/portal/admin/stock',        label: 'Stock'       },
+  { href: '/portal/admin/resenas',      label: 'Reseñas'     },
+  { href: '/portal/admin/novedades',    label: 'Novedades'   },
 ]
 
 export default function PortalSidebar({
@@ -42,6 +47,14 @@ export default function PortalSidebar({
 
   function isActive(href: string) {
     if (href === '/portal') return pathname === '/portal'
+    if (href === '/portal/admin') return pathname === '/portal/admin'
+    // "Nuevo Pedido" solo activo en esa ruta exacta
+    if (href === '/portal/pedidos/nuevo') return pathname === '/portal/pedidos/nuevo'
+    // "Mis Pedidos": activo en /portal/pedidos y /portal/pedidos/[id], pero NO en /nuevo
+    if (href === '/portal/pedidos') {
+      return pathname === '/portal/pedidos' ||
+        (pathname.startsWith('/portal/pedidos/') && !pathname.startsWith('/portal/pedidos/nuevo'))
+    }
     return pathname.startsWith(href)
   }
 

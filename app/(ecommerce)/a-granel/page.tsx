@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
 import Image from 'next/image'
+import Link from 'next/link'
+import { MessageCircle } from 'lucide-react'
 import { WA_NUMBER } from '@/lib/products'
 
 export const metadata: Metadata = {
@@ -29,14 +31,14 @@ const BALDES_MIEL = [
   {
     tag: 'Miel Líquida · 6 kg',
     title: 'Balde 6 kg',
-    img: '/lifestyle/miel-liquida-open.png',
+    img: '/products/miel-balde-6-front.png',
     desc: 'Para cafeterías, restaurantes y pastelerías. Miel multifloral sin pasteurizar, sin procesar.',
     waText: 'Hola Hardy, quiero info de miel a granel 6kg',
   },
   {
     tag: 'Miel Líquida · 30 kg',
     title: 'Balde 30 kg',
-    img: '/lifestyle/miel-liquida-open.png',
+    img: '/products/miel-balde-30-front.png',
     desc: 'Para producción a escala. Panificados, barras energéticas, bebidas. La mejor relación costo por kg.',
     waText: 'Hola Hardy, quiero info de miel a granel 30kg',
   },
@@ -106,14 +108,23 @@ export default function AGranelPage() {
           <p className="text-[16px] text-[#bbb] max-w-[560px] leading-[1.7] mb-9">
             Crema de maní y miel en volumen para gastronomía, repostería, cafeterías, producción e industria.
           </p>
-          <a
-            href={`${WA_NUMBER}?text=Hola%20Hardy,%20quiero%20información%20de%20productos%20a%20granel`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-block bg-red text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-7 py-[13px]"
-          >
-            Consultar por WhatsApp →
-          </a>
+          <div className="flex gap-3 flex-wrap items-center">
+            <Link
+              href="/portal"
+              className="inline-block bg-red text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-7 py-[13px]"
+            >
+              Acceder a Portal Cliente →
+            </Link>
+            <a
+              href={`${WA_NUMBER}?text=Hola%20Hardy,%20quiero%20información%20de%20productos%20a%20granel`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-paper/10 border border-white/20 text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-7 py-[13px] flex items-center gap-2"
+              aria-label="Consultar por WhatsApp"
+            >
+              Contactanos <MessageCircle size={14} />
+            </a>
+          </div>
         </div>
       </section>
 
@@ -190,9 +201,10 @@ export default function AGranelPage() {
             href={`${WA_NUMBER}?text=Hola%20Hardy,%20quiero%20consultar%20por%20volumen%20a%20granel`}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-block bg-red text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-7 py-[13px]"
+            className="bg-red text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-8 py-[16px] inline-flex items-center gap-2 mx-auto"
+            aria-label="Consultar por WhatsApp"
           >
-            Consultar por WhatsApp →
+            Contactanos <MessageCircle size={16} />
           </a>
         </div>
       </section>

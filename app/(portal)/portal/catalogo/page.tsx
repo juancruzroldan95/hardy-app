@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 import { db } from '@/lib/db'
 import { profiles, priceOverrides } from '@/drizzle/schema'
 import { and, eq } from 'drizzle-orm'
-import { getProducts, formatARS } from '@/lib/products'
+import { getProducts } from '@/lib/products'
 import { ROLE_LABELS } from '@/lib/roles'
 
 export default async function CatalogoPage() {
@@ -49,6 +49,17 @@ export default async function CatalogoPage() {
   const frascos = productosCatalogo.filter((p) => p.line === 'frasco')
   const baldes  = productosCatalogo.filter((p) => p.line !== 'frasco')
 
+  // Catálogo PDF por rol
+  const catalogoPDF: Record<string, string | null> = {
+    mayorista:    '/catalogos/catalogo-mayorista.pdf',
+    gastronomico: '/catalogos/catalogo-gastronomico.pdf',
+    distribuidor: '/catalogos/catalogo-distribuidor.pdf',
+    productor:    '/catalogos/catalogo-distribuidor.pdf',
+    consumer:     null,
+    admin:        null,
+  }
+  const pdfUrl = catalogoPDF[role] ?? null
+
   return (
     <div className="max-w-[1000px]">
       <div className="flex items-center justify-between mb-2 flex-wrap gap-4">
@@ -61,13 +72,15 @@ export default async function CatalogoPage() {
           </h1>
         </div>
         <div className="flex items-center gap-3 flex-wrap">
-          <a
-            href="/downloads/lista-precios.pdf"
-            download
-            className="bg-paper-2 border border-ink/15 text-ink font-mono text-[11px] tracking-[0.15em] uppercase px-5 py-[12px] whitespace-nowrap hover:bg-paper transition-colors"
-          >
-            ↓ Descargar PDF
-          </a>
+          {pdfUrl && (
+            <a
+              href={pdfUrl}
+              download
+              className="bg-paper-2 border border-ink/15 text-ink font-mono text-[11px] tracking-[0.15em] uppercase px-5 py-[12px] whitespace-nowrap hover:bg-paper transition-colors"
+            >
+              ↓ Descargar catálogo PDF
+            </a>
+          )}
           <Link
             href="/portal/pedidos/nuevo"
             className="bg-red text-paper font-mono text-[11px] tracking-[0.15em] uppercase px-6 py-[13px] whitespace-nowrap"
@@ -90,7 +103,11 @@ export default async function CatalogoPage() {
         </p>
         <div className="bg-paper border border-ink/8 divide-y divide-ink/8">
           {frascos.map((p) => (
-            <div key={p.id} className="flex items-center gap-5 px-5 py-4">
+            <Link
+              key={p.id}
+              href={`/portal/catalogo/${p.id}`}
+              className="flex items-center gap-5 px-5 py-4 hover:bg-paper-2 transition-colors group"
+            >
               <Image
                 src={p.image}
                 alt={p.name}
@@ -103,16 +120,16 @@ export default async function CatalogoPage() {
                 <div className="font-mono text-[9px] tracking-[0.15em] text-red uppercase mt-[2px]">
                   {p.variant} · {p.size}
                 </div>
+                {p.diferencial && (
+                  <div className="font-mono text-[9px] tracking-[0.06em] text-ink/40 mt-[4px] truncate">
+                    {p.diferencial}
+                  </div>
+                )}
               </div>
-              <div className="text-right shrink-0">
-                <div className="font-heading text-[20px] font-medium text-ink">
-                  {formatARS(p.b2bPrice)}
-                </div>
-                <div className="font-mono text-[9px] tracking-[0.1em] text-ink/40 uppercase">
-                  por unidad · mín. {p.minQty}u
-                </div>
-              </div>
-            </div>
+              <span className="font-mono text-[11px] text-ink/30 group-hover:text-red transition-colors shrink-0">
+                Ver detalle →
+              </span>
+            </Link>
           ))}
         </div>
       </div>
@@ -125,7 +142,11 @@ export default async function CatalogoPage() {
           </p>
           <div className="bg-paper border border-ink/8 divide-y divide-ink/8">
             {baldes.map((p) => (
-              <div key={p.id} className="flex items-center gap-5 px-5 py-4">
+              <Link
+                key={p.id}
+                href={`/portal/catalogo/${p.id}`}
+                className="flex items-center gap-5 px-5 py-4 hover:bg-paper-2 transition-colors group"
+              >
                 <Image
                   src={p.image}
                   alt={p.name}
@@ -138,16 +159,16 @@ export default async function CatalogoPage() {
                   <div className="font-mono text-[9px] tracking-[0.15em] text-red uppercase mt-[2px]">
                     {p.variant} · {p.size}
                   </div>
+                  {p.diferencial && (
+                    <div className="font-mono text-[9px] tracking-[0.06em] text-ink/40 mt-[4px] truncate">
+                      {p.diferencial}
+                    </div>
+                  )}
                 </div>
-                <div className="text-right shrink-0">
-                  <div className="font-heading text-[20px] font-medium text-ink">
-                    {formatARS(p.b2bPrice)}
-                  </div>
-                  <div className="font-mono text-[9px] tracking-[0.1em] text-ink/40 uppercase">
-                    por unidad · mín. {p.minQty}u
-                  </div>
-                </div>
-              </div>
+                <span className="font-mono text-[11px] text-ink/30 group-hover:text-red transition-colors shrink-0">
+                  Ver detalle →
+                </span>
+              </Link>
             ))}
           </div>
         </div>

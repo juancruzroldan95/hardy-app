@@ -53,3 +53,27 @@
     display: block;
   }
 }
+
+/* ── Scroll reveal ─────────────────────────────────────── */
+
+@layer utilities {
+  .reveal-hidden {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 500ms ease-out, transform 500ms ease-out;
+  }
+
+  .reveal-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Respects prefers-reduced-motion: content is always visible, no animation */
+  @media (prefers-reduced-motion: reduce) {
+    .reveal-hidden {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+  }
+}

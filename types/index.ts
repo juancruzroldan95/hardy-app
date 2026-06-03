@@ -14,6 +14,7 @@ export interface Product {
   diferencial?: string
   nutri?: [string, string][]
   nutriLabel?: string
+  unitsPerBox?: number   // cajas de 15u (maní), 12u (miel), 1 (baldes)
 }
 
 export interface Receta {
