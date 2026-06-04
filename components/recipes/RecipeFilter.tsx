@@ -1,10 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import Image from 'next/image'
 import Link from 'next/link'
+import Image from 'next/image'
 import type { Receta } from '@/types'
-import { CATEGORIAS } from '@/lib/recetas'
+import { CATEGORIAS } from '@/consts/recetas'
 
 export default function RecipeFilter({ recetas }: { recetas: Receta[] }) {
   const [activeCategory, setActiveCategory] = useState<string>('Todas')
@@ -15,52 +15,78 @@ export default function RecipeFilter({ recetas }: { recetas: Receta[] }) {
 
   return (
     <>
-      {/* Filter bar */}
-      <div className="sticky top-[0px] z-40 bg-paper border-b border-ink/15 py-4 px-10 max-md:px-5">
-        <div className="max-w-[1240px] mx-auto flex gap-2 overflow-x-auto">
+      {/* Filter bar — sticky just below the nav */}
+      <section className="sticky top-[99px] z-40 bg-paper border-b border-ink/10">
+        <div className="max-w-[1100px] mx-auto px-10 max-md:px-5 flex gap-[2px]">
           {CATEGORIAS.map((cat) => (
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
-              className={`font-mono text-[11px] tracking-[0.15em] uppercase px-5 py-[10px] flex-shrink-0 transition-colors duration-200 ${
+              className={`px-6 py-4 font-mono text-[11px] tracking-[0.15em] uppercase border-none cursor-pointer transition-all duration-200 flex-shrink-0 ${
                 activeCategory === cat
                   ? 'bg-ink text-paper'
-                  : 'bg-paper-2 text-ink hover:bg-ink/10'
+                  : 'bg-transparent text-[#555] hover:bg-ink/5'
               }`}
             >
               {cat}
             </button>
           ))}
         </div>
-      </div>
+      </section>
 
       {/* Recipe grid */}
-      <div className="py-16 px-10 max-md:px-5 max-md:py-10">
-        <div className="max-w-[1240px] mx-auto">
-          <div className="grid grid-cols-3 gap-[2px] max-md:grid-cols-1">
+      <section className="py-[60px] px-10 bg-paper max-md:px-5 max-md:py-12">
+        <div className="max-w-[1100px] mx-auto">
+          <div className="font-mono text-[11px] text-[#888] tracking-[0.1em] mb-6">
+            {filtered.length} recetas
+          </div>
+          <div className="grid grid-cols-3 gap-6 max-md:grid-cols-2 max-[600px]:grid-cols-1">
             {filtered.map((r) => (
-              <div key={r.slug} className="bg-paper-2 overflow-hidden flex flex-col group">
-                <div className="relative aspect-[4/3] overflow-hidden">
-                  <div className="absolute top-[14px] left-[14px] z-[2] bg-ink text-paper font-mono text-[9px] tracking-[0.15em] uppercase px-[10px] py-1">
-                    {r.categoria}
-                  </div>
+              <div
+                key={r.slug}
+                className="group bg-paper border border-ink/10 overflow-hidden flex flex-col cursor-pointer transition-colors duration-300 hover:bg-ink hover:shadow-[0_8px_32px_rgba(0,0,0,0.2)]"
+              >
+                <div className="overflow-hidden aspect-[4/3]">
                   <Image
                     src={r.imagen}
                     alt={r.titulo}
-                    fill
-                    className="object-cover transition-transform duration-[400ms] group-hover:scale-[1.04]"
+                    width={600}
+                    height={450}
+                    className="w-full h-full object-cover block transition-transform duration-[400ms] group-hover:scale-[1.04]"
                   />
                 </div>
-                <div className="p-6 pb-7 flex-1 flex flex-col">
-                  <div className="flex gap-3 mb-2 flex-wrap">
-                    <span className="font-mono text-[9px] tracking-[0.15em] text-red uppercase">{r.tiempo}</span>
-                    <span className="font-mono text-[9px] tracking-[0.15em] text-[#888] uppercase">{r.dificultad}</span>
+                <div className="p-4 flex flex-col flex-1">
+                  {/* Meta */}
+                  <div className="flex gap-2 mb-3 flex-wrap items-center">
+                    <span className="font-mono text-[10px] tracking-[0.15em] uppercase text-red group-hover:text-red">
+                      {r.categoria}
+                    </span>
+                    <span className="text-[#ccc] text-[10px]">·</span>
+                    <span className="font-mono text-[10px] text-[#888] group-hover:text-[#666]">⏱ {r.tiempo}</span>
+                    <span className="text-[#ccc] text-[10px]">·</span>
+                    <span className="font-mono text-[10px] text-[#888] group-hover:text-[#666]">👤 {r.porciones}</span>
                   </div>
-                  <h3 className="font-heading text-[18px] font-medium m-0 mb-2 leading-[1.2]">{r.titulo}</h3>
-                  <p className="text-[13px] text-[#666] leading-[1.5] m-0 mb-5 flex-1">{r.descripcion}</p>
+                  <h3 className="font-heading text-[20px] font-medium m-0 mb-2 leading-[1.2] group-hover:text-paper transition-colors duration-300">
+                    {r.titulo}
+                  </h3>
+                  <p className="text-[13px] text-[#555] group-hover:text-[#aaa] leading-[1.6] m-0 mb-4 flex-1 transition-colors duration-300">
+                    {r.descripcion}
+                  </p>
+                  {/* Product chips */}
+                  <div className="mb-4 flex flex-wrap gap-[6px]">
+                    {r.productos.map((p, i) => (
+                      <span
+                        key={i}
+                        className="bg-paper-2 group-hover:bg-[#2a2a2a] px-[10px] py-1 font-mono text-[9px] tracking-[0.1em] uppercase text-[#666] group-hover:text-[#aaa] transition-colors duration-300"
+                      >
+                        {p}
+                      </span>
+                    ))}
+                  </div>
                   <Link
                     href={`/recetas/${r.slug}`}
-                    className="font-mono text-[10px] tracking-[0.15em] uppercase text-ink border-b border-ink pb-[1px] self-start"
+                    className="block bg-ink group-hover:bg-red text-paper text-center font-mono text-[11px] tracking-[0.15em] uppercase py-[14px] px-5 no-underline transition-colors duration-300"
+                    onClick={(e) => e.stopPropagation()}
                   >
                     Ver receta →
                   </Link>
@@ -69,7 +95,7 @@ export default function RecipeFilter({ recetas }: { recetas: Receta[] }) {
             ))}
           </div>
         </div>
-      </div>
+      </section>
     </>
   )
 }

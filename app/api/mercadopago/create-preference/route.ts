@@ -1,5 +1,5 @@
-import { createPreference } from '@/lib/mercadopago'
-import type { MPItem } from '@/lib/mercadopago'
+import { createPreference } from '@/services/mercado-pago'
+import type { MPItem } from '@/services/mercado-pago'
 
 export async function POST(request: Request): Promise<Response> {
   try {

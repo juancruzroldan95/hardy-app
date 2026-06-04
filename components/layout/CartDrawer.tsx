@@ -2,12 +2,11 @@
 
 import Image from 'next/image'
 import { X, Plus, Minus } from 'lucide-react'
-import { useCart } from '@/lib/cart-context'
+import { useCart } from '@/components/contexts/cart-context'
 
 export default function CartDrawer() {
   const {
     cartItems,
-    cartCount,
     cartTotal,
     cartOpen,
     checkoutOpen,
@@ -119,7 +118,7 @@ export default function CartDrawer() {
                   Finalizar compra →
                 </button>
                 <div className="text-center mt-[10px] text-[10px] text-[#888] font-mono tracking-[0.1em]">
-                  Mercado Pago · Envío Andreani
+                  Mercado Pago · Coordinamos el envío
                 </div>
               </div>
             )}
@@ -138,7 +137,7 @@ export default function CartDrawer() {
             <div className="bg-paper-2 p-4 font-mono text-[12px] text-left mb-6 leading-[1.8]">
               Total: <strong>{formatARS(cartTotal)}</strong>
               <br />
-              Envío: Andreani (calculado en el checkout)
+              Envío: coordinado según zona y volumen
               <br />
               Método: Mercado Pago
             </div>
