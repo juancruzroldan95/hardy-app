@@ -142,6 +142,12 @@ export default async function AdminClientesPage() {
                   </div>
                   <div className="flex gap-3 items-start">
                     <Link
+                      href={`/portal/admin/clientes/${client.id}/editar`}
+                      className="font-mono text-[9px] tracking-[0.12em] uppercase text-red hover:text-red/80 border border-red/20 hover:border-red/40 px-3 py-[7px] transition-colors"
+                    >
+                      Editar perfil
+                    </Link>
+                    <Link
                       href={`/portal/admin/pedidos?userId=${client.userId}`}
                       className="font-mono text-[9px] tracking-[0.12em] uppercase text-ink/40 hover:text-ink border border-ink/15 hover:border-ink px-3 py-[7px] transition-colors"
                     >

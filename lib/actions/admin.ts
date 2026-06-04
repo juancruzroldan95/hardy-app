@@ -8,6 +8,7 @@ import { profiles, orders, orderItems, solicitudes, novedades, clientAlerts, ord
 import { and, eq, sql as drizzleSql } from 'drizzle-orm'
 import type { EstadoSolicitud, OrderStatus, PaymentStatus, AlertTipo, UserRole } from '@/drizzle/schema'
 import { sendOrderStatusUpdate } from '@/lib/email'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 // ─── Guard ─────────────────────────────────────────────────────────────────────
 
@@ -218,7 +219,10 @@ export async function updateClientRole(profileId: string, role: UserRole) {
 // Busca al usuario en auth.users por email y crea el perfil en public.profiles.
 // El usuario debe estar invitado en Supabase Dashboard antes de ejecutar esto.
 
-export type CreateClientState = { error: string } | { success: true; displayName: string } | undefined
+export type CreateClientState =
+  | { error: string }
+  | { success: true; displayName: string; email: string; tempPassword?: string; linkedExisting?: boolean }
+  | undefined
 
 export async function createClientProfile(
   _prev: CreateClientState,
@@ -239,24 +243,49 @@ export async function createClientProfile(
   if (!email)       return { error: 'El email es requerido.' }
   if (!displayName) return { error: 'El nombre es requerido.' }
 
-  // Buscar en auth.users por email
+  // 1. Verificar si ya existe en auth.users por email
   let authUserId: string | null = null
+  let isNewUser = false
+  let tempPassword = ''
+
   try {
     const result = await db.execute(
       drizzleSql`SELECT id FROM auth.users WHERE email = ${email} LIMIT 1`
     )
     authUserId = (result as unknown as Array<{ id: string }>)[0]?.id ?? null
-  } catch {
-    return { error: 'Error al consultar la base de datos.' }
+  } catch (e) {
+    console.error('Error al consultar auth.users por email:', e)
   }
 
+  // 2. Si no existe, lo creamos en Supabase Auth
   if (!authUserId) {
-    return {
-      error: `No se encontró un usuario con el email "${email}" en Supabase Auth. Primero invitalo desde el Dashboard de Supabase (Authentication → Users → Invite user).`,
+    isNewUser = true
+    const randomStr = Math.random().toString(36).substring(2, 8).toUpperCase()
+    tempPassword = `Hardy2026$${randomStr}`
+
+    try {
+      const adminClient = createAdminClient()
+      const { data: authData, error: authError } = await adminClient.auth.admin.createUser({
+        email,
+        password: tempPassword,
+        email_confirm: true,
+      })
+
+      if (authError) {
+        return { error: `Error al crear usuario en Supabase Auth: ${authError.message}` }
+      }
+      authUserId = authData.user?.id ?? null
+    } catch (e) {
+      console.error('Error con Supabase Admin Client:', e)
+      return { error: 'Error de comunicación con Supabase Auth.' }
     }
   }
 
-  // Verificar que no tenga perfil ya
+  if (!authUserId) {
+    return { error: 'No se pudo crear o resolver el ID de usuario en Supabase Auth.' }
+  }
+
+  // 3. Verificar que no tenga un perfil ya creado en la DB
   const existing = await db.query.profiles.findFirst({
     where: eq(profiles.userId, authUserId),
   })
@@ -264,20 +293,83 @@ export async function createClientProfile(
     return { error: 'Este usuario ya tiene un perfil en el portal.' }
   }
 
-  await db.insert(profiles).values({
-    userId:      authUserId,
-    role,
-    displayName,
-    company,
-    phone,
-    city,
-    province,
-    cuit,
-    address,
-  })
+  // 4. Insertar el perfil
+  try {
+    await db.insert(profiles).values({
+      userId:      authUserId,
+      role,
+      displayName,
+      company,
+      phone,
+      city,
+      province,
+      cuit,
+      address,
+    })
+  } catch (e) {
+    console.error('Error al insertar perfil:', e)
+    return { error: 'Error al guardar el perfil en la base de datos.' }
+  }
 
   revalidatePath('/portal/admin/clientes')
-  return { success: true, displayName }
+
+  const params = new URLSearchParams()
+  params.set('success', 'true')
+  params.set('displayName', displayName)
+  params.set('email', email)
+  if (isNewUser && tempPassword) {
+    params.set('tempPassword', tempPassword)
+  } else {
+    params.set('linkedExisting', 'true')
+  }
+
+  redirect(`/portal/admin/clientes/nuevo?${params.toString()}`)
+}
+
+// ─── Edit Client Profile (Admin) ──────────────────────────────────────────────
+
+export type EditClientState = { error: string } | { success: true } | undefined
+
+export async function updateClientProfileAdmin(
+  profileId: string,
+  _prev: EditClientState,
+  formData: FormData,
+): Promise<EditClientState> {
+  await getAdminUser()
+
+  const displayName = (formData.get('displayName') as string)?.trim()
+  const company     = (formData.get('company')     as string)?.trim() || null
+  const role        = (formData.get('role')        as UserRole) ?? 'mayorista'
+  const phone       = (formData.get('phone')       as string)?.trim() || null
+  const city        = (formData.get('city')        as string)?.trim() || null
+  const province    = (formData.get('province')    as string)?.trim() || null
+  const cuit        = (formData.get('cuit')        as string)?.trim() || null
+  const address     = (formData.get('address')     as string)?.trim() || null
+
+  if (!displayName) return { error: 'El nombre es requerido.' }
+
+  try {
+    await db.update(profiles)
+      .set({
+        displayName,
+        company,
+        role,
+        phone,
+        city,
+        province,
+        cuit,
+        address,
+        updatedAt: new Date(),
+      })
+      .where(eq(profiles.id, profileId))
+  } catch (e) {
+    console.error('Error al actualizar perfil de cliente:', e)
+    return { error: 'Error al actualizar el perfil en la base de datos.' }
+  }
+
+  revalidatePath('/portal/admin/clientes')
+  revalidatePath(`/portal/admin/clientes/${profileId}/editar`)
+  redirect('/portal/admin/clientes')
 }
 
 // ─── Tracking number ──────────────────────────────────────────────────────────

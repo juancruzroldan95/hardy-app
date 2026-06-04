@@ -38,3 +38,52 @@ export async function updateProfile(
   revalidatePath('/portal/perfil')
   return { success: true }
 }
+
+export async function changePassword(
+  _prevState: ProfileActionState,
+  formData: FormData
+): Promise<ProfileActionState> {
+  const currentPassword = formData.get('currentPassword') as string
+  const newPassword     = formData.get('newPassword') as string
+  const confirmPassword = formData.get('confirmPassword') as string
+
+  if (!currentPassword || !newPassword || !confirmPassword) {
+    return { error: 'Todos los campos son obligatorios.' }
+  }
+
+  if (newPassword.length < 6) {
+    return { error: 'La nueva contraseña debe tener al menos 6 caracteres.' }
+  }
+
+  if (newPassword !== confirmPassword) {
+    return { error: 'Las nuevas contraseñas no coinciden.' }
+  }
+
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user || !user.email) {
+    return { error: 'No autenticado.' }
+  }
+
+  // Verify the current password by signing in
+  const { error: signInError } = await supabase.auth.signInWithPassword({
+    email: user.email,
+    password: currentPassword,
+  })
+
+  if (signInError) {
+    return { error: 'La contraseña actual es incorrecta.' }
+  }
+
+  // Update password in Supabase auth
+  const { error: updateError } = await supabase.auth.updateUser({
+    password: newPassword,
+  })
+
+  if (updateError) {
+    return { error: updateError.message }
+  }
+
+  return { success: true }
+}
+

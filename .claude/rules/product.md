@@ -50,3 +50,22 @@ export async function POST(request: Request) {
 Variable de entorno requerida: `MERCADOPAGO_ACCESS_TOKEN` (en `.env.local` para dev, Vercel para prod).
 
 Las URLs de retorno deben apuntar al dominio correcto (actualizar cuando se defina el dominio de producción).
+
+---
+
+## Roles y Lógica de Precios (B2B)
+
+El portal B2B utiliza los roles definidos en `public.profiles.role` para segmentar clientes y aplicarles listas de precios personalizadas a través de la tabla `price_overrides`.
+
+### Matriz de Roles y Capacidades
+
+- **`admin`**: Acceso completo al panel de administración (`/portal/admin/*`). Puede gestionar el CRM de clientes (crear nuevos directamente con clave temporal, editar sus perfiles), modificar estados y tracking de pedidos, gestionar stock, redactar novedades y chatear internamente con clientes en sus pedidos.
+- **Roles de Cliente B2B** (`mayorista`, `gastronomico`, `distribuidor`, `productor`, `consumer`): Acceso al panel B2B estándar (`/portal/*`). Pueden ver el catálogo de productos con precios personalizados para su rol, realizar pedidos, editar sus datos de perfil (salvo el email que es inmutable), ver novedades y chatear con administración.
+
+### Aplicación de Precios (`price_overrides`)
+
+Los precios que ve cada cliente autenticado en el catálogo o al realizar pedidos están condicionados por:
+1. Su rol (`profiles.role`).
+2. Las reglas de la tabla `price_overrides` para ese rol y producto.
+3. La cantidad mínima de compra (`minQty`) requerida para calificar al descuento.
+

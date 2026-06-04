@@ -6,6 +6,8 @@ import { and, eq } from 'drizzle-orm'
 import { ROLE_LABELS, ROLE_DESCRIPTIONS } from '@/lib/roles'
 import ProfileForm from '@/components/portal/ProfileForm'
 import DeliveryAddressesSection from '@/components/portal/DeliveryAddressesSection'
+import PasswordChangeModal from '@/components/portal/PasswordChangeModal'
+
 
 export default async function PerfilPage() {
   const supabase = await createClient()
@@ -62,6 +64,9 @@ export default async function PerfilPage() {
         <p className="font-mono text-[9px] tracking-[0.1em] text-ink/30 mt-1">
           Para cambiar el email, contactá a Hardy.
         </p>
+        <div className="mt-4 pt-4 border-t border-ink/8 flex justify-start">
+          <PasswordChangeModal />
+        </div>
       </div>
 
       <ProfileForm profile={profile} />
