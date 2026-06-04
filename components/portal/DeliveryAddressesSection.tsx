@@ -6,8 +6,8 @@ import {
   deleteDeliveryAddress,
   setDefaultDeliveryAddress,
   type AddressState,
-} from '@/lib/actions/addresses'
-import type { DeliveryAddress } from '@/drizzle/schema'
+} from '@/repository/mutations/addresses'
+import type { DeliveryAddress } from '@/db/schema'
 
 interface Props {
   addresses: DeliveryAddress[]

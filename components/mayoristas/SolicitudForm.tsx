@@ -1,8 +1,8 @@
 'use client'
 
 import { useActionState } from 'react'
-import { submitSolicitud } from '@/lib/actions/solicitudes'
-import type { SolicitudState } from '@/lib/actions/solicitudes'
+import { submitSolicitud } from '@/repository/mutations/solicitudes'
+import type { SolicitudState } from '@/repository/mutations/solicitudes'
 
 const TIPOS = [
   { value: 'dietetica',    label: 'Dietética' },

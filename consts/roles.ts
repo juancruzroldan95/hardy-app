@@ -1,4 +1,4 @@
-import type { UserRole } from '@/drizzle/schema'
+import type { UserRole } from '@/db/schema'
 
 export const ROLE_LABELS: Record<UserRole, string> = {
   consumer:     'Consumidor',

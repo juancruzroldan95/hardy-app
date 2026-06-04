@@ -1,8 +1,8 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { MessageCircle } from 'lucide-react'
-import { getRecetas } from '@/lib/recetas'
-import { WA_NUMBER } from '@/lib/products'
+import { getRecetas } from '@/consts/recetas'
+import { WA_NUMBER } from '@/consts/products'
 import RevealSection from '@/components/ui/RevealSection'
 
 // ── Quick pillars bar (no "+500" — that number lives only in stats)

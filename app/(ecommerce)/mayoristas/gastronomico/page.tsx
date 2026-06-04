@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import Image from 'next/image'
-import { WA_NUMBER } from '@/lib/products'
+import { WA_NUMBER } from '@/consts/products'
 
 export const metadata: Metadata = {
   title: 'Gastronómico — Hardy',

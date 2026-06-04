@@ -1,9 +1,9 @@
-import { createClient } from '@/lib/supabase/server'
-import { db } from '@/lib/db'
-import { profiles } from '@/drizzle/schema'
+import { createClient } from '@/services/supabase/server'
+import { db } from '@/db'
+import { profiles } from '@/db/schema'
 import { and, eq } from 'drizzle-orm'
 import PortalSidebar from '@/components/portal/PortalSidebar'
-import type { UserRole } from '@/drizzle/schema'
+import type { UserRole } from '@/db/schema'
 
 export default async function PortalLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()

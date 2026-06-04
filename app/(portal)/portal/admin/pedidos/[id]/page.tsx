@@ -1,15 +1,15 @@
 import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
-import { db } from '@/lib/db'
-import { orderItems, orders, profiles, orderMessages } from '@/drizzle/schema'
+import { createClient } from '@/services/supabase/server'
+import { db } from '@/db'
+import { orderItems, orders, profiles, orderMessages } from '@/db/schema'
 import { and, eq, asc } from 'drizzle-orm'
-import { formatARS } from '@/lib/products'
-import { updateOrderStatus, updateTrackingNumber } from '@/lib/actions/admin'
+import { formatARS } from '@/consts/products'
+import { updateOrderStatus, updateTrackingNumber } from '@/repository/mutations/admin'
 import OrderStatusBadge from '@/components/portal/OrderStatusBadge'
 import PaymentStatusBadge from '@/components/portal/PaymentStatusBadge'
 import MessageThread from '@/components/portal/MessageThread'
-import type { OrderStatus, PaymentStatus } from '@/drizzle/schema'
+import type { OrderStatus, PaymentStatus } from '@/db/schema'
 
 const ORDER_STATUS_OPTIONS: { value: OrderStatus; label: string }[] = [
   { value: 'pending',   label: 'Pendiente'       },

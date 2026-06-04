@@ -1,10 +1,8 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
-import { db } from '@/lib/db'
-import { profiles } from '@/drizzle/schema'
-import { and, eq } from 'drizzle-orm'
-import { createNovedad } from '@/lib/actions/admin'
+import { createClient } from '@/services/supabase/server'
+import { getProfileByUserId } from '@/repository/queries/profile'
+import { createNovedad } from '@/repository/mutations/admin'
 import AdminNovedadForm from '@/components/portal/AdminNovedadForm'
 
 export default async function AdminNuevaNovedadPage() {
@@ -12,9 +10,7 @@ export default async function AdminNuevaNovedadPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const profile = await db.query.profiles.findFirst({
-    where: and(eq(profiles.userId, user.id), eq(profiles.isDeleted, false)),
-  })
+  const profile = await getProfileByUserId(user.id)
   if (profile?.role !== 'admin') redirect('/portal')
 
   return (

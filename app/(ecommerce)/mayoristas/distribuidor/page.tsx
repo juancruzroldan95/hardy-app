@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { WA_NUMBER } from '@/lib/products'
+import { WA_NUMBER } from '@/consts/products'
 
 export const metadata: Metadata = {
   title: 'Distribuidores — Hardy',

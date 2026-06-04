@@ -2,9 +2,9 @@
 
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
-import { db } from '@/lib/db'
-import { profiles, productReviews } from '@/drizzle/schema'
+import { createClient } from '@/services/supabase/server'
+import { db } from '@/db'
+import { profiles, productReviews } from '@/db/schema'
 import { and, eq } from 'drizzle-orm'
 
 export type ReviewState = { error: string } | { success: true } | undefined

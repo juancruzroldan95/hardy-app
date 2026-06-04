@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import type { Receta } from '@/types'
-import { CATEGORIAS } from '@/lib/recetas'
+import { CATEGORIAS } from '@/consts/recetas'
 
 export default function RecipeFilter({ recetas }: { recetas: Receta[] }) {
   const [activeCategory, setActiveCategory] = useState<string>('Todas')

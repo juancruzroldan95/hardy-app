@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
 import { ShoppingBag, Menu, X, MessageCircle } from 'lucide-react'
-import { WA_NUMBER } from '@/lib/products'
+import { WA_NUMBER } from '@/consts/products'
 
 interface NavProps {
   cartCount?: number

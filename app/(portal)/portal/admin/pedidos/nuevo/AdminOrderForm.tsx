@@ -1,8 +1,8 @@
 'use client'
 
 import { useActionState } from 'react'
-import { createPortalOrderForClient } from '@/lib/actions/orders'
-import type { CreateOrderState } from '@/lib/actions/orders'
+import { createPortalOrderForClient } from '@/repository/mutations/orders'
+import type { CreateOrderState } from '@/repository/mutations/orders'
 import NuevoPedidoForm from '@/components/portal/NuevoPedidoForm'
 import type { ProductOrden } from '@/components/portal/NuevoPedidoForm'
 

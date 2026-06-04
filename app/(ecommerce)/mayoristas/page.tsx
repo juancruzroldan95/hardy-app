@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { MessageCircle } from 'lucide-react'
-import { WA_NUMBER, ESCALAS } from '@/lib/products'
+import { WA_NUMBER, ESCALAS } from '@/consts/products'
 import SolicitudForm from '@/components/mayoristas/SolicitudForm'
 
 export const metadata: Metadata = {

@@ -1,13 +1,12 @@
 import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
-import { db } from '@/lib/db'
-import { orderItems, orders, orderMessages, profiles } from '@/drizzle/schema'
-import { and, eq, asc } from 'drizzle-orm'
+import { createClient } from '@/services/supabase/server'
+import { getProfileByUserId } from '@/repository/queries/profile'
+import { getOrderById, getOrderMessages } from '@/repository/queries/orders'
 import OrderStatusBadge from '@/components/portal/OrderStatusBadge'
-import { formatARS } from '@/lib/products'
+import { formatARS } from '@/consts/products'
 import MessageThread from '@/components/portal/MessageThread'
-import type { OrderStatus } from '@/drizzle/schema'
+import type { OrderStatus } from '@/db/schema'
 
 const STATUS_STEPS: OrderStatus[] = ['pending', 'confirmed', 'preparing', 'shipped', 'delivered']
 
@@ -53,17 +52,9 @@ export default async function PedidoDetailPage({ params }: Props) {
   const { id } = await params
 
   const [order, profile, messages] = await Promise.all([
-    db.query.orders.findFirst({
-      where: and(eq(orders.id, id), eq(orders.isDeleted, false)),
-      with:  { items: { where: eq(orderItems.isDeleted, false) } },
-    }),
-    db.query.profiles.findFirst({
-      where: and(eq(profiles.userId, user.id), eq(profiles.isDeleted, false)),
-    }),
-    db.query.orderMessages.findMany({
-      where: and(eq(orderMessages.orderId, id), eq(orderMessages.isDeleted, false)),
-      orderBy: [asc(orderMessages.createdAt)],
-    }),
+    getOrderById(id),
+    getProfileByUserId(user.id),
+    getOrderMessages(id),
   ])
 
   if (!order) notFound()

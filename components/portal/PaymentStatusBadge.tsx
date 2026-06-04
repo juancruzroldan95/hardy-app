@@ -1,4 +1,4 @@
-import type { PaymentStatus } from '@/drizzle/schema'
+import type { PaymentStatus } from '@/db/schema'
 
 const STATUS_CONFIG: Record<PaymentStatus, { label: string; bg: string; text: string }> = {
   unpaid:   { label: 'Sin pagar',   bg: 'bg-[#fdecea]', text: 'text-red'        },

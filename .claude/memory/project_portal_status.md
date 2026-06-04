@@ -15,15 +15,15 @@ Portal de clientes MVP implementado en mayo 2026. Usa Supabase Auth + Drizzle OR
 
 ## Lo que está implementado
 
-- `drizzle/schema.ts` — tablas: profiles, orders, order_items, price_overrides; enums: user_role, order_status, payment_status
-- `drizzle.config.ts` — carga .env.local, apunta a drizzle/schema.ts
-- `drizzle/migrations/0000_sturdy_payback.sql` — migración aplicada a Supabase
-- `lib/db.ts` — cliente Drizzle singleton
-- `lib/supabase/server.ts` — createClient() para Server Components y Server Actions
-- `lib/supabase/client.ts` — createClient() para Client Components (browser)
-- `lib/roles.ts` — ROLE_LABELS y ROLE_DESCRIPTIONS por UserRole
-- `lib/actions/auth.ts` — logout() Server Action
-- `lib/actions/profile.ts` — updateProfile() Server Action
+- `db/schema.ts` — tablas: profiles, orders, order_items, price_overrides; enums: user_role, order_status, payment_status
+- `drizzle.config.ts` — carga .env.local, apunta a db/schema.ts
+- `db/migrations/...` — migración aplicada a Supabase
+- `db/index.ts` — cliente Drizzle singleton
+- `services/supabase/server.ts` — createClient() para Server Components y Server Actions
+- `services/supabase/client.ts` — createClient() para Client Components (browser)
+- `consts/roles.ts` — ROLE_LABELS y ROLE_DESCRIPTIONS por UserRole
+- `repository/mutations/auth.ts` — logout() Server Action
+- `repository/mutations/profile.ts` — updateProfile() Server Action
 - `proxy.ts` — auth guard (Next.js 16: middleware ahora se llama proxy)
 - `app/auth/callback/route.ts` — callback para PKCE flow de Supabase
 - `app/(auth)/layout.tsx + login/page.tsx` — página de login en /login

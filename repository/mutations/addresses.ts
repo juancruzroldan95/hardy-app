@@ -2,9 +2,9 @@
 
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
-import { createClient } from '@/lib/supabase/server'
-import { db } from '@/lib/db'
-import { profiles, deliveryAddresses } from '@/drizzle/schema'
+import { createClient } from '@/services/supabase/server'
+import { db } from '@/db'
+import { profiles, deliveryAddresses } from '@/db/schema'
 import { and, eq } from 'drizzle-orm'
 
 async function getAuthProfile() {

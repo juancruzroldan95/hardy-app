@@ -1,10 +1,9 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
-import { db } from '@/lib/db'
-import { orderItems, orders, profiles } from '@/drizzle/schema'
-import { and, eq, desc } from 'drizzle-orm'
-import { formatARS } from '@/lib/products'
+import { createClient } from '@/services/supabase/server'
+import { getProfileByUserId, getAllProfiles } from '@/repository/queries/profile'
+import { getAllOrders } from '@/repository/queries/orders'
+import { formatARS } from '@/consts/products'
 import OrderStatusBadge from '@/components/portal/OrderStatusBadge'
 import PaymentStatusBadge from '@/components/portal/PaymentStatusBadge'
 
@@ -13,26 +12,13 @@ export default async function AdminPedidosPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const profile = await db.query.profiles.findFirst({
-    where: and(eq(profiles.userId, user.id), eq(profiles.isDeleted, false)),
-  })
+  const profile = await getProfileByUserId(user.id)
   if (profile?.role !== 'admin') redirect('/portal')
 
-  const allOrders = await db.query.orders.findMany({
-    where:   eq(orders.isDeleted, false),
-    orderBy: [desc(orders.createdAt)],
-    with:    { items: { where: eq(orderItems.isDeleted, false) } },
-  })
+  const allOrders = await getAllOrders()
 
   // Build a map userId → profile for display
-  const userIds    = [...new Set(allOrders.map((o) => o.userId))]
-  const allProfiles = userIds.length > 0
-    ? await db.query.profiles.findMany({
-        where: and(
-          eq(profiles.isDeleted, false),
-        ),
-      })
-    : []
+  const allProfiles = await getAllProfiles()
 
   const profileMap = new Map(allProfiles.map((p) => [p.userId, p]))
 

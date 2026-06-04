@@ -1,28 +1,26 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
-import { db } from '@/lib/db'
-import { orders, profiles, orderItems, clientAlerts, solicitudes } from '@/drizzle/schema'
-import { and, eq, desc, gte, lt, sum, count, ne } from 'drizzle-orm'
-import { formatARS } from '@/lib/products'
+import { createClient } from '@/services/supabase/server'
+import { getProfileByUserId, getAllClients } from '@/repository/queries/profile'
+import { getAllOrders, getOrdersSummaryForStats, getMonthlyRevenue, getAllOrdersForRevenueTracking } from '@/repository/queries/orders'
+import { getPendingAlertsCount } from '@/repository/queries/stock'
+import { getPendingSolicitudesCount } from '@/repository/queries/solicitudes'
+import { formatARS } from '@/consts/products'
 import OrderStatusBadge from '@/components/portal/OrderStatusBadge'
-import { ROLE_LABELS } from '@/lib/roles'
+import { ROLE_LABELS } from '@/consts/roles'
 
 export default async function AdminDashboardPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const profile = await db.query.profiles.findFirst({
-    where: and(eq(profiles.userId, user.id), eq(profiles.isDeleted, false)),
-  })
+  const profile = await getProfileByUserId(user.id)
   if (profile?.role !== 'admin') redirect('/portal')
 
   // ── Date helpers ──────────────────────────────────────────────────────────────
   const now          = new Date()
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
   const startOfLastM = new Date(now.getFullYear(), now.getMonth() - 1, 1)
-  const endOfLastM   = new Date(now.getFullYear(), now.getMonth(), 0)
 
   // ── Parallel queries ─────────────────────────────────────────────────────────
   const [
@@ -30,53 +28,23 @@ export default async function AdminDashboardPage() {
     revenueThisMonth,
     revenueLastMonth,
     allProfiles,
-    pendingAlerts,
-    pendingSolicitudes,
+    alertsCount,
+    solicitudesCount,
     recentOrders,
   ] = await Promise.all([
-    // All non-deleted orders for stats
-    db.select({ id: orders.id, status: orders.status, paymentStatus: orders.paymentStatus, totalArs: orders.totalArs })
-      .from(orders)
-      .where(eq(orders.isDeleted, false)),
-
-    // Revenue this month
-    db.select({ total: sum(orders.totalArs) })
-      .from(orders)
-      .where(and(eq(orders.isDeleted, false), gte(orders.createdAt, startOfMonth))),
-
-    // Revenue last month
-    db.select({ total: sum(orders.totalArs) })
-      .from(orders)
-      .where(and(eq(orders.isDeleted, false), gte(orders.createdAt, startOfLastM), lt(orders.createdAt, startOfMonth))),
-
-    // All client profiles for top clients
-    db.query.profiles.findMany({
-      where: and(eq(profiles.isDeleted, false), ne(profiles.role, 'admin')),
-    }),
-
-    // Unresolved alerts
-    db.select({ total: count() })
-      .from(clientAlerts)
-      .where(and(eq(clientAlerts.isDeleted, false), eq(clientAlerts.isResolved, false))),
-
-    // Pending solicitudes
-    db.select({ total: count() })
-      .from(solicitudes)
-      .where(and(eq(solicitudes.isDeleted, false), eq(solicitudes.estado, 'pendiente'))),
-
-    // Recent 8 orders with client info
-    db.query.orders.findMany({
-      where: eq(orders.isDeleted, false),
-      orderBy: [desc(orders.createdAt)],
-      limit: 8,
-      with: { items: { where: eq(orderItems.isDeleted, false) } },
-    }),
+    getOrdersSummaryForStats(),
+    getMonthlyRevenue(startOfMonth),
+    getMonthlyRevenue(startOfLastM, startOfMonth),
+    getAllClients(),
+    getPendingAlertsCount(),
+    getPendingSolicitudesCount(),
+    getAllOrders().then((orders) => orders.slice(0, 8)),
   ])
 
   // ── Compute metrics ──────────────────────────────────────────────────────────
   const totalOrders   = allOrders.length
-  const thisMonthArs  = Number(revenueThisMonth[0]?.total ?? 0)
-  const lastMonthArs  = Number(revenueLastMonth[0]?.total ?? 0)
+  const thisMonthArs  = revenueThisMonth
+  const lastMonthArs  = revenueLastMonth
   const growthPct     = lastMonthArs > 0
     ? ((thisMonthArs - lastMonthArs) / lastMonthArs * 100).toFixed(0)
     : null
@@ -95,10 +63,7 @@ export default async function AdminDashboardPage() {
   }
 
   // Build a proper revenue per userId from allOrders
-  const allOrdersFull = await db.query.orders.findMany({
-    where: eq(orders.isDeleted, false),
-    columns: { userId: true, totalArs: true },
-  })
+  const allOrdersFull = await getAllOrdersForRevenueTracking()
   const revenuePerUser = new Map<string, number>()
   for (const o of allOrdersFull) {
     revenuePerUser.set(o.userId, (revenuePerUser.get(o.userId) ?? 0) + Number(o.totalArs))
@@ -110,9 +75,6 @@ export default async function AdminDashboardPage() {
     .slice(0, 5)
 
   const profileMap = new Map(allProfiles.map((p) => [p.userId, p]))
-
-  const alertsCount      = pendingAlerts[0]?.total ?? 0
-  const solicitudesCount = pendingSolicitudes[0]?.total ?? 0
 
   return (
     <div className="max-w-[1100px]">

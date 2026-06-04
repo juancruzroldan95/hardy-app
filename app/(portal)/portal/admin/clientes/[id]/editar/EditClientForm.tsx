@@ -2,9 +2,9 @@
 
 import { useActionState } from 'react'
 import Link from 'next/link'
-import { updateClientProfileAdmin } from '@/lib/actions/admin'
-import type { EditClientState } from '@/lib/actions/admin'
-import type { Profile } from '@/drizzle/schema'
+import { updateClientProfileAdmin } from '@/repository/mutations/admin'
+import type { EditClientState } from '@/repository/mutations/admin'
+import type { Profile } from '@/db/schema'
 
 const ROLE_OPTIONS = [
   { value: 'mayorista',    label: 'Mayorista'     },

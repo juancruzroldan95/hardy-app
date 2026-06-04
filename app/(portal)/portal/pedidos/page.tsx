@@ -1,12 +1,11 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
-import { db } from '@/lib/db'
-import { orderItems, orders, profiles } from '@/drizzle/schema'
-import { eq, desc, and } from 'drizzle-orm'
+import { createClient } from '@/services/supabase/server'
+import { getProfileByUserId } from '@/repository/queries/profile'
+import { getOrdersByUserId } from '@/repository/queries/orders'
 import OrderStatusBadge from '@/components/portal/OrderStatusBadge'
-import { formatARS } from '@/lib/products'
-import type { OrderStatus } from '@/drizzle/schema'
+import { formatARS } from '@/consts/products'
+import type { OrderStatus } from '@/db/schema'
 
 const STATUS_FILTERS: { value: OrderStatus | 'all'; label: string }[] = [
   { value: 'all',       label: 'Todos'          },
@@ -42,16 +41,8 @@ export default async function PedidosPage({ searchParams }: Props) {
   const statusFilter = rawStatus && isValidStatus(rawStatus) ? rawStatus : null
 
   const [profile, userOrders] = await Promise.all([
-    db.query.profiles.findFirst({
-      where: and(eq(profiles.userId, user.id), eq(profiles.isDeleted, false)),
-    }),
-    db.query.orders.findMany({
-      where: statusFilter
-        ? and(eq(orders.userId, user.id), eq(orders.status, statusFilter), eq(orders.isDeleted, false))
-        : and(eq(orders.userId, user.id), eq(orders.isDeleted, false)),
-      orderBy: [desc(orders.createdAt)],
-      with: { items: { where: eq(orderItems.isDeleted, false) } },
-    }),
+    getProfileByUserId(user.id),
+    getOrdersByUserId(user.id, statusFilter),
   ])
 
   const role = profile?.role ?? 'consumer'

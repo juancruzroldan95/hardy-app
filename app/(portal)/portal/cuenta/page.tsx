@@ -1,10 +1,9 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
-import { db } from '@/lib/db'
-import { orderItems, orders, profiles } from '@/drizzle/schema'
-import { and, eq, desc, sum } from 'drizzle-orm'
-import { formatARS } from '@/lib/products'
+import { createClient } from '@/services/supabase/server'
+import { getProfileByUserId } from '@/repository/queries/profile'
+import { getOrdersByUserId, getUserOrdersTotalSum } from '@/repository/queries/orders'
+import { formatARS } from '@/consts/products'
 import OrderStatusBadge from '@/components/portal/OrderStatusBadge'
 import PaymentStatusBadge from '@/components/portal/PaymentStatusBadge'
 
@@ -13,23 +12,15 @@ export default async function CuentaPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const [profile, allOrders, [totals]] = await Promise.all([
-    db.query.profiles.findFirst({
-      where: and(eq(profiles.userId, user.id), eq(profiles.isDeleted, false)),
-    }),
-    db.query.orders.findMany({
-      where:   and(eq(orders.userId, user.id), eq(orders.isDeleted, false)),
-      orderBy: [desc(orders.createdAt)],
-      with:    { items: { where: eq(orderItems.isDeleted, false) } },
-    }),
-    db.select({ total: sum(orders.totalArs) })
-      .from(orders)
-      .where(and(eq(orders.userId, user.id), eq(orders.isDeleted, false))),
+  const [profile, allOrders, totals] = await Promise.all([
+    getProfileByUserId(user.id),
+    getOrdersByUserId(user.id),
+    getUserOrdersTotalSum(user.id),
   ])
 
   if (!profile) redirect('/portal')
 
-  const totalFacturado = Number(totals?.total ?? 0)
+  const totalFacturado = totals
   const totalPedidos   = allOrders.length
   const pendientesPago = allOrders.filter((o) => o.paymentStatus === 'unpaid')
   const totalPendiente = pendientesPago.reduce((acc, o) => acc + Number(o.totalArs), 0)

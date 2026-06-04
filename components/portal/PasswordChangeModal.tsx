@@ -2,7 +2,7 @@
 
 import { useState, useActionState, useEffect } from 'react'
 import { X } from 'lucide-react'
-import { changePassword } from '@/lib/actions/profile'
+import { changePassword } from '@/repository/mutations/profile'
 
 function Field({
   label,

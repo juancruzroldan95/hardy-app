@@ -8,11 +8,11 @@
  */
 
 import { NextResponse } from 'next/server'
-import { db } from '@/lib/db'
-import { clientAlerts, profiles } from '@/drizzle/schema'
+import { db } from '@/db'
+import { clientAlerts, profiles } from '@/db/schema'
 import { and, eq, isNull, lte, isNotNull } from 'drizzle-orm'
-import { sendAlertReminder } from '@/lib/email'
-import type { AlertReminderData } from '@/lib/email'
+import { sendAlertReminder } from '@/services/resend'
+import type { AlertReminderData } from '@/services/resend'
 
 export async function GET(request: Request) {
   // Verificar secret (Vercel Cron pasa el header Authorization)

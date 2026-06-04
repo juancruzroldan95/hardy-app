@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { WA_NUMBER } from '@/lib/products'
+import { WA_NUMBER } from '@/consts/products'
 
 export const metadata: Metadata = {
   title: 'Dónde comprar Hardy — Puntos de venta en Argentina',

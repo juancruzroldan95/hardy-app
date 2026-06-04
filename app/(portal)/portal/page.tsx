@@ -1,11 +1,10 @@
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
-import { db } from '@/lib/db'
-import { orderItems, orders, profiles } from '@/drizzle/schema'
-import { and, eq, count, desc } from 'drizzle-orm'
-import { ROLE_LABELS, ROLE_DESCRIPTIONS } from '@/lib/roles'
+import { createClient } from '@/services/supabase/server'
+import { getProfileByUserId } from '@/repository/queries/profile'
+import { getOrdersByUserId, getUserOrderCount } from '@/repository/queries/orders'
+import { ROLE_LABELS, ROLE_DESCRIPTIONS } from '@/consts/roles'
 import OrderStatusBadge from '@/components/portal/OrderStatusBadge'
-import { formatARS, WA_NUMBER } from '@/lib/products'
+import { formatARS, WA_NUMBER } from '@/consts/products'
 import SolicitudForm from '@/components/mayoristas/SolicitudForm'
 
 // ── §5: Pantalla pública de dos caminos para visitantes sin sesión ──────────
@@ -128,24 +127,14 @@ export default async function PortalDashboardPage() {
     return <PortalPublicLanding />
   }
 
-  const [profile, recentOrders, [orderCount]] = await Promise.all([
-    db.query.profiles.findFirst({
-      where: and(eq(profiles.userId, user.id), eq(profiles.isDeleted, false)),
-    }),
-    db.query.orders.findMany({
-      where:   and(eq(orders.userId, user.id), eq(orders.isDeleted, false)),
-      orderBy: [desc(orders.createdAt)],
-      limit:   5,
-      with:    { items: { where: eq(orderItems.isDeleted, false) } },
-    }),
-    db.select({ total: count() })
-      .from(orders)
-      .where(and(eq(orders.userId, user.id), eq(orders.isDeleted, false))),
+  const [profile, recentOrders, total] = await Promise.all([
+    getProfileByUserId(user.id),
+    getOrdersByUserId(user.id).then((orders) => orders.slice(0, 5)),
+    getUserOrderCount(user.id),
   ])
 
   const role        = profile?.role ?? 'consumer'
   const displayName = profile?.displayName ?? user.email ?? 'Cliente'
-  const total       = orderCount?.total ?? 0
 
   return (
     <div className="max-w-[900px]">

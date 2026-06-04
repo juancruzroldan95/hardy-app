@@ -1,11 +1,11 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
-import { db } from '@/lib/db'
-import { profiles, priceOverrides, orders, orderItems, deliveryAddresses, productAvailability } from '@/drizzle/schema'
-import { and, eq } from 'drizzle-orm'
-import { getProducts } from '@/lib/products'
-import { ROLE_LABELS } from '@/lib/roles'
+import { createClient } from '@/services/supabase/server'
+import { getProfileByUserId, getDeliveryAddressesByProfileId } from '@/repository/queries/profile'
+import { getOrderById } from '@/repository/queries/orders'
+import { getActivePriceOverrides, getAllStockRecords } from '@/repository/queries/stock'
+import { getProducts } from '@/consts/products'
+import { ROLE_LABELS } from '@/consts/roles'
 import NuevoPedidoForm from '@/components/portal/NuevoPedidoForm'
 import type { ProductOrden } from '@/components/portal/NuevoPedidoForm'
 
@@ -34,13 +34,9 @@ export default async function NuevoPedidoPage({ searchParams }: Props) {
   const { repeat: repeatOrderId } = await searchParams
 
   const [profile, allOverrides, stockRecords] = await Promise.all([
-    db.query.profiles.findFirst({
-      where: and(eq(profiles.userId, user.id), eq(profiles.isDeleted, false)),
-    }),
-    db.query.priceOverrides.findMany({
-      where: and(eq(priceOverrides.isDeleted, false), eq(priceOverrides.isActive, true)),
-    }),
-    db.query.productAvailability.findMany(),
+    getProfileByUserId(user.id),
+    getActivePriceOverrides(),
+    getAllStockRecords(),
   ])
 
   const role = profile?.role ?? 'consumer'
@@ -93,13 +89,7 @@ export default async function NuevoPedidoPage({ searchParams }: Props) {
 
   // Load delivery addresses for this profile
   const clientAddresses = profile
-    ? await db.query.deliveryAddresses.findMany({
-        where: and(
-          eq(deliveryAddresses.profileId, profile.id),
-          eq(deliveryAddresses.isDeleted, false),
-          eq(deliveryAddresses.isActive, true),
-        ),
-      })
+    ? await getDeliveryAddressesByProfileId(profile.id)
     : []
 
   // Load previous order for repeat
@@ -107,11 +97,8 @@ export default async function NuevoPedidoPage({ searchParams }: Props) {
   let isRepeatOrder = false
 
   if (repeatOrderId) {
-    const prevOrder = await db.query.orders.findFirst({
-      where: and(eq(orders.id, repeatOrderId), eq(orders.userId, user.id), eq(orders.isDeleted, false)),
-      with:  { items: { where: eq(orderItems.isDeleted, false) } },
-    })
-    if (prevOrder?.items?.length) {
+    const prevOrder = await getOrderById(repeatOrderId)
+    if (prevOrder && prevOrder.userId === user.id && prevOrder.items?.length) {
       initialQtys  = Object.fromEntries(prevOrder.items.map((i) => [i.productId, i.qty]))
       isRepeatOrder = true
     }

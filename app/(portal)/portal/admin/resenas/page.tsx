@@ -1,25 +1,19 @@
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
-import { db } from '@/lib/db'
-import { profiles, productReviews } from '@/drizzle/schema'
-import { and, eq, desc } from 'drizzle-orm'
-import { getProductById } from '@/lib/products'
-import { publishReview, deleteReview } from '@/lib/actions/reviews'
+import { createClient } from '@/services/supabase/server'
+import { getProfileByUserId } from '@/repository/queries/profile'
+import { getAllReviews } from '@/repository/queries/reviews'
+import { getProductById } from '@/consts/products'
+import { publishReview, deleteReview } from '@/repository/mutations/reviews'
 
 export default async function AdminResenasPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const profile = await db.query.profiles.findFirst({
-    where: and(eq(profiles.userId, user.id), eq(profiles.isDeleted, false)),
-  })
+  const profile = await getProfileByUserId(user.id)
   if (profile?.role !== 'admin') redirect('/portal')
 
-  const allReviews = await db.query.productReviews.findMany({
-    where: eq(productReviews.isDeleted, false),
-    orderBy: [desc(productReviews.createdAt)],
-  })
+  const allReviews = await getAllReviews()
 
   const pending   = allReviews.filter((r) => !r.isPublished)
   const published = allReviews.filter((r) => r.isPublished)

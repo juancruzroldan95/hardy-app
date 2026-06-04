@@ -1,9 +1,7 @@
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
-import { db } from '@/lib/db'
-import { profiles, deliveryAddresses } from '@/drizzle/schema'
-import { and, eq } from 'drizzle-orm'
-import { ROLE_LABELS, ROLE_DESCRIPTIONS } from '@/lib/roles'
+import { createClient } from '@/services/supabase/server'
+import { getProfileByUserId, getDeliveryAddressesByProfileId } from '@/repository/queries/profile'
+import { ROLE_LABELS, ROLE_DESCRIPTIONS } from '@/consts/roles'
 import ProfileForm from '@/components/portal/ProfileForm'
 import DeliveryAddressesSection from '@/components/portal/DeliveryAddressesSection'
 import PasswordChangeModal from '@/components/portal/PasswordChangeModal'
@@ -14,27 +12,11 @@ export default async function PerfilPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const [profile, addresses] = await Promise.all([
-    db.query.profiles.findFirst({
-      where: and(eq(profiles.userId, user.id), eq(profiles.isDeleted, false)),
-    }),
-    db.query.deliveryAddresses.findMany({
-      where: (da, { and, eq }) => and(
-        eq(da.isDeleted, false),
-        eq(da.isActive, true),
-      ),
-    }).then((all) => all), // loaded after we know profile.id below
-  ])
+  const profile = await getProfileByUserId(user.id)
 
   if (!profile) redirect('/portal')
 
-  const myAddresses = await db.query.deliveryAddresses.findMany({
-    where: and(
-      eq(deliveryAddresses.profileId, profile.id),
-      eq(deliveryAddresses.isDeleted, false),
-      eq(deliveryAddresses.isActive, true),
-    ),
-  })
+  const myAddresses = await getDeliveryAddressesByProfileId(profile.id)
 
   return (
     <div className="max-w-[640px]">

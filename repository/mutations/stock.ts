@@ -2,11 +2,11 @@
 
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
-import { db } from '@/lib/db'
-import { profiles, productAvailability } from '@/drizzle/schema'
+import { createClient } from '@/services/supabase/server'
+import { db } from '@/db'
+import { profiles, productAvailability } from '@/db/schema'
 import { and, eq } from 'drizzle-orm'
-import type { StockStatus } from '@/drizzle/schema'
+import type { StockStatus } from '@/db/schema'
 
 export async function updateProductStock(
   productId: string,

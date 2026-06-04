@@ -1,11 +1,10 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
-import { db } from '@/lib/db'
-import { profiles, priceOverrides } from '@/drizzle/schema'
-import { and, eq, ne } from 'drizzle-orm'
-import { getProducts } from '@/lib/products'
-import { ROLE_LABELS } from '@/lib/roles'
+import { createClient } from '@/services/supabase/server'
+import { getProfileByUserId, getAllClients } from '@/repository/queries/profile'
+import { getActivePriceOverrides } from '@/repository/queries/stock'
+import { getProducts } from '@/consts/products'
+import { ROLE_LABELS } from '@/consts/roles'
 import AdminOrderForm from './AdminOrderForm'
 import type { ProductOrden } from '@/components/portal/NuevoPedidoForm'
 
@@ -31,22 +30,13 @@ export default async function AdminNuevoPedidoPage({ searchParams }: Props) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const adminProfile = await db.query.profiles.findFirst({
-    where: and(eq(profiles.userId, user.id), eq(profiles.isDeleted, false)),
-  })
+  const adminProfile = await getProfileByUserId(user.id)
   if (adminProfile?.role !== 'admin') redirect('/portal')
 
   const { clientId } = await searchParams
 
   // ── Client list (always load for the selector) ──────────────────────────────
-  const allClients = await db.query.profiles.findMany({
-    where: and(
-      eq(profiles.isDeleted, false),
-      eq(profiles.isActive, true),
-      ne(profiles.role, 'admin'),
-    ),
-    orderBy: (profiles, { asc }) => [asc(profiles.displayName)],
-  })
+  const allClients = await getAllClients()
 
   // ── If no client selected, show selector ────────────────────────────────────
   if (!clientId) {
@@ -105,9 +95,7 @@ export default async function AdminNuevoPedidoPage({ searchParams }: Props) {
   const role = clientProfile.role
 
   // Load price overrides for client's role
-  const allOverrides = await db.query.priceOverrides.findMany({
-    where: and(eq(priceOverrides.isDeleted, false), eq(priceOverrides.isActive, true)),
-  })
+  const allOverrides = await getActivePriceOverrides()
 
   const products = getProducts()
 

@@ -1,9 +1,9 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
-import { db } from '@/lib/db'
-import { profiles } from '@/drizzle/schema'
-import { and, eq, sql } from 'drizzle-orm'
+import { createClient } from '@/services/supabase/server'
+import { getProfileByUserId, getProfileById } from '@/repository/queries/profile'
+import { db } from '@/db'
+import { sql } from 'drizzle-orm'
 import EditClientForm from './EditClientForm'
 
 interface PageProps {
@@ -19,15 +19,11 @@ export default async function EditarClientePage({ params }: PageProps) {
   if (!user) redirect('/login')
 
   // 2. Validar que el usuario sea administrador
-  const adminProfile = await db.query.profiles.findFirst({
-    where: and(eq(profiles.userId, user.id), eq(profiles.isDeleted, false)),
-  })
+  const adminProfile = await getProfileByUserId(user.id)
   if (adminProfile?.role !== 'admin') redirect('/portal')
 
   // 3. Buscar perfil del cliente a editar
-  const client = await db.query.profiles.findFirst({
-    where: and(eq(profiles.id, id), eq(profiles.isDeleted, false)),
-  })
+  const client = await getProfileById(id)
 
   if (!client) {
     redirect('/portal/admin/clientes')

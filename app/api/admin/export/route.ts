@@ -3,9 +3,9 @@
  * Descarga un CSV de pedidos o clientes. Solo accesible para admins.
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
-import { db } from '@/lib/db'
-import { orders, orderItems, profiles } from '@/drizzle/schema'
+import { createClient } from '@/services/supabase/server'
+import { db } from '@/db'
+import { orders, orderItems, profiles } from '@/db/schema'
 import { and, eq, desc } from 'drizzle-orm'
 
 function escapeCsv(value: string | number | null | undefined): string {

@@ -2,10 +2,10 @@
 
 import { useActionState, useEffect, useMemo, useState } from 'react'
 import Image from 'next/image'
-import { createPortalOrder } from '@/lib/actions/orders'
-import type { CreateOrderState } from '@/lib/actions/orders'
-import { formatARS, WA_NUMBER } from '@/lib/products'
-import { HARDY_BANK, HARDY_DEPOSITO } from '@/lib/hardy'
+import { createPortalOrder } from '@/repository/mutations/orders'
+import type { CreateOrderState } from '@/repository/mutations/orders'
+import { formatARS, WA_NUMBER } from '@/consts/products'
+import { HARDY_BANK, HARDY_DEPOSITO } from '@/consts/hardy'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

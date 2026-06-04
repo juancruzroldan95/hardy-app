@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { sendOrderMessage } from '@/lib/actions/admin'
+import { sendOrderMessage } from '@/repository/mutations/admin'
 
 interface Message {
   id:           string

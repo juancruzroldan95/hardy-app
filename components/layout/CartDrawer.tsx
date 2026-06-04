@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 import { X, Plus, Minus } from 'lucide-react'
-import { useCart } from '@/lib/cart-context'
+import { useCart } from '@/components/contexts/cart-context'
 
 export default function CartDrawer() {
   const {

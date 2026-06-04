@@ -1,4 +1,4 @@
-import type { OrderStatus } from '@/drizzle/schema'
+import type { OrderStatus } from '@/db/schema'
 
 const STATUS_CONFIG: Record<OrderStatus, { label: string; bg: string; text: string }> = {
   pending:   { label: 'Pendiente',       bg: 'bg-paper-2',     text: 'text-ink/50'        },

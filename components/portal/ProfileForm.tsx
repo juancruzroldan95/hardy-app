@@ -1,9 +1,9 @@
 'use client'
 
 import { useActionState } from 'react'
-import { updateProfile } from '@/lib/actions/profile'
-import type { Profile } from '@/drizzle/schema'
-import type { ProfileActionState } from '@/lib/actions/profile'
+import { updateProfile } from '@/repository/mutations/profile'
+import type { Profile } from '@/db/schema'
+import type { ProfileActionState } from '@/repository/mutations/profile'
 
 interface Props {
   profile: Profile

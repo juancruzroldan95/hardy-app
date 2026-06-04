@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { MessageCircle } from 'lucide-react'
-import { WA_NUMBER } from '@/lib/products'
+import { WA_NUMBER } from '@/consts/products'
 
 interface FooterLink {
   label: string

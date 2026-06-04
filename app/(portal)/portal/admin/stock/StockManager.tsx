@@ -2,7 +2,7 @@
 
 import { useTransition, useState } from 'react'
 import Image from 'next/image'
-import { updateProductStock } from '@/lib/actions/stock'
+import { updateProductStock } from '@/repository/mutations/stock'
 
 type StockStatus = 'available' | 'low_stock' | 'out_of_stock' | 'preorder'
 

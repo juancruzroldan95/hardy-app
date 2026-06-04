@@ -1,8 +1,8 @@
 'use server'
 
-import { db } from '@/lib/db'
-import { solicitudes } from '@/drizzle/schema'
-import type { TipoNegocio } from '@/drizzle/schema'
+import { db } from '@/db'
+import { solicitudes } from '@/db/schema'
+import type { TipoNegocio } from '@/db/schema'
 
 export type SolicitudState =
   | { success: true }

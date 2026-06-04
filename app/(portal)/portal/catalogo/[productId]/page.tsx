@@ -1,8 +1,8 @@
 import { notFound, redirect } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
-import { getProductById, formatARS } from '@/lib/products'
+import { createClient } from '@/services/supabase/server'
+import { getProductById, formatARS } from '@/consts/products'
 
 interface Props {
   params: Promise<{ productId: string }>

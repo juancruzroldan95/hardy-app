@@ -6,12 +6,11 @@
  */
 import { notFound, redirect } from 'next/navigation'
 import Image from 'next/image'
-import { createClient } from '@/lib/supabase/server'
-import { db } from '@/lib/db'
-import { orderItems, orders, profiles } from '@/drizzle/schema'
-import { and, eq } from 'drizzle-orm'
-import { formatARS } from '@/lib/products'
-import { HARDY_BANK } from '@/lib/hardy'
+import { createClient } from '@/services/supabase/server'
+import { getProfileByUserId } from '@/repository/queries/profile'
+import { getOrderById } from '@/repository/queries/orders'
+import { formatARS } from '@/consts/products'
+import { HARDY_BANK } from '@/consts/hardy'
 import PrintButton from './PrintButton'
 
 const SHIPPING_LABELS: Record<string, string> = {
@@ -54,21 +53,16 @@ export default async function RemitoPage({ params }: Props) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const order = await db.query.orders.findFirst({
-    where: and(eq(orders.id, id), eq(orders.isDeleted, false)),
-    with:  { items: { where: eq(orderItems.isDeleted, false) } },
-  })
+  const order = await getOrderById(id)
   if (!order) notFound()
 
   // Security: only the owner or an admin can view the remito
-  const profile = await db.query.profiles.findFirst({
-    where: and(eq(profiles.userId, user.id), eq(profiles.isDeleted, false)),
-  })
+  const profile = await getProfileByUserId(user.id)
   if (profile?.role !== 'admin' && order.userId !== user.id) notFound()
 
   // Get client profile for display
   const clientProfile = order.userId !== user.id
-    ? await db.query.profiles.findFirst({ where: eq(profiles.userId, order.userId) })
+    ? await getProfileByUserId(order.userId)
     : profile
 
   const remitNumber = `R-${order.createdAt.getFullYear()}${String(order.createdAt.getMonth() + 1).padStart(2, '0')}-${order.id.slice(-6).toUpperCase()}`

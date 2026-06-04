@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
-import { getRecetaBySlug, getRecetas } from '@/lib/recetas'
+import { getRecetaBySlug, getRecetas } from '@/consts/recetas'
 
 interface Props {
   params: Promise<{ slug: string }>

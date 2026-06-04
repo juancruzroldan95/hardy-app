@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { Anton, Fraunces, JetBrains_Mono, Manrope } from 'next/font/google'
-import { CartProvider } from '@/lib/cart-context'
+import { CartProvider } from '@/components/contexts/cart-context'
 import CartDrawer from '@/components/layout/CartDrawer'
 import './globals.css'
 

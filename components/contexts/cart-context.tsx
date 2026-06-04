@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useMemo, useState } from 'react'
 import type { CartItem, CartState } from '@/types'
-import { PRODUCTS, formatARS } from '@/lib/products'
+import { PRODUCTS, formatARS } from '@/consts/products'
 
 interface CartContextValue {
   cart: CartState

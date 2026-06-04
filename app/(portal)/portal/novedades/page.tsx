@@ -1,18 +1,13 @@
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
-import { db } from '@/lib/db'
-import { novedades } from '@/drizzle/schema'
-import { and, eq, desc } from 'drizzle-orm'
+import { createClient } from '@/services/supabase/server'
+import { getActiveNovedades } from '@/repository/queries/novedades'
 
 export default async function NovedadesPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const items = await db.query.novedades.findMany({
-    where:   and(eq(novedades.isDeleted, false), eq(novedades.isActive, true)),
-    orderBy: [desc(novedades.createdAt)],
-  })
+  const items = await getActiveNovedades()
 
   return (
     <div className="max-w-[780px]">

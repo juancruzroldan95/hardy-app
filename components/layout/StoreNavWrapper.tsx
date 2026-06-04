@@ -1,6 +1,6 @@
 'use client'
 
-import { useCart } from '@/lib/cart-context'
+import { useCart } from '@/components/contexts/cart-context'
 import { usePathname } from 'next/navigation'
 import Nav from '@/components/layout/Nav'
 

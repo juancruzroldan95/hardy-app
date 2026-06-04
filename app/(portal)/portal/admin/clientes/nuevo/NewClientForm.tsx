@@ -1,8 +1,8 @@
 'use client'
 
 import { useActionState } from 'react'
-import { createClientProfile } from '@/lib/actions/admin'
-import type { CreateClientState } from '@/lib/actions/admin'
+import { createClientProfile } from '@/repository/mutations/admin'
+import type { CreateClientState } from '@/repository/mutations/admin'
 
 const ROLE_OPTIONS = [
   { value: 'mayorista',    label: 'Mayorista'     },

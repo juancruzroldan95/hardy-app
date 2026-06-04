@@ -2,13 +2,13 @@
 
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
-import { createClient } from '@/lib/supabase/server'
-import { db } from '@/lib/db'
-import { profiles, orders, orderItems, solicitudes, novedades, clientAlerts, orderMessages } from '@/drizzle/schema'
+import { createClient } from '@/services/supabase/server'
+import { db } from '@/db'
+import { profiles, orders, orderItems, solicitudes, novedades, clientAlerts, orderMessages } from '@/db/schema'
 import { and, eq, sql as drizzleSql } from 'drizzle-orm'
-import type { EstadoSolicitud, OrderStatus, PaymentStatus, AlertTipo, UserRole } from '@/drizzle/schema'
-import { sendOrderStatusUpdate } from '@/lib/email'
-import { createAdminClient } from '@/lib/supabase/admin'
+import type { EstadoSolicitud, OrderStatus, PaymentStatus, AlertTipo, UserRole } from '@/db/schema'
+import { sendOrderStatusUpdate } from '@/services/resend'
+import { createAdminClient } from '@/services/supabase/admin'
 
 // ─── Guard ─────────────────────────────────────────────────────────────────────
 

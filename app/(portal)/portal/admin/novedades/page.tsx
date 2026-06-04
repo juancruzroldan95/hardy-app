@@ -1,25 +1,19 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
-import { db } from '@/lib/db'
-import { novedades, profiles } from '@/drizzle/schema'
-import { and, eq, desc } from 'drizzle-orm'
-import { softDeleteNovedad } from '@/lib/actions/admin'
+import { createClient } from '@/services/supabase/server'
+import { getProfileByUserId } from '@/repository/queries/profile'
+import { getAllNovedadesAdmin } from '@/repository/queries/novedades'
+import { softDeleteNovedad } from '@/repository/mutations/admin'
 
 export default async function AdminNovedadesPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const profile = await db.query.profiles.findFirst({
-    where: and(eq(profiles.userId, user.id), eq(profiles.isDeleted, false)),
-  })
+  const profile = await getProfileByUserId(user.id)
   if (profile?.role !== 'admin') redirect('/portal')
 
-  const items = await db.query.novedades.findMany({
-    where:   eq(novedades.isDeleted, false),
-    orderBy: [desc(novedades.createdAt)],
-  })
+  const items = await getAllNovedadesAdmin()
 
   return (
     <div className="max-w-[860px]">

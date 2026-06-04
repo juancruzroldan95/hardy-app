@@ -1,272 +1,122 @@
-# Convenciones de código — Hardy App
+# Convenciones de Código — Hardy App
 
-## CRÍTICO: Next.js 16 (breaking changes vs 14/15)
-
-Antes de escribir cualquier código Next.js, leer el archivo relevante en `node_modules/next/dist/docs/`.
-
-### Paths críticos de documentación
-
-```
-node_modules/next/dist/docs/01-app/01-getting-started/05-server-and-client-components.md
-node_modules/next/dist/docs/01-app/01-getting-started/06-fetching-data.md
-node_modules/next/dist/docs/01-app/01-getting-started/07-mutating-data.md
-node_modules/next/dist/docs/01-app/01-getting-started/08-caching.md
-node_modules/next/dist/docs/01-app/01-getting-started/15-route-handlers.md
-node_modules/next/dist/docs/01-app/02-guides/ai-agents.md
-```
-
-### Cambios breaking clave vs Next.js 15
-
-| Lo viejo (≤15) | Lo nuevo (16) |
-|---------------|---------------|
-| `export const dynamic = 'force-dynamic'` | `use cache` directive + `cacheLife()` |
-| `export const revalidate = 60` | `cacheLife({ revalidate: 60 })` |
-| Webpack como bundler default | Turbopack (más rápido, puede diferir en edge cases) |
-| ISR con `revalidate` en fetch | `use cache` en funciones y componentes |
-| `next/headers` importado directamente | `connection()` para operaciones request-time |
+Este documento establece las convenciones de desarrollo y estilo de código del proyecto Hardy App. Nos basamos estrictamente en las directrices recomendadas por los skills de **Vercel React Best Practices** y **Supabase**, adaptándolas a nuestro flujo de trabajo.
 
 ---
 
-## CRÍTICO: Tailwind v4 (distinto a v3)
+## 1. Convenciones de Vercel React & Next.js
 
-### Reglas globales deben ir en `@layer base`
+Adherimos a las directrices de optimización y desarrollo contenidas en el skill de Vercel React:
+*Directorio de referencia:* `file:///.claude/skills/vercel-react-best-practices/` (especialmente `AGENTS.md` con reglas de rendimiento y optimización).
 
-En Tailwind v4 las utilities viven en `@layer utilities`. Las reglas CSS definidas **fuera de cualquier layer** tienen mayor prioridad en la cascade que las reglas dentro de un layer — por lo tanto sobreescriben las clases de Tailwind sin importar la especificidad.
+### Ruteo y Renderizado (Server vs Client)
+- **Páginas (`page.tsx`):**
+  - **Prohibido `'use client'`:** Todos los archivos `page.tsx` deben ser **Server Components** puros. No se permite el uso de event handlers, hooks de React (`useState`, `useEffect`, etc.) o APIs de navegador directamente en ellos.
+  - **Interactividad en Componentes:** Delegue la interactividad a componentes especializados ubicados bajo la carpeta `components/` y márquelos con `'use client'` sólo cuando sea necesario.
+- **Evitar Waterfalls (`async-parallel`):**
+  - Al realizar lecturas múltiples e independientes en Server Components, ejecútelas en paralelo con `Promise.all()` en lugar de secuenciarlas con múltiples `await` consecutivos.
 
-**Síntoma típico**: una clase como `text-paper` en un `<a>` no tiene efecto porque `a { color: inherit }` en `globals.css` la pisa.
+### Optimización de Bundle y Carga
+- **Prohibido el uso de Barrel Files (`bundle-barrel-imports`):**
+  - Evite la creación de archivos `index.ts` que re-exportan múltiples módulos (barrel files) en carpetas de componentes o utilidades. Esto genera dependencias circulares y aumenta el tamaño del bundle cargado.
+  - Realice importaciones directas al archivo del componente:
+    ```tsx
+    // BIEN
+    import Button from '@/components/ui/Button'
+    // MAL
+    import { Button } from '@/components/ui'
+    ```
+- **Carga Diferida (`bundle-dynamic-imports`):**
+  - Use `next/dynamic` para componentes pesados de la UI que no son críticos para el renderizado inicial en pantalla (fold).
 
-**Regla**: todos los resets y estilos base en `globals.css` deben estar envueltos en `@layer base`:
+### Caching en Next.js 16
+- **Directiva `use cache`:**
+  - Aplique la directiva `'use cache'` en funciones que realizan lecturas estáticas o de larga duración.
+  - Para refrescar los datos, combine su uso con `cacheLife` y establezca tiempos de expiración acordes a los requerimientos de negocio:
+    ```tsx
+    import { cacheLife } from 'next/cache'
 
-```css
-/* MAL — pisa las utilities de Tailwind */
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-/* BIEN — respeta la cascade de Tailwind */
-@layer base {
-  a {
-    color: inherit;
-    text-decoration: none;
-  }
-}
-```
-
----
-
-```css
-/* v4 — lo que usamos */
-@import "tailwindcss";
-
-@theme inline {
-  --color-red: #C0171E;
-}
-
-/* v3 — NO usar */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-```
-
-No existe `tailwind.config.js` en v4. Toda la config va en `globals.css` con `@theme inline`.
+    async function getStaticProducts() {
+      'use cache'
+      cacheLife({ revalidate: 3600 }) // 1 hora
+      return products
+    }
+    ```
+- **Deduplicación por Request (`server-cache-react`):**
+  - Envuelva las llamadas repetitivas dentro de una misma solicitud en `React.cache()` para evitar llamadas duplicadas a bases de datos o APIs durante el ciclo de vida del renderizado de la página.
 
 ---
 
-## TypeScript
+## 2. Convenciones de Supabase & Base de Datos
 
-- `strict: true` siempre
-- No usar `any` — si no sabés el tipo, inferirlo o crear una interface
-- Los tipos de dominio van en `types/index.ts`
-- Los tipos específicos de un módulo pueden vivir en el mismo archivo
+Adherimos a las directrices de seguridad, integración y base de datos contenidas en el skill de Supabase:
+*Directorios de referencia:* `file:///.claude/skills/supabase/` y `file:///.claude/skills/supabase-postgres-best-practices/`.
 
----
+### Instanciación de Clientes Supabase
+- **Cliente Centralizado:** Nunca use `createClient` directo de `@supabase/supabase-js` o `@supabase/ssr` en componentes de presentación. Utilice siempre los clientes configurados en la capa de servicios (`@/services/supabase/`):
+  - `createClient()` (cliente del lado de cliente)
+  - `createServerClient()` (cliente del lado del servidor)
 
-## Server vs Client Components
+### Seguridad, Auth y Roles
+- **Información Segura del Usuario:**
+  - Use siempre `supabase.auth.getUser()` para obtener el usuario autenticado del servidor. Evite `supabase.auth.getSession()`, ya que la información del session puede ser modificada por el cliente y no valida la integridad en el backend.
+- **Autorización Segura (RLS):**
+  - **No usar `user_metadata`:** Está prohibido tomar decisiones de autorización o lógica RLS basadas en `raw_user_meta_data` (JWT), ya que es editable por el usuario. Use `app_metadata` o mapee roles mediante la tabla interna `profiles` en la base de datos PostgreSQL.
+  - **Seguridad en Vistas:** Recuerde que las vistas de Postgres bypassan RLS por defecto. Use `security_invoker = true` al declararlas.
 
-**Por defecto: Server Component** (no requiere ningún marcador).
-
-```tsx
-// Server Component — default, no se marca
-export default async function ProductPage() {
-  const products = await getProducts()
-  return <div>...</div>
-}
-
-// Client Component — solo cuando se necesita:
-// - useState, useEffect, useRef, context
-// - event handlers (onClick, onChange, etc.)
-// - browser APIs (localStorage, window, etc.)
-'use client'
-export default function ProductCard({ product }) {
-  const [added, setAdded] = useState(false)
-  ...
-}
-```
-
-**Regla práctica**: Si podés hacerlo sin `useState` o event handlers, hacelo Server Component.
-
----
-
-## Caching con `use cache` (Next.js 16)
-
-```tsx
-async function getProducts() {
-  'use cache'
-  return products
-}
-
-// Con duración específica
-import { cacheLife } from 'next/cache'
-
-async function getProducts() {
-  'use cache'
-  cacheLife({ revalidate: 3600 })
-  return products
-}
-```
-
----
-
-## Server Actions para mutaciones
-
-```tsx
-// lib/actions/orders.ts
-'use server'
-
-export async function createOrder(formData: FormData) {
-  // lógica de servidor
-  revalidatePath('/portal/pedidos')
-}
-```
-
----
-
-## Importaciones — NO usar barrel files
-
-```tsx
-// MAL
-import { Button, Input, Card } from '@/components/ui'
-
-// BIEN
-import Button from '@/components/ui/Button'
-import Input from '@/components/ui/Input'
-```
-
----
-
-## Path aliases
-
-```
-@/components/...   → components/
-@/lib/...          → lib/
-@/types/...        → types/
-@/app/...          → app/
-```
-
----
-
-## Design system
-
-**Siempre leer `DESIGN.md` antes de escribir estilos.**
-
-### Tokens Tailwind (resumen rápido)
-
-```
-Colores:    bg-red, bg-ink, bg-paper, bg-paper-2
-            text-red, text-ink, text-paper, text-paper-2
-Fuentes:    font-display (Anton), font-heading (Fraunces),
-            font-mono (JetBrains Mono), font-body (Manrope)
-Breakpoint: md: aplica a partir de 900px
-```
-
-### Patrones de estilo frecuentes
-
-```tsx
-// Eyebrow label (sobre headings)
-<p className="font-mono text-[11px] tracking-[0.25em] text-red uppercase mb-4">
-  ── Categoría
-</p>
-
-// Heading principal
-<h2 className="font-heading text-[clamp(36px,5vw,56px)] font-medium leading-[1.1] tracking-[-0.02em]">
-  Texto <em className="not-italic text-red">énfasis.</em>
-</h2>
-
-// Botón CTA primario
-<button className="bg-red text-paper font-mono text-[12px] tracking-[0.15em] uppercase px-8 py-[18px]">
-  Acción →
-</button>
-
-// Tag de producto
-<span className="font-mono text-[9px] tracking-[0.2em] text-red uppercase">
-  Natural · 380g
-</span>
-```
-
----
-
-## Convenciones de base de datos
-
-### Estructura obligatoria de toda tabla
-
-**Toda tabla nueva debe tener estas columnas — sin excepción:**
-
+### Diseño y Estructura de Tablas (Drizzle ORM)
+Toda tabla en el esquema (`db/schema.ts`) debe cumplir con los siguientes campos estándar:
 ```ts
-id:        uuid('id').primaryKey().defaultRandom(),  // PK interna auto-generada
+id:        uuid('id').primaryKey().defaultRandom(),  // PK interno generado
 isActive:  boolean('is_active').notNull().default(true),
-isDeleted: boolean('is_deleted').notNull().default(false),
+isDeleted: boolean('is_deleted').notNull().default(false), // Eliminación lógica
 createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 ```
+- **Mapeo de Usuarios:** Para tablas que representen perfiles o registros pertenecientes a un usuario de Supabase, declare `userId` como UUID único o FK relacionado:
+  ```ts
+  userId: uuid('user_id').notNull().unique(), // Vinculado a auth.users de Supabase
+  ```
 
-Cuando la tabla representa un usuario/cliente, agregar también:
+### Eliminación Lógica (Soft Delete)
+- **Prohibido `db.delete()`:** Está prohibido eliminar físicamente registros de la base de datos. Toda eliminación debe ser lógica, actualizando `isDeleted: true`:
+  ```ts
+  await db.update(orders)
+    .set({ isDeleted: true })
+    .where(eq(orders.id, id))
+  ```
+- **Filtro Obligatorio:** Todas las consultas de lectura (`repository/queries/`) deben incluir explícitamente el filtro `eq(tabla.isDeleted, false)` en sus condiciones de búsqueda, tanto para la tabla principal como en sus relaciones:
+  ```ts
+  db.query.orders.findMany({
+    where: and(eq(orders.userId, userId), eq(orders.isDeleted, false)),
+    with: { items: { where: eq(orderItems.isDeleted, false) } }
+  })
+  ```
+- **Búsqueda de Profiles:** Para buscar el perfil de un usuario autenticado de Supabase, siempre filtre por `userId` (el UID de la sesión) y no por `id` (el PK interno autogenerado):
+  ```ts
+  where: and(eq(profiles.userId, supabaseUserId), eq(profiles.isDeleted, false))
+  ```
 
-```ts
-userId: uuid('user_id').notNull().unique(),  // UUID de Supabase auth.users
-```
+---
 
-El `id` es el PK interno de la DB. El `userId` es el UUID que genera Supabase al crear el usuario en Auth.
+## 3. Estilos y Tailwind CSS v4
 
-### Soft delete — NUNCA borrar registros
+- **Cascada CSS en Tailwind v4:**
+  - Dado que Tailwind v4 maneja de forma distinta la prioridad de la cascada, todas las reglas base y overrides personalizados en `globals.css` deben estar envueltos en `@layer base` para evitar pisar las clases utilitarias de Tailwind.
+  ```css
+  @layer base {
+    body {
+      background-color: var(--color-paper);
+      color: var(--color-ink);
+    }
+  }
+  ```
+- **Evitar Estilos en Línea:** Utilice siempre las variables de tema y clases utilitarias configuradas en `@theme` en `globals.css` (colores como `red`, `ink`, `paper`, tipografías como `font-display`, `font-body`).
 
-**Nunca usar `db.delete()`**. Siempre hacer un update de `is_deleted = true`:
+---
 
-```ts
-// MAL
-await db.delete(orders).where(eq(orders.id, id))
+## 4. TypeScript y Tipado
 
-// BIEN
-await db.update(orders)
-  .set({ isDeleted: true })
-  .where(eq(orders.id, id))
-```
-
-### Todas las queries de fetch filtran is_deleted
-
-**Siempre incluir `eq(tabla.isDeleted, false)` en el WHERE:**
-
-```ts
-// Una condición sola — usar and()
-db.query.orders.findFirst({
-  where: and(eq(orders.id, id), eq(orders.isDeleted, false)),
-})
-
-// Con relaciones anidadas — filtrar también los items
-db.query.orders.findMany({
-  where: and(eq(orders.userId, user.id), eq(orders.isDeleted, false)),
-  with: { items: { where: eq(orderItems.isDeleted, false) } },
-})
-```
-
-### Buscar profiles por userId (no por id)
-
-El `id` de `profiles` es un UUID interno. Para buscar el perfil de un usuario autenticado, siempre usar `userId`:
-
-```ts
-// MAL — profiles.id es el PK interno, no el UUID de Supabase
-where: eq(profiles.id, user.id)
-
-// BIEN
-where: and(eq(profiles.userId, user.id), eq(profiles.isDeleted, false))
-```
+- **Tipado Estricto (`strict: true`):**
+  - Está prohibido el uso del tipo `any`. Si el tipo de una variable o retorno es complejo o dinámico, defina interfaces genéricas o use tipos derivados.
+  - Los tipos de datos globales y de base de datos compartidos se centralizan en `types/index.ts`.

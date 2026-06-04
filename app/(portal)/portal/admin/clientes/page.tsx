@@ -1,11 +1,9 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
-import { db } from '@/lib/db'
-import { profiles, orders, orderItems, clientAlerts } from '@/drizzle/schema'
-import { and, eq, desc, sql } from 'drizzle-orm'
-import { ROLE_LABELS } from '@/lib/roles'
-import { formatARS } from '@/lib/products'
+import { createClient } from '@/services/supabase/server'
+import { getProfileByUserId, getAllClientsWithOrdersAndAlerts } from '@/repository/queries/profile'
+import { ROLE_LABELS } from '@/consts/roles'
+import { formatARS } from '@/consts/products'
 import {
   assignVendedor,
   createClientAlert,
@@ -13,7 +11,7 @@ import {
   deleteClientAlert,
   updateClientNotes,
   updateClientRole,
-} from '@/lib/actions/admin'
+} from '@/repository/mutations/admin'
 
 const ALERT_TIPO_LABELS = {
   reorder:    'Recompra',
@@ -34,29 +32,11 @@ export default async function AdminClientesPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const adminProfile = await db.query.profiles.findFirst({
-    where: and(eq(profiles.userId, user.id), eq(profiles.isDeleted, false)),
-  })
+  const adminProfile = await getProfileByUserId(user.id)
   if (adminProfile?.role !== 'admin') redirect('/portal')
 
   // ── Fetch all non-admin clients with their orders + alerts ──────────────────
-  const allProfiles = await db.query.profiles.findMany({
-    where:   and(eq(profiles.isDeleted, false)),
-    orderBy: [desc(profiles.createdAt)],
-    with: {
-      orders: {
-        where: eq(orders.isDeleted, false),
-        orderBy: [desc(orders.createdAt)],
-        with: {
-          items: { where: eq(orderItems.isDeleted, false) },
-        },
-      },
-      alerts: {
-        where: eq(clientAlerts.isDeleted, false),
-        orderBy: [desc(clientAlerts.createdAt)],
-      },
-    },
-  })
+  const allProfiles = await getAllClientsWithOrdersAndAlerts()
 
   const clients = allProfiles.filter((p) => p.role !== 'admin')
 

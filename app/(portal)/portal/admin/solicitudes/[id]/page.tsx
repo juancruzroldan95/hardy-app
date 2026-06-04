@@ -1,11 +1,10 @@
 import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
-import { db } from '@/lib/db'
-import { profiles, solicitudes } from '@/drizzle/schema'
-import { and, eq } from 'drizzle-orm'
-import { updateSolicitudEstado } from '@/lib/actions/admin'
-import type { EstadoSolicitud } from '@/drizzle/schema'
+import { createClient } from '@/services/supabase/server'
+import { getProfileByUserId } from '@/repository/queries/profile'
+import { getSolicitudById } from '@/repository/queries/solicitudes'
+import { updateSolicitudEstado } from '@/repository/mutations/admin'
+import type { EstadoSolicitud } from '@/db/schema'
 
 const TIPO_LABELS: Record<string, string> = {
   dietetica:    'Dietética',
@@ -34,16 +33,12 @@ export default async function AdminSolicitudDetailPage({ params }: Props) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const profile = await db.query.profiles.findFirst({
-    where: and(eq(profiles.userId, user.id), eq(profiles.isDeleted, false)),
-  })
+  const profile = await getProfileByUserId(user.id)
   if (profile?.role !== 'admin') redirect('/portal')
 
   const { id } = await params
 
-  const solicitud = await db.query.solicitudes.findFirst({
-    where: and(eq(solicitudes.id, id), eq(solicitudes.isDeleted, false)),
-  })
+  const solicitud = await getSolicitudById(id)
   if (!solicitud) notFound()
 
   async function handleUpdate(formData: FormData) {

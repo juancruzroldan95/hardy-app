@@ -2,13 +2,13 @@
 
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
-import { db } from '@/lib/db'
-import { orders, orderItems, profiles, priceOverrides } from '@/drizzle/schema'
+import { db } from '@/db'
+import { orders, orderItems, profiles, priceOverrides } from '@/db/schema'
 import { and, eq } from 'drizzle-orm'
-import { createClient } from '@/lib/supabase/server'
-import { getProductById } from '@/lib/products'
-import { sendOrderConfirmation } from '@/lib/email'
-import type { ShippingMethod, PaymentMethod, UserRole } from '@/drizzle/schema'
+import { createClient } from '@/services/supabase/server'
+import { getProductById } from '@/consts/products'
+import { sendOrderConfirmation } from '@/services/resend'
+import type { ShippingMethod, PaymentMethod, UserRole } from '@/db/schema'
 
 export type CreateOrderState =
   | { error: string }

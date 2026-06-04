@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { useCart } from '@/lib/cart-context'
-import { formatARS, WA_NUMBER } from '@/lib/products'
+import { useCart } from '@/components/contexts/cart-context'
+import { formatARS, WA_NUMBER } from '@/consts/products'
 import type { Product } from '@/types'
 
 export default function ProductCard({ product }: { product: Product }) {

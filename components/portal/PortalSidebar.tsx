@@ -2,9 +2,9 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { ROLE_LABELS } from '@/lib/roles'
+import { ROLE_LABELS } from '@/consts/roles'
 import LogoutButton from '@/components/portal/LogoutButton'
-import type { UserRole } from '@/drizzle/schema'
+import type { UserRole } from '@/db/schema'
 
 interface Props {
   role: UserRole

@@ -1,10 +1,9 @@
 import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
-import { db } from '@/lib/db'
-import { novedades, profiles } from '@/drizzle/schema'
-import { and, eq } from 'drizzle-orm'
-import { updateNovedad } from '@/lib/actions/admin'
+import { createClient } from '@/services/supabase/server'
+import { getProfileByUserId } from '@/repository/queries/profile'
+import { getNovedadById } from '@/repository/queries/novedades'
+import { updateNovedad } from '@/repository/mutations/admin'
 import AdminNovedadForm from '@/components/portal/AdminNovedadForm'
 
 interface Props {
@@ -16,16 +15,12 @@ export default async function AdminEditarNovedadPage({ params }: Props) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const profile = await db.query.profiles.findFirst({
-    where: and(eq(profiles.userId, user.id), eq(profiles.isDeleted, false)),
-  })
+  const profile = await getProfileByUserId(user.id)
   if (profile?.role !== 'admin') redirect('/portal')
 
   const { id } = await params
 
-  const novedad = await db.query.novedades.findFirst({
-    where: and(eq(novedades.id, id), eq(novedades.isDeleted, false)),
-  })
+  const novedad = await getNovedadById(id)
   if (!novedad) notFound()
 
   const boundUpdate = updateNovedad.bind(null, id)

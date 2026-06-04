@@ -1,9 +1,8 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
-import { db } from '@/lib/db'
-import { profiles, solicitudes } from '@/drizzle/schema'
-import { and, eq, desc } from 'drizzle-orm'
+import { createClient } from '@/services/supabase/server'
+import { getProfileByUserId } from '@/repository/queries/profile'
+import { getAllSolicitudes } from '@/repository/queries/solicitudes'
 
 const ESTADO_LABELS = {
   pendiente:  { label: 'Pendiente',   bg: 'bg-[#fff3e0]', text: 'text-[#8b4513]' },
@@ -28,15 +27,10 @@ export default async function AdminSolicitudesPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const profile = await db.query.profiles.findFirst({
-    where: and(eq(profiles.userId, user.id), eq(profiles.isDeleted, false)),
-  })
+  const profile = await getProfileByUserId(user.id)
   if (profile?.role !== 'admin') redirect('/portal')
 
-  const items = await db.query.solicitudes.findMany({
-    where:   eq(solicitudes.isDeleted, false),
-    orderBy: [desc(solicitudes.createdAt)],
-  })
+  const items = await getAllSolicitudes()
 
   const pendientes  = items.filter((s) => s.estado === 'pendiente').length
   const contactados = items.filter((s) => s.estado === 'contactado').length

@@ -1,9 +1,8 @@
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
-import { db } from '@/lib/db'
-import { profiles, productAvailability } from '@/drizzle/schema'
-import { and, eq } from 'drizzle-orm'
-import { getProducts } from '@/lib/products'
+import { createClient } from '@/services/supabase/server'
+import { getProfileByUserId } from '@/repository/queries/profile'
+import { getAllStockRecords } from '@/repository/queries/stock'
+import { getProducts } from '@/consts/products'
 import StockManager from './StockManager'
 
 export default async function AdminStockPage() {
@@ -11,15 +10,13 @@ export default async function AdminStockPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const profile = await db.query.profiles.findFirst({
-    where: and(eq(profiles.userId, user.id), eq(profiles.isDeleted, false)),
-  })
+  const profile = await getProfileByUserId(user.id)
   if (profile?.role !== 'admin') redirect('/portal')
 
   const products = getProducts()
 
   // Load all availability records
-  const records = await db.query.productAvailability.findMany()
+  const records = await getAllStockRecords()
   const recordMap = new Map(records.map((r) => [r.productId, r]))
 
   const items = products.map((p) => ({

@@ -1,7 +1,7 @@
 'use client'
 
 import { useActionState } from 'react'
-import type { NovedadState } from '@/lib/actions/admin'
+import type { NovedadState } from '@/repository/mutations/admin'
 
 interface Props {
   action: (prevState: NovedadState, formData: FormData) => Promise<NovedadState>

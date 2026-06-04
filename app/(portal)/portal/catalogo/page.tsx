@@ -1,12 +1,11 @@
 import { redirect } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
-import { db } from '@/lib/db'
-import { profiles, priceOverrides } from '@/drizzle/schema'
-import { and, eq } from 'drizzle-orm'
-import { getProducts } from '@/lib/products'
-import { ROLE_LABELS } from '@/lib/roles'
+import { createClient } from '@/services/supabase/server'
+import { getProfileByUserId } from '@/repository/queries/profile'
+import { getActivePriceOverrides } from '@/repository/queries/stock'
+import { getProducts } from '@/consts/products'
+import { ROLE_LABELS } from '@/consts/roles'
 
 export default async function CatalogoPage() {
   const supabase = await createClient()
@@ -14,15 +13,8 @@ export default async function CatalogoPage() {
   if (!user) redirect('/login')
 
   const [profile, overrides] = await Promise.all([
-    db.query.profiles.findFirst({
-      where: and(eq(profiles.userId, user.id), eq(profiles.isDeleted, false)),
-    }),
-    db.query.priceOverrides.findMany({
-      where: and(
-        eq(priceOverrides.isDeleted, false),
-        eq(priceOverrides.isActive, true),
-      ),
-    }),
+    getProfileByUserId(user.id),
+    getActivePriceOverrides(),
   ])
 
   const role = profile?.role ?? 'consumer'

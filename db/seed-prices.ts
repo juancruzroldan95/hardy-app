@@ -1,6 +1,6 @@
 /**
  * Seed script — precios B2B por rol y volumen
- * Ejecutar: npx tsx drizzle/seed-prices.ts
+ * Ejecutar: npx tsx db/seed-prices.ts
  *
  * Todos los precios son POR UNIDAD (sin IVA).
  * La app calcula precio/caja = priceArs × unitsPerBox.

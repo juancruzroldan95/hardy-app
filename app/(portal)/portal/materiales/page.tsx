@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
-import { WA_NUMBER } from '@/lib/products'
+import { createClient } from '@/services/supabase/server'
+import { WA_NUMBER } from '@/consts/products'
 
 interface Material {
   id:       string

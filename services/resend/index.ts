@@ -1,6 +1,6 @@
 import { Resend } from 'resend'
-import type { OrderItem } from '@/drizzle/schema'
-import { formatARS } from '@/lib/products'
+import type { OrderItem } from '@/db/schema'
+import { formatARS } from '@/consts/products'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 

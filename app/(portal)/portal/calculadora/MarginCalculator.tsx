@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { formatARS } from '@/lib/products'
+import { formatARS } from '@/consts/products'
 
 interface ProductConfig {
   id:          string

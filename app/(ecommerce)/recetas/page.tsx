@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { getRecetas } from '@/lib/recetas'
+import { getRecetas } from '@/consts/recetas'
 import RecipeFilter from '@/components/recipes/RecipeFilter'
 
 export const metadata: Metadata = {

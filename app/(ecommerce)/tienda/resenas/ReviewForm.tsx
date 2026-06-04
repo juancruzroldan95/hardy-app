@@ -1,7 +1,7 @@
 'use client'
 
 import { useActionState, useState } from 'react'
-import { submitProductReview, type ReviewState } from '@/lib/actions/reviews'
+import { submitProductReview, type ReviewState } from '@/repository/mutations/reviews'
 
 interface ProductOption {
   id:   string
