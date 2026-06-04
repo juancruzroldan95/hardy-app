@@ -4,7 +4,7 @@ import { createClient } from '@/services/supabase/server'
 import { getProfileByUserId, getProfileById } from '@/repository/queries/profile'
 import { db } from '@/db'
 import { sql } from 'drizzle-orm'
-import EditClientForm from './EditClientForm'
+import EditClientForm from '@/components/portal/EditClientForm'
 
 interface PageProps {
   params: Promise<{ id: string }>

@@ -50,10 +50,6 @@ export default async function AdminDashboardPage() {
     : null
   const pendingCount  = allOrders.filter((o) => o.status === 'pending').length
   const unpaidCount   = allOrders.filter((o) => o.paymentStatus === 'unpaid').length
-  const thisMonthOrders = allOrders.filter((o) => {
-    const date = typeof o.id === 'string' ? new Date() : new Date()
-    return true // simplified, recentOrders gives us the data we need
-  }).length
 
   // ── Top clients by total spend ───────────────────────────────────────────────
   const spendByUser = new Map<string, number>()

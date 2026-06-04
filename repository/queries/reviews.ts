@@ -1,5 +1,3 @@
-'use server'
-
 import { db } from '@/db'
 import { productReviews } from '@/db/schema'
 import { eq, desc } from 'drizzle-orm'

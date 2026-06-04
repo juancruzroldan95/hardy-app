@@ -1,7 +1,5 @@
-'use server'
-
 import { db } from '@/db'
-import { productAvailability, priceOverrides, clientAlerts } from '@/db/schema'
+import { priceOverrides, clientAlerts } from '@/db/schema'
 import { and, eq, count } from 'drizzle-orm'
 
 export async function getAllStockRecords() {

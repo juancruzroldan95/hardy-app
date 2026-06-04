@@ -51,7 +51,7 @@ export default async function ProductoDetailPage({ params }: Props) {
 
           {product.tagline && (
             <p className="font-body text-[15px] text-ink/60 italic mb-5 leading-[1.6]">
-              "{product.tagline}"
+              &ldquo;{product.tagline}&rdquo;
             </p>
           )}
 

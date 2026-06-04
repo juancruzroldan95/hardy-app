@@ -3,7 +3,7 @@ import { createClient } from '@/services/supabase/server'
 import { getProfileByUserId } from '@/repository/queries/profile'
 import { getAllStockRecords } from '@/repository/queries/stock'
 import { getProducts } from '@/consts/products'
-import StockManager from './StockManager'
+import StockManager from '@/components/portal/StockManager'
 
 export default async function AdminStockPage() {
   const supabase = await createClient()

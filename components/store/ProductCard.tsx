@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { useCart } from '@/components/contexts/cart-context'
 import { formatARS, WA_NUMBER } from '@/consts/products'
 import type { Product } from '@/types'
@@ -28,9 +29,11 @@ export default function ProductCard({ product }: { product: Product }) {
         {/* Image area */}
         <div className="relative bg-paper-2 group-hover:bg-[#1a1a1a] transition-colors duration-[220ms]">
           <div className="aspect-square overflow-hidden">
-            <img
+            <Image
               src={images[imgIdx]}
               alt={`${product.name} ${product.variant}`}
+              width={280}
+              height={280}
               className="w-full h-full object-contain block p-4"
             />
           </div>
@@ -45,7 +48,7 @@ export default function ProductCard({ product }: { product: Product }) {
                     i === imgIdx ? 'border-ink group-hover:border-white' : 'border-[#ccc]'
                   }`}
                 >
-                  <img src={src} alt="" className="w-full h-full object-contain" />
+                  <Image src={src} alt="" width={22} height={22} className="w-full h-full object-contain" />
                 </button>
               ))}
             </div>
@@ -112,9 +115,11 @@ export default function ProductCard({ product }: { product: Product }) {
             {/* Image panel */}
             <div className="flex flex-col bg-[#111]">
               <div className="flex-1 overflow-hidden relative" style={{ minHeight: '320px' }}>
-                <img
+                <Image
                   src={images[modalImgIdx]}
                   alt={product.name}
+                  width={460}
+                  height={460}
                   className="w-full h-full object-contain block p-6 transition-opacity duration-200"
                 />
               </div>
@@ -127,7 +132,7 @@ export default function ProductCard({ product }: { product: Product }) {
                       i === modalImgIdx ? 'border-red' : 'border-white/20'
                     }`}
                   >
-                    <img src={src} alt="" className="w-full h-full object-contain" />
+                    <Image src={src} alt="" width={44} height={44} className="w-full h-full object-contain" />
                   </button>
                 ))}
               </div>

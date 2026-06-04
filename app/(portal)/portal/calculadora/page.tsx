@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/services/supabase/server'
-import MarginCalculator from './MarginCalculator'
+import MarginCalculator from '@/components/portal/MarginCalculator'
 
 export default async function CalculadoraPage() {
   const supabase = await createClient()

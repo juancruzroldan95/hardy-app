@@ -138,7 +138,7 @@ export default async function MaterialesPage() {
         Materiales de marca
       </h1>
       <p className="font-body text-[14px] text-ink/50 mb-8">
-        Catálogos, fotos y recursos para usar en tu canal. Los archivos marcados con "Solicitar" se envían por WhatsApp.
+        Catálogos, fotos y recursos para usar en tu canal. Los archivos marcados con &ldquo;Solicitar&rdquo; se envían por WhatsApp.
       </p>
 
       {/* WA banner */}

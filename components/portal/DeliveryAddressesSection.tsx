@@ -14,7 +14,7 @@ interface Props {
 }
 
 export default function DeliveryAddressesSection({ addresses: initial }: Props) {
-  const [addresses, setAddresses] = useState(initial)
+  const [addresses] = useState(initial)
   const [showForm, setShowForm] = useState(false)
   const [state, action, isPending] = useActionState<AddressState, FormData>(
     async (prev, fd) => {

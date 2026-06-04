@@ -240,7 +240,9 @@ export default function NuevoPedidoForm({
       if (!raw) return
       const draft = JSON.parse(raw) as Record<string, number>
       const hasContent = Object.values(draft).some((v) => v > 0)
-      if (hasContent) setHasDraft(true)
+      if (hasContent) {
+        setTimeout(() => setHasDraft(true), 0)
+      }
     } catch {}
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -312,7 +314,7 @@ export default function NuevoPedidoForm({
 
   // ── Shipping tier helper ─────────────────────────────────────────────────────
 
-  function getActiveShippingTierIdx(tiers: readonly { cost: number; label: string }[]): number {
+  function getActiveShippingTierIdx(): number {
     if (totalCajas <= 14) return 0
     if (totalCajas <= 25) return 1
     return 2
@@ -328,7 +330,6 @@ export default function NuevoPedidoForm({
   }
 
   const showBankDetails      = selectedPayment && BANK_PAYMENT_VALUES.has(selectedPayment)
-  const selectedShippingOpt  = SHIPPING_OPTIONS.find((o) => o.value === selectedShipping)
 
   // ── WA contact (consulta) ────────────────────────────────────────────────────
 
@@ -411,7 +412,6 @@ export default function NuevoPedidoForm({
                 <div className="grid gap-[3px]">
                   {group.tiers.map((tier, i) => {
                     const isActive   = i === activeTierIdx && counter > 0
-                    const isNext     = !isActive && i === activeTierIdx + 1 && counter > 0
                     const nextMin    = group.tiers[activeTierIdx + 1]?.minQty
                     const toUnlock   = nextMin ? nextMin - counter : null
                     const tierLabel  = i === group.tiers.length - 1
@@ -642,7 +642,7 @@ export default function NuevoPedidoForm({
                 {opt.tiers && (
                   <div className="mt-3 bg-ink/5 border border-ink/8 px-3 py-2 flex flex-col gap-[3px]">
                     {opt.tiers.map((tier, ti) => {
-                      const isActive = selectedShipping === opt.value && getActiveShippingTierIdx(opt.tiers!) === ti
+                      const isActive = selectedShipping === opt.value && getActiveShippingTierIdx() === ti
                       return (
                         <div
                           key={ti}

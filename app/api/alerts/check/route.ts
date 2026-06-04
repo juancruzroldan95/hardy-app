@@ -42,7 +42,6 @@ export async function GET(request: Request) {
     }
 
     // Obtener perfiles de los clientes
-    const profileIds = [...new Set(dueAlerts.map((a) => a.profileId))]
     const profileList = await db.query.profiles.findMany({
       where: and(eq(profiles.isDeleted, false)),
     })

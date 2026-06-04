@@ -30,7 +30,10 @@ interface Props {
 }
 
 const VOLUME_ROLES = ['mayorista', 'distribuidor', 'productor', 'gastronomico'] as const
-type VolumeRole = typeof VOLUME_ROLES[number]
+
+function getDaysSinceLast(createdAt: Date | string): number {
+  return Math.floor((Date.now() - new Date(createdAt).getTime()) / 86_400_000)
+}
 
 export default async function PedidosPage({ searchParams }: Props) {
   const supabase = await createClient()
@@ -51,7 +54,7 @@ export default async function PedidosPage({ searchParams }: Props) {
   // Volume suggestion: show banner if last order is between 30 and 90 days ago
   const lastOrder = userOrders[0] ?? null
   const daysSinceLast = lastOrder
-    ? Math.floor((Date.now() - new Date(lastOrder.createdAt).getTime()) / 86_400_000)
+    ? getDaysSinceLast(lastOrder.createdAt)
     : null
   const showRepeatBanner = isVolumeRole && lastOrder && daysSinceLast !== null && daysSinceLast >= 30 && daysSinceLast <= 90
 

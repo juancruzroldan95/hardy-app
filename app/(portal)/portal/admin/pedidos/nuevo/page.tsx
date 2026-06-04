@@ -5,7 +5,7 @@ import { getProfileByUserId, getAllClients } from '@/repository/queries/profile'
 import { getActivePriceOverrides } from '@/repository/queries/stock'
 import { getProducts } from '@/consts/products'
 import { ROLE_LABELS } from '@/consts/roles'
-import AdminOrderForm from './AdminOrderForm'
+import AdminOrderForm from '@/components/portal/AdminOrderForm'
 import type { ProductOrden } from '@/components/portal/NuevoPedidoForm'
 
 const FRASCO_IDS  = new Set(['natural-380', 'crunchy-380', 'miel-liquida-500', 'miel-solida-500'])

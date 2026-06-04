@@ -85,3 +85,33 @@ No confíes en que el frontend oculta botones o secciones para proteger rutas ad
   // BIEN (Seguro, escapa el parámetro de manera automática):
   await sql`SELECT * FROM profiles WHERE display_name = ${name}`
   ```
+
+---
+
+## 6. Seguridad en Server Actions (`'use server'`)
+
+Cualquier archivo o función que declare la directiva `'use server'` es expuesto por Next.js como un endpoint HTTP POST público. Es fundamental seguir estas directrices para evitar brechas de seguridad:
+
+1. **Autenticación y Autorización Interna**:
+   - Nunca confíes en que una Server Action es segura simplemente porque se ejecuta tras un componente protegido en el cliente o no se renderiza en la UI.
+   - Valida la sesión activa (`supabase.auth.getUser()`) y el rol del usuario (`profiles.role`) **dentro** de cada Server Action que requiera privilegios.
+   - **Ejemplo Incorrecto:**
+     ```typescript
+     // MAL: Cualquiera que conozca la firma de la Server Action y un id puede ejecutarla
+     export async function createPortalOrderForClient(clientUserId: string, formData: FormData) {
+       return _createOrderForUser({ userId: clientUserId, ... })
+     }
+     ```
+   - **Ejemplo Correcto:**
+     ```typescript
+     // BIEN: Valida de manera explícita que la sesión pertenezca a un administrador
+     export async function createPortalOrderForClient(clientUserId: string, formData: FormData) {
+       await getAdminUser() // Lanza error o redirige si no es admin
+       return _createOrderForUser({ userId: clientUserId, ... })
+     }
+     ```
+
+2. **Evitar `'use server'` en Consultas Innecesarias**:
+   - Si una función de lectura de base de datos (por ejemplo, en `repository/queries/`) solo se consume en React Server Components (páginas o layouts de servidor), **NO** declares `'use server'` en su cabecera.
+   - Mantener estas funciones puras y ejecutadas únicamente del lado del servidor elimina la posibilidad de que sean invocadas remotamente como endpoints HTTP públicos.
+

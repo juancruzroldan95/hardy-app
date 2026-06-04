@@ -1,5 +1,3 @@
-'use server'
-
 import { db } from '@/db'
 import { profiles, deliveryAddresses, orders, orderItems, clientAlerts } from '@/db/schema'
 import { and, eq, ne, desc } from 'drizzle-orm'

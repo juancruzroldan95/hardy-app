@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
 import { getProducts } from '@/consts/products'
 import { WA_NUMBER } from '@/consts/products'
 import ProductCard from '@/components/store/ProductCard'

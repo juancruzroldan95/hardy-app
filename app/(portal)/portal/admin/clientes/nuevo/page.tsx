@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import NewClientForm from './NewClientForm'
+import NewClientForm from '@/components/portal/NewClientForm'
 
 interface PageProps {
   searchParams: Promise<{

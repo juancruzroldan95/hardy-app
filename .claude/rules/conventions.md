@@ -45,6 +45,19 @@ Adherimos a las directrices de optimización y desarrollo contenidas en el skill
 - **Deduplicación por Request (`server-cache-react`):**
   - Envuelva las llamadas repetitivas dentro de una misma solicitud en `React.cache()` para evitar llamadas duplicadas a bases de datos o APIs durante el ciclo de vida del renderizado de la página.
 
+### Reglas de ESLint y Pureza (React 19 & Next.js 16)
+- **Funciones Impuras en Render (Error: Cannot call impure function during render):**
+  - Está prohibido invocar directamente funciones impuras como `Date.now()`, `Math.random()` o instanciar `new Date()` en el cuerpo principal de renderizado de un componente (sea Server o Client Component).
+  - Si necesitás calcular diferencias de tiempo (como "días desde el último pedido"), extraé la lógica a una función auxiliar por fuera del cuerpo del componente o calcula el valor como una prop de servidor.
+- **Evitar setState Síncronos en Efectos (Error: Calling setState synchronously within an effect):**
+  - Nunca actualices el estado de forma síncrona dentro del cuerpo de un `useEffect` (común al inicializar datos del cliente como `localStorage`). Esto genera renders en cascada.
+  - Envuelve la actualización del estado en un timer diferido como `setTimeout(() => setState(val), 0)`.
+- **Uso Obligatorio de `<Image />`:**
+  - Queda prohibido el uso de la etiqueta nativa `<img>`. Utilice siempre el componente `<Image />` de `next/image` con las propiedades `width` y `height` (o `fill`) correspondientes para optimizar el LCP y ancho de banda.
+- **Higiene Extrema de Código (no-unused-vars):**
+  - No dejes imports, variables locales ni parámetros de funciones sin usar.
+  - Nota: El linter del proyecto no silencia variables que comiencen con guion bajo (`_`). Si una variable o parámetro de una firma de función no se usa, elimínalo por completo del código.
+
 ---
 
 ## 2. Convenciones de Supabase & Base de Datos

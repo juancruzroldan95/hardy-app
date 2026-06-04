@@ -38,7 +38,7 @@ export default function MessageThread({ orderId, messages, currentUserId, isAdmi
     setText('')
 
     startTransition(async () => {
-      await sendOrderMessage(orderId, trimmed, isAdmin)
+      await sendOrderMessage(orderId, trimmed)
     })
   }
 

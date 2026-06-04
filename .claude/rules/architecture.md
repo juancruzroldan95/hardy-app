@@ -57,7 +57,7 @@ Centraliza toda la interacción con la base de datos (Drizzle ORM). Actúa como 
 - **`db/index.ts`:**
   - Establece e inicializa la conexión con PostgreSQL a través de Drizzle. Actúa como cliente singleton `@/db`.
 - **Lecturas (`repository/queries/`):**
-  - Archivos TypeScript puros con la directiva `'use server'` en la cabecera.
+  - Archivos TypeScript puros (ejecutados en el servidor). **No deben usar la directiva `'use server'`** a menos que las funciones deban ser invocadas directamente como acciones desde componentes de cliente. Al omitir `'use server'`, evitamos exponer de manera pública endpoints HTTP innecesarios y aseguramos que las consultas solo se ejecuten de manera interna dentro de React Server Components (RSCs).
   - Encapsulan todas las lecturas (`db.query.*` y `db.select()`).
   - Retornan datos tipados listos para ser consumidos por la capa de presentación.
 - **Escrituras (`repository/mutations/`):**

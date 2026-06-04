@@ -5,13 +5,12 @@
  * O: botón "Descargar comprobante" que abre esta página en nueva pestaña + print()
  */
 import { notFound, redirect } from 'next/navigation'
-import Image from 'next/image'
 import { createClient } from '@/services/supabase/server'
 import { getProfileByUserId } from '@/repository/queries/profile'
 import { getOrderById } from '@/repository/queries/orders'
 import { formatARS } from '@/consts/products'
 import { HARDY_BANK } from '@/consts/hardy'
-import PrintButton from './PrintButton'
+import PrintButton from '@/components/portal/PrintButton'
 
 const SHIPPING_LABELS: Record<string, string> = {
   urgente_caba:      'Urgente — CABA (48-72hs hábiles)',
@@ -173,7 +172,7 @@ export default async function RemitoPage({ params }: Props) {
               </tr>
             </thead>
             <tbody>
-              {order.items.map((item, i) => (
+              {order.items.map((item) => (
                 <tr key={item.id} style={{ borderBottom: '1px solid #e5e5e5' }}>
                   <td className="py-3 pr-4">
                     <div className="font-medium text-[13px]">{item.productName}</div>

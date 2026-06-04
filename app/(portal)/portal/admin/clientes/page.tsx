@@ -27,6 +27,10 @@ const ALERT_TIPO_COLORS = {
   custom:     'text-ink/60     bg-paper-2   border-ink/10',
 } as const
 
+function getDaysSinceLast(createdAt: Date | string): number {
+  return Math.floor((Date.now() - new Date(createdAt).getTime()) / 86_400_000)
+}
+
 export default async function AdminClientesPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -75,7 +79,7 @@ export default async function AdminClientesPage() {
               .reduce((s, item) => s + item.qty, 0)
             const pendingAlerts  = clientAlertsList.filter((a) => !a.isResolved)
             const daysSinceLast  = lastOrder
-              ? Math.floor((Date.now() - new Date(lastOrder.createdAt).getTime()) / 86_400_000)
+              ? getDaysSinceLast(lastOrder.createdAt)
               : null
 
             return (

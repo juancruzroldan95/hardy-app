@@ -3,7 +3,7 @@ import { db } from '@/db'
 import { productReviews } from '@/db/schema'
 import { and, eq, desc } from 'drizzle-orm'
 import { getProducts } from '@/consts/products'
-import ReviewForm from './ReviewForm'
+import ReviewForm from '@/components/store/ReviewForm'
 
 export const metadata: Metadata = {
   title: 'Reseñas · Hardy',

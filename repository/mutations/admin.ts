@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/services/supabase/server'
 import { db } from '@/db'
-import { profiles, orders, orderItems, solicitudes, novedades, clientAlerts, orderMessages } from '@/db/schema'
+import { profiles, orders, solicitudes, novedades, clientAlerts, orderMessages } from '@/db/schema'
 import { and, eq, sql as drizzleSql } from 'drizzle-orm'
 import type { EstadoSolicitud, OrderStatus, PaymentStatus, AlertTipo, UserRole } from '@/db/schema'
 import { sendOrderStatusUpdate } from '@/services/resend'
@@ -12,7 +12,7 @@ import { createAdminClient } from '@/services/supabase/admin'
 
 // ─── Guard ─────────────────────────────────────────────────────────────────────
 
-async function getAdminUser() {
+export async function getAdminUser() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
@@ -385,7 +385,7 @@ export async function updateTrackingNumber(orderId: string, trackingNumber: stri
 
 // ─── Order messages ───────────────────────────────────────────────────────────
 
-export async function sendOrderMessage(orderId: string, message: string, isAdmin: boolean) {
+export async function sendOrderMessage(orderId: string, message: string) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')

@@ -33,7 +33,6 @@ export default function MarginCalculator() {
   const [selectedId,  setSelectedId]  = useState<string>('natural')
   const [buyPrice,    setBuyPrice]    = useState<string>('57000') // price per caja
   const [sellPrice,   setSellPrice]   = useState<string>('')
-  const [usePerUnit,  setUsePerUnit]  = useState(false)   // show per-unit breakdown
 
   const product = PRODUCTS.find((p) => p.id === selectedId)!
 
@@ -190,6 +189,7 @@ export default function MarginCalculator() {
                   sobre costo
                 </p>
               </div>
+
             </div>
 
             {/* Breakdown */}

@@ -9,6 +9,8 @@ import { createClient } from '@/services/supabase/server'
 import { getProductById } from '@/consts/products'
 import { sendOrderConfirmation } from '@/services/resend'
 import type { ShippingMethod, PaymentMethod, UserRole } from '@/db/schema'
+import { getAdminUser } from './admin'
+
 
 export type CreateOrderState =
   | { error: string }
@@ -88,6 +90,7 @@ export async function createPortalOrderForClient(
   _prev: CreateOrderState,
   formData: FormData,
 ): Promise<CreateOrderState> {
+  await getAdminUser()
   const clientProfile = await db.query.profiles.findFirst({
     where: and(eq(profiles.userId, clientUserId), eq(profiles.isDeleted, false)),
   })

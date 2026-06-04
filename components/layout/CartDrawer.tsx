@@ -7,7 +7,6 @@ import { useCart } from '@/components/contexts/cart-context'
 export default function CartDrawer() {
   const {
     cartItems,
-    cartCount,
     cartTotal,
     cartOpen,
     checkoutOpen,
