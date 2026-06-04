@@ -3,6 +3,7 @@
 import { db } from '@/db'
 import { solicitudes } from '@/db/schema'
 import type { TipoNegocio } from '@/db/schema'
+import { escape } from 'html-escaper'
 
 export type SolicitudState =
   | { success: true }
@@ -72,14 +73,14 @@ export async function submitSolicitud(
             html:    `
               <h2>Nueva solicitud de acceso al portal</h2>
               <table>
-                <tr><td><strong>Nombre:</strong></td><td>${nombre}</td></tr>
-                <tr><td><strong>Empresa:</strong></td><td>${empresa}</td></tr>
-                <tr><td><strong>Tipo:</strong></td><td>${tipoRaw}</td></tr>
-                <tr><td><strong>Email:</strong></td><td>${email}</td></tr>
-                <tr><td><strong>WhatsApp:</strong></td><td>${whatsapp}</td></tr>
-                <tr><td><strong>Ciudad:</strong></td><td>${ciudad}, ${provincia}</td></tr>
-                ${cuit ? `<tr><td><strong>CUIT:</strong></td><td>${cuit}</td></tr>` : ''}
-                ${mensaje ? `<tr><td><strong>Mensaje:</strong></td><td>${mensaje}</td></tr>` : ''}
+                <tr><td><strong>Nombre:</strong></td><td>${escape(nombre)}</td></tr>
+                <tr><td><strong>Empresa:</strong></td><td>${escape(empresa)}</td></tr>
+                <tr><td><strong>Tipo:</strong></td><td>${escape(tipoRaw)}</td></tr>
+                <tr><td><strong>Email:</strong></td><td>${escape(email)}</td></tr>
+                <tr><td><strong>WhatsApp:</strong></td><td>${escape(whatsapp)}</td></tr>
+                <tr><td><strong>Ciudad:</strong></td><td>${escape(ciudad)}, ${escape(provincia)}</td></tr>
+                ${cuit ? `<tr><td><strong>CUIT:</strong></td><td>${escape(cuit)}</td></tr>` : ''}
+                ${mensaje ? `<tr><td><strong>Mensaje:</strong></td><td>${escape(mensaje)}</td></tr>` : ''}
               </table>
               <p><a href="${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://hardy.com.ar'}/portal/admin/solicitudes">
                 Ver en el panel admin →

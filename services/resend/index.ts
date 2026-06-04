@@ -2,7 +2,7 @@ import { Resend } from 'resend'
 import type { OrderItem } from '@/db/schema'
 import { formatARS } from '@/consts/products'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+const resend = new Resend(process.env.RESEND_API_KEY || "re_REPLACE")
 
 // Hardy warehouse email that receives copies of all orders
 const WAREHOUSE_EMAIL = process.env.HARDY_WAREHOUSE_EMAIL ?? 'guido.giambruni@gmail.com'
