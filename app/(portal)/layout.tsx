@@ -1,7 +1,7 @@
 import { createClient } from '@/services/supabase/server'
 import { db } from '@/db'
-import { profiles } from '@/db/schema'
-import { and, eq } from 'drizzle-orm'
+import { profiles, orders } from '@/db/schema'
+import { and, eq, gt } from 'drizzle-orm'
 import PortalSidebar from '@/components/portal/PortalSidebar'
 import type { UserRole } from '@/db/schema'
 
@@ -29,6 +29,17 @@ export default async function PortalLayout({ children }: { children: React.React
   const vendedorNombre   = profile?.vendedorNombre ?? undefined
   const vendedorWhatsapp = profile?.vendedorWhatsapp ?? undefined
 
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+  const recentlyUpdated = await db.query.orders.findMany({
+    where: and(
+      eq(orders.userId, user.id),
+      eq(orders.isDeleted, false),
+      gt(orders.updatedAt, sevenDaysAgo),
+    ),
+    columns: { id: true, status: true, updatedAt: true },
+  })
+  const notifCount = recentlyUpdated.filter(o => o.status !== 'pending').length
+
   return (
     <div className="min-h-screen bg-paper-2 flex max-md:flex-col">
       <PortalSidebar
@@ -37,6 +48,7 @@ export default async function PortalLayout({ children }: { children: React.React
         userEmail={user.email ?? ''}
         vendedorNombre={vendedorNombre}
         vendedorWhatsapp={vendedorWhatsapp}
+        notifCount={notifCount}
       />
       <main className="flex-1 min-w-0 p-8 max-md:p-5">
         {children}

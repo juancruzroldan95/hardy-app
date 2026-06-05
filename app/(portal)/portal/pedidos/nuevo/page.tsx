@@ -1,13 +1,17 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/services/supabase/server'
-import { getProfileByUserId, getDeliveryAddressesByProfileId } from '@/repository/queries/profile'
+import { db } from '@/db'
+import { profiles, priceOverrides, orders, orderItems, deliveryAddresses, productAvailability } from '@/db/schema'
+import { and, eq, ne, desc } from 'drizzle-orm'
+import { getProducts, getProductById } from '@/consts/products'
+import { ROLE_LABELS } from '@/consts/roles'
+import NuevoPedidoFormWithSuggestions from '@/components/portal/NuevoPedidoFormWithSuggestions'
+import type { ProductOrden } from '@/components/portal/NuevoPedidoForm'
+import type { OrderSuggestion, SuggestedItem } from '@/components/portal/SuggestionsPanel'
+import { getDeliveryAddressesByProfileId, getProfileByUserId } from '@/repository/queries/profile'
 import { getOrderById } from '@/repository/queries/orders'
 import { getActivePriceOverrides, getAllStockRecords } from '@/repository/queries/stock'
-import { getProducts } from '@/consts/products'
-import { ROLE_LABELS } from '@/consts/roles'
-import NuevoPedidoForm from '@/components/portal/NuevoPedidoForm'
-import type { ProductOrden } from '@/components/portal/NuevoPedidoForm'
 
 // Products visible per role
 const FRASCO_IDS  = new Set(['natural-380', 'crunchy-380', 'miel-liquida-500', 'miel-solida-500'])
@@ -20,6 +24,29 @@ const ROLE_VISIBLE: Record<string, Set<string>> = {
 const MIN_ORDER_CAJAS: Record<string, number> = {
   mayorista:    3,
   distribuidor: 20,
+}
+
+// Pedido recomendado por HARDY por rol
+const HARDY_SUGGESTION: Record<string, Array<{ productId: string; qty: number }>> = {
+  mayorista: [
+    { productId: 'natural-380',   qty: 5 },
+    { productId: 'crunchy-380',   qty: 3 },
+    { productId: 'miel-liquida-500', qty: 2 },
+  ],
+  distribuidor: [
+    { productId: 'natural-380',   qty: 10 },
+    { productId: 'crunchy-380',   qty: 5 },
+    { productId: 'miel-liquida-500', qty: 5 },
+    { productId: 'balde-45',      qty: 2 },
+  ],
+  gastronomico: [
+    { productId: 'balde-45',     qty: 3 },
+    { productId: 'miel-balde-6', qty: 2 },
+  ],
+  productor: [
+    { productId: 'balde-23',     qty: 2 },
+    { productId: 'miel-balde-30', qty: 1 },
+  ],
 }
 
 interface Props {
@@ -41,11 +68,9 @@ export default async function NuevoPedidoPage({ searchParams }: Props) {
 
   const role = profile?.role ?? 'consumer'
 
-  // Stock map productId → status
   const stockByProduct: Record<string, string> = {}
   stockRecords.forEach((r) => { stockByProduct[r.productId] = r.status })
 
-  // Build tier map
   const tiersByProduct = new Map<string, Array<{ minQty: number; pricePerUnit: number; pricePerCaja: number }>>()
   const products = getProducts()
 
@@ -87,7 +112,6 @@ export default async function NuevoPedidoPage({ searchParams }: Props) {
       }
     })
 
-  // Load delivery addresses for this profile
   const clientAddresses = profile
     ? await getDeliveryAddressesByProfileId(profile.id)
     : []
@@ -95,12 +119,131 @@ export default async function NuevoPedidoPage({ searchParams }: Props) {
   // Load previous order for repeat
   let initialQtys: Record<string, number> | undefined
   let isRepeatOrder = false
+  let lastOrderId: string | undefined
 
   if (repeatOrderId) {
     const prevOrder = await getOrderById(repeatOrderId)
     if (prevOrder && prevOrder.userId === user.id && prevOrder.items?.length) {
       initialQtys  = Object.fromEntries(prevOrder.items.map((i) => [i.productId, i.qty]))
       isRepeatOrder = true
+    }
+  }
+
+  // ── Build suggestions ──────────────────────────────────────────────────────
+  const suggestions: OrderSuggestion[] = []
+
+  // Only show suggestions when not already in repeat mode
+  if (!isRepeatOrder) {
+    // 1. Pedido recomendado por HARDY
+    const hardyItems = (HARDY_SUGGESTION[role] ?? [])
+      .filter((s) => !visibleIds || visibleIds.has(s.productId))
+      .map<SuggestedItem | null>((s) => {
+        const p = getProductById(s.productId)
+        if (!p) return null
+        return {
+          productId:   p.id,
+          productName: p.name,
+          size:        p.size,
+          image:       p.image,
+          qty:         s.qty,
+          isBalde:     BALDE_IDS.has(p.id),
+        }
+      })
+      .filter((x): x is SuggestedItem => x !== null)
+
+    if (hardyItems.length > 0) {
+      const totalCajas = hardyItems.reduce((s, i) => s + i.qty, 0)
+      suggestions.push({
+        type:       'hardy',
+        title:      'Pedido recomendado por HARDY',
+        subtitle:   'Armado pensado para tu segmento',
+        items:      hardyItems,
+        totalLabel: `${totalCajas} ${hardyItems[0]?.isBalde ? 'baldes' : 'cajas'}`,
+      })
+    }
+
+    // 2. Repetir último pedido
+    const lastOrder = await db.query.orders.findFirst({
+      where: and(eq(orders.userId, user.id), eq(orders.isDeleted, false)),
+      orderBy: [desc(orders.createdAt)],
+      with: { items: { where: eq(orderItems.isDeleted, false) } },
+    })
+    lastOrderId = lastOrder?.id
+
+    if (lastOrder?.items?.length) {
+      const repeatItems = lastOrder.items
+        .map<SuggestedItem | null>((item) => {
+          const p = getProductById(item.productId)
+          if (!p) return null
+          return {
+            productId:   p.id,
+            productName: p.name,
+            size:        p.size,
+            image:       p.image,
+            qty:         item.qty,
+            isBalde:     BALDE_IDS.has(p.id),
+          }
+        })
+        .filter((x): x is SuggestedItem => x !== null)
+
+      if (repeatItems.length > 0) {
+        const totalCajas = repeatItems.reduce((s, i) => s + i.qty, 0)
+        suggestions.push({
+          type:       'repeat',
+          title:      'Repetir último pedido',
+          subtitle:   `${new Date(lastOrder.createdAt).toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric' })}`,
+          items:      repeatItems,
+          totalLabel: `${totalCajas} ${repeatItems[0]?.isBalde ? 'baldes' : 'cajas'}`,
+          orderId:    lastOrder.id,
+        })
+      }
+    }
+
+    // 3. Clientes con perfil parecido
+    if (profile) {
+      const similarOrder = await db.query.orders.findFirst({
+        where: and(
+          eq(orders.isDeleted, false),
+          ne(orders.userId, user.id),
+        ),
+        orderBy: [desc(orders.createdAt)],
+        with: { items: { where: eq(orderItems.isDeleted, false) } },
+      }).then(async (o) => {
+        if (!o) return null
+        // Verify it's from same role
+        const p = await db.query.profiles.findFirst({
+          where: and(eq(profiles.userId, o.userId), eq(profiles.isDeleted, false)),
+        })
+        return p?.role === role ? o : null
+      })
+
+      if (similarOrder?.items?.length) {
+        const similarItems = similarOrder.items
+          .map<SuggestedItem | null>((item) => {
+            const p = getProductById(item.productId)
+            if (!p) return null
+            return {
+              productId:   p.id,
+              productName: p.name,
+              size:        p.size,
+              image:       p.image,
+              qty:         item.qty,
+              isBalde:     BALDE_IDS.has(p.id),
+            }
+          })
+          .filter((x): x is SuggestedItem => x !== null)
+
+        if (similarItems.length > 0) {
+          const totalCajas = similarItems.reduce((s, i) => s + i.qty, 0)
+          suggestions.push({
+            type:       'similar',
+            title:      'Clientes similares pidieron',
+            subtitle:   `Otro cliente ${ROLE_LABELS[role] ?? role} con perfil parecido`,
+            items:      similarItems,
+            totalLabel: `${totalCajas} ${similarItems[0]?.isBalde ? 'baldes' : 'cajas'}`,
+          })
+        }
+      }
     }
   }
 
@@ -133,7 +276,7 @@ export default async function NuevoPedidoPage({ searchParams }: Props) {
         </div>
       )}
 
-      <NuevoPedidoForm
+      <NuevoPedidoFormWithSuggestions
         productos={productosOrden}
         initialQtys={initialQtys}
         minTotalCajas={minTotalCajas}
@@ -148,6 +291,7 @@ export default async function NuevoPedidoPage({ searchParams }: Props) {
         }))}
         stockByProduct={stockByProduct}
         userId={user.id}
+        suggestions={suggestions}
       />
     </div>
   )

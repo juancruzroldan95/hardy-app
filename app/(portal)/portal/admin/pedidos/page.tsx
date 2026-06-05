@@ -1,13 +1,30 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/services/supabase/server'
-import { getProfileByUserId, getAllProfiles } from '@/repository/queries/profile'
-import { getAllOrders } from '@/repository/queries/orders'
+import { getProfileByUserId } from '@/repository/queries/profile'
 import { formatARS } from '@/consts/products'
+import { ROLE_LABELS } from '@/consts/roles'
 import OrderStatusBadge from '@/components/portal/OrderStatusBadge'
 import PaymentStatusBadge from '@/components/portal/PaymentStatusBadge'
+import { imputarPago } from '@/repository/mutations/admin'
+import type { UserRole } from '@/db/schema'
+import { db } from '@/db'
+import { and, desc, eq, sql } from 'drizzle-orm'
+import { orderItems, orders, profiles } from '@/db/schema'
 
-export default async function AdminPedidosPage() {
+const ROLE_OPTIONS: { value: string; label: string }[] = [
+  { value: '',             label: 'Todos'        },
+  { value: 'mayorista',    label: 'Mayoristas'   },
+  { value: 'distribuidor', label: 'Distribuidores' },
+  { value: 'gastronomico', label: 'Gastronómicos' },
+  { value: 'productor',    label: 'Productores'  },
+]
+
+interface Props {
+  searchParams: Promise<{ role?: string }>
+}
+
+export default async function AdminPedidosPage({ searchParams }: Props) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
@@ -15,16 +32,27 @@ export default async function AdminPedidosPage() {
   const profile = await getProfileByUserId(user.id)
   if (profile?.role !== 'admin') redirect('/portal')
 
-  const allOrders = await getAllOrders()
+  const { role: roleFilter } = await searchParams
 
-  // Build a map userId → profile for display
-  const allProfiles = await getAllProfiles()
+  const allOrders = await db.query.orders.findMany({
+    where:   eq(orders.isDeleted, false),
+    orderBy: [desc(orders.createdAt)],
+    with:    { items: { where: eq(orderItems.isDeleted, false) } },
+  })
 
+  const allProfiles = await db.query.profiles.findMany({
+    where: eq(profiles.isDeleted, false),
+  })
   const profileMap = new Map(allProfiles.map((p) => [p.userId, p]))
 
-  const pending   = allOrders.filter((o) => o.status === 'pending').length
-  const confirmed = allOrders.filter((o) => o.status === 'confirmed').length
-  const unpaid    = allOrders.filter((o) => o.paymentStatus === 'unpaid').length
+  // Filter by role if selected
+  const filteredOrders = roleFilter
+    ? allOrders.filter((o) => profileMap.get(o.userId)?.role === roleFilter)
+    : allOrders
+
+  const pending   = filteredOrders.filter((o) => o.status === 'pending').length
+  const confirmed = filteredOrders.filter((o) => o.status === 'confirmed').length
+  const unpaid    = filteredOrders.filter((o) => o.paymentStatus === 'unpaid').length
 
   return (
     <div className="max-w-[1100px]">
@@ -52,12 +80,12 @@ export default async function AdminPedidosPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-4 gap-3 mb-8 max-md:grid-cols-2">
+      <div className="grid grid-cols-4 gap-3 mb-6 max-md:grid-cols-2">
         {[
-          { label: 'Total',          value: allOrders.length, highlight: false },
-          { label: 'Pendientes',     value: pending,          highlight: pending > 0 },
-          { label: 'Confirmados',    value: confirmed,        highlight: false },
-          { label: 'Sin pago',       value: unpaid,           highlight: unpaid > 0 },
+          { label: 'Total',       value: filteredOrders.length, highlight: false },
+          { label: 'Pendientes',  value: pending,               highlight: pending > 0 },
+          { label: 'Confirmados', value: confirmed,             highlight: false },
+          { label: 'Sin pago',    value: unpaid,                highlight: unpaid > 0 },
         ].map(({ label, value, highlight }) => (
           <div key={label} className={`border p-4 ${highlight ? 'bg-[#fdecea] border-red/20' : 'bg-paper border-ink/8'}`}>
             <p className="font-mono text-[9px] tracking-[0.15em] uppercase text-ink/40 mb-1">{label}</p>
@@ -68,18 +96,39 @@ export default async function AdminPedidosPage() {
         ))}
       </div>
 
+      {/* Role filter */}
+      <div className="flex items-center gap-2 flex-wrap mb-6">
+        <span className="font-mono text-[9px] tracking-[0.15em] uppercase text-ink/40 mr-1">Filtrar por tipo:</span>
+        {ROLE_OPTIONS.map((opt) => (
+          <Link
+            key={opt.value}
+            href={opt.value ? `/portal/admin/pedidos?role=${opt.value}` : '/portal/admin/pedidos'}
+            className={[
+              'font-mono text-[9px] tracking-[0.12em] uppercase px-3 py-1.5 border transition-all',
+              (roleFilter ?? '') === opt.value
+                ? 'bg-ink text-paper border-ink'
+                : 'bg-paper border-ink/15 text-ink/50 hover:text-ink hover:border-ink/40',
+            ].join(' ')}
+          >
+            {opt.label}
+          </Link>
+        ))}
+      </div>
+
       {/* Table */}
-      {allOrders.length === 0 ? (
+      {filteredOrders.length === 0 ? (
         <div className="bg-paper border border-ink/8 p-10 text-center">
-          <p className="font-body text-[14px] text-ink/40">No hay pedidos todavía.</p>
+          <p className="font-body text-[14px] text-ink/40">No hay pedidos para este segmento.</p>
         </div>
       ) : (
-        <div className="bg-paper border border-ink/8">
+        <div className="bg-paper border border-ink/8 overflow-x-auto">
+          <div className="min-w-[760px]">
           <div
             className="px-5 py-3 border-b border-ink/8 bg-paper-2 grid gap-4"
-            style={{ gridTemplateColumns: '1fr 130px 100px 110px 100px 40px' }}
+            style={{ gridTemplateColumns: '1fr 110px 130px 100px 110px 100px 80px' }}
           >
             <span className="font-mono text-[9px] tracking-[0.15em] uppercase text-ink/40">Cliente</span>
+            <span className="font-mono text-[9px] tracking-[0.15em] uppercase text-ink/40">Segmento</span>
             <span className="font-mono text-[9px] tracking-[0.15em] uppercase text-ink/40">Fecha</span>
             <span className="font-mono text-[9px] tracking-[0.15em] uppercase text-ink/40">Estado</span>
             <span className="font-mono text-[9px] tracking-[0.15em] uppercase text-ink/40">Pago</span>
@@ -88,13 +137,15 @@ export default async function AdminPedidosPage() {
           </div>
 
           <div className="divide-y divide-ink/8">
-            {allOrders.map((order) => {
+            {filteredOrders.map((order) => {
               const p = profileMap.get(order.userId)
+              const roleName = p?.role ? (ROLE_LABELS[p.role as UserRole] ?? p.role) : '—'
+              const isUnpaid = order.paymentStatus === 'unpaid'
               return (
                 <div
                   key={order.id}
                   className="px-5 py-4 grid gap-4 items-center"
-                  style={{ gridTemplateColumns: '1fr 130px 100px 110px 100px 40px' }}
+                  style={{ gridTemplateColumns: '1fr 110px 130px 100px 110px 100px 80px' }}
                 >
                   <div>
                     <div className="font-body font-semibold text-[13px] text-ink truncate">
@@ -104,6 +155,9 @@ export default async function AdminPedidosPage() {
                       {order.items.length} {order.items.length === 1 ? 'producto' : 'productos'}
                     </div>
                   </div>
+                  <span className="font-mono text-[8px] tracking-[0.1em] uppercase text-red border border-red/20 px-1.5 py-0.5 inline-block w-fit">
+                    {roleName}
+                  </span>
                   <span className="font-mono text-[10px] tracking-[0.08em] text-ink/50">
                     {new Date(order.createdAt).toLocaleDateString('es-AR', {
                       day: '2-digit', month: 'short', year: 'numeric',
@@ -114,16 +168,30 @@ export default async function AdminPedidosPage() {
                   <span className="font-mono text-[13px] text-ink text-right">
                     {formatARS(Number(order.totalArs))}
                   </span>
-                  <Link
-                    href={`/portal/admin/pedidos/${order.id}`}
-                    className="font-mono text-[11px] text-red hover:text-ink transition-colors"
-                  >
-                    →
-                  </Link>
+                  <div className="flex items-center gap-2 justify-end">
+                    {isUnpaid && (
+                      <form action={async () => { 'use server'; await imputarPago(order.id) }}>
+                        <button
+                          type="submit"
+                          title="Imputar pago"
+                          className="font-mono text-[9px] tracking-[0.1em] uppercase text-green-700 border border-green-200 bg-green-50 hover:bg-green-100 px-2 py-1 transition-colors"
+                        >
+                          ✓ Pago
+                        </button>
+                      </form>
+                    )}
+                    <Link
+                      href={`/portal/admin/pedidos/${order.id}`}
+                      className="font-mono text-[11px] text-red hover:text-ink transition-colors"
+                    >
+                      →
+                    </Link>
+                  </div>
                 </div>
               )
             })}
           </div>
+          </div>{/* fin min-w */}
         </div>
       )}
     </div>

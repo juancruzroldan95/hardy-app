@@ -4,7 +4,7 @@ import { WA_NUMBER } from '@/consts/products'
 
 export const metadata: Metadata = {
   title: 'Dónde comprar Hardy — Puntos de venta en Argentina',
-  description: 'Encontrá crema de maní y miel Hardy en más de 200 tiendas, dietéticas y comercios en toda Argentina.',
+  description: 'Encontrá crema de maní y miel Hardy en más de 500 tiendas, dietéticas y comercios en toda Argentina.',
 }
 
 interface Punto {
@@ -56,8 +56,6 @@ const TIPO_COLORS: Record<string, string> = {
 }
 
 export default function DondeComprarPage() {
-  const total = PUNTOS_DE_VENTA.length
-
   return (
     <div className="min-h-screen bg-paper">
 
@@ -69,7 +67,7 @@ export default function DondeComprarPage() {
             Encontranos en tu <em className="not-italic text-red">barrio.</em>
           </h1>
           <p className="font-body text-[16px] text-paper/60 max-w-[600px] leading-[1.7]">
-            Hardy está en más de {total}+ tiendas, dietéticas y comercios en toda Argentina.
+            Hardy está en +500 tiendas, dietéticas y comercios en toda Argentina.
             Si no encontrás un punto cercano, podés comprar online o escribirnos.
           </p>
           <div className="flex items-center gap-4 mt-8 flex-wrap">
@@ -91,32 +89,11 @@ export default function DondeComprarPage() {
         </div>
       </section>
 
-      {/* Online stores note */}
-      <section className="py-8 px-8 border-b border-ink/10 max-md:px-5">
-        <div className="max-w-[1100px] mx-auto flex items-center gap-6 flex-wrap">
-          <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-ink/50">También en</p>
-          {[
-            { name: 'Mercado Libre', href: 'https://www.mercadolibre.com.ar' },
-            { name: 'Tienda Nube (propia)', href: '/tienda' },
-          ].map((store) => (
-            <a
-              key={store.name}
-              href={store.href}
-              target={store.href.startsWith('http') ? '_blank' : '_self'}
-              rel="noopener noreferrer"
-              className="font-mono text-[11px] tracking-[0.1em] uppercase text-ink border-b border-ink/30 hover:text-red hover:border-red transition-colors"
-            >
-              {store.name} →
-            </a>
-          ))}
-        </div>
-      </section>
-
       {/* Store list by province */}
       <section className="py-12 px-8 max-md:px-5">
         <div className="max-w-[1100px] mx-auto">
           <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-ink/50 mb-8">
-            {total} puntos de venta en {PROVINCES.length} provincias
+            Algunos de nuestros puntos de venta en {PROVINCES.length} provincias
           </p>
 
           <div className="space-y-10">

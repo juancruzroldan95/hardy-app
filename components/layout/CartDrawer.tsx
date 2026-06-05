@@ -3,6 +3,7 @@
 import Image from 'next/image'
 import { X, Plus, Minus } from 'lucide-react'
 import { useCart } from '@/components/contexts/cart-context'
+import { trackInitiateCheckout } from '@/consts/meta-pixel'
 
 export default function CartDrawer() {
   const {
@@ -18,6 +19,11 @@ export default function CartDrawer() {
   } = useCart()
 
   const handleCheckout = async () => {
+    trackInitiateCheckout({
+      value: cartTotal,
+      numItems: cartItems.length,
+      contentIds: cartItems.map((i) => i.id),
+    })
     try {
       const res = await fetch('/api/mercadopago/create-preference', {
         method: 'POST',

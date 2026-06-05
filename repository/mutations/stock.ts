@@ -12,6 +12,7 @@ export async function updateProductStock(
   productId: string,
   status:    StockStatus,
   notes:     string | null,
+  stockQty?: number | null,
 ) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -22,20 +23,33 @@ export async function updateProductStock(
   })
   if (profile?.role !== 'admin') throw new Error('Unauthorized')
 
-  // Upsert: update if exists, insert if not
+  // Auto-set status based on qty thresholds
+  let resolvedStatus = status
+  if (stockQty !== undefined && stockQty !== null) {
+    if (stockQty === 0) resolvedStatus = 'out_of_stock'
+    else if (stockQty <= 50 && status === 'available') resolvedStatus = 'low_stock'
+  }
+
   const existing = await db.query.productAvailability.findFirst({
     where: eq(productAvailability.productId, productId),
   })
 
   if (existing) {
     await db.update(productAvailability)
-      .set({ status, notes, updatedByUserId: user.id, updatedAt: new Date() })
+      .set({
+        status:          resolvedStatus,
+        notes,
+        stockQty:        stockQty ?? null,
+        updatedByUserId: user.id,
+        updatedAt:       new Date(),
+      })
       .where(eq(productAvailability.productId, productId))
   } else {
     await db.insert(productAvailability).values({
       productId,
-      status,
+      status:          resolvedStatus,
       notes,
+      stockQty:        stockQty ?? null,
       updatedByUserId: user.id,
     })
   }

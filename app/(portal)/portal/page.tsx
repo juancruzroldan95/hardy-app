@@ -1,7 +1,9 @@
 import Link from 'next/link'
 import { createClient } from '@/services/supabase/server'
-import { getProfileByUserId } from '@/repository/queries/profile'
-import { getOrdersByUserId, getUserOrderCount } from '@/repository/queries/orders'
+import { db } from '@/db'
+import { orderItems, orders, profiles, productReviews } from '@/db/schema'
+import { and, eq, count, desc, inArray } from 'drizzle-orm'
+import { getProductById } from '@/consts/products'
 import { ROLE_LABELS, ROLE_DESCRIPTIONS } from '@/consts/roles'
 import OrderStatusBadge from '@/components/portal/OrderStatusBadge'
 import { formatARS, WA_NUMBER } from '@/consts/products'
@@ -127,14 +129,72 @@ export default async function PortalDashboardPage() {
     return <PortalPublicLanding />
   }
 
-  const [profile, recentOrders, total] = await Promise.all([
-    getProfileByUserId(user.id),
-    getOrdersByUserId(user.id).then((orders) => orders.slice(0, 5)),
-    getUserOrderCount(user.id),
+  const userOrdersSubquery = db.select({ id: orders.id })
+    .from(orders)
+    .where(and(eq(orders.userId, user.id), eq(orders.isDeleted, false)))
+
+  const [profile, recentOrders, [{ total }], reviews, allOrderItems, allOrders] = await Promise.all([
+    db.query.profiles.findFirst({
+      where: and(eq(profiles.userId, user.id), eq(profiles.isDeleted, false)),
+    }),
+    db.query.orders.findMany({
+      where:   and(eq(orders.userId, user.id), eq(orders.isDeleted, false)),
+      orderBy: [desc(orders.createdAt)],
+      limit:   5,
+      with:    { items: { where: eq(orderItems.isDeleted, false) } },
+    }),
+    db.select({ total: count() })
+      .from(orders)
+      .where(and(eq(orders.userId, user.id), eq(orders.isDeleted, false))),
+    db.query.productReviews.findMany({
+      where:   and(eq(productReviews.isPublished, true), eq(productReviews.isDeleted, false)),
+      orderBy: [desc(productReviews.createdAt)],
+      limit:   4,
+    }),
+    db.query.orderItems.findMany({
+      where: and(
+        inArray(orderItems.orderId, userOrdersSubquery),
+        eq(orderItems.isDeleted, false),
+      ),
+    }),
+    db.query.orders.findMany({
+      where:   and(eq(orders.userId, user.id), eq(orders.isDeleted, false)),
+      orderBy: [desc(orders.createdAt)],
+    }),
   ])
 
   const role        = profile?.role ?? 'consumer'
   const displayName = profile?.displayName ?? user.email ?? 'Cliente'
+
+  // ── Insights de compra ──────────────────────────────────────────────────────
+  // Producto más pedido
+  const qtyByProduct: Record<string, { name: string; qty: number }> = {}
+  for (const item of allOrderItems) {
+    const key = item.productId
+    if (!qtyByProduct[key]) qtyByProduct[key] = { name: item.productName, qty: 0 }
+    qtyByProduct[key].qty += item.qty
+  }
+  const topProduct = Object.values(qtyByProduct).sort((a, b) => b.qty - a.qty)[0] ?? null
+
+  // Gasto total acumulado
+  const gastoTotal = allOrders.reduce((sum, o) => sum + Number(o.totalArs), 0)
+
+  // Frecuencia promedio (días entre pedidos)
+  let frecuenciaLabel = 'Sin pedidos'
+  if (allOrders.length === 1) {
+    frecuenciaLabel = 'Primer pedido'
+  } else if (allOrders.length >= 2) {
+    const sorted = [...allOrders].sort(
+      (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+    )
+    let totalDays = 0
+    for (let i = 1; i < sorted.length; i++) {
+      const diff = new Date(sorted[i].createdAt).getTime() - new Date(sorted[i - 1].createdAt).getTime()
+      totalDays += diff / (1000 * 60 * 60 * 24)
+    }
+    const avgDays = Math.round(totalDays / (sorted.length - 1))
+    frecuenciaLabel = `c/${avgDays} días`
+  }
 
   return (
     <div className="max-w-[900px]">
@@ -150,7 +210,7 @@ export default async function PortalDashboardPage() {
       </p>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 gap-4 mb-10 max-md:grid-cols-1">
+      <div className="grid grid-cols-2 gap-4 mb-6 max-md:grid-cols-1">
         <div className="bg-paper border border-ink/8 p-6">
           <p className="font-mono text-[9px] tracking-[0.2em] uppercase text-ink/40 mb-2">
             Total de pedidos
@@ -168,6 +228,105 @@ export default async function PortalDashboardPage() {
           </p>
         </div>
       </div>
+
+      {/* Insights de compra */}
+      <div className="grid grid-cols-3 gap-4 mb-10 max-md:grid-cols-1">
+        <div className="bg-paper border border-ink/8 p-6">
+          <p className="font-mono text-[9px] tracking-[0.2em] uppercase text-ink/40 mb-2">
+            Producto más pedido
+          </p>
+          <p className="font-heading text-[15px] font-medium leading-snug text-ink">
+            {topProduct ? topProduct.name : '—'}
+          </p>
+          {topProduct && (
+            <p className="font-mono text-[9px] tracking-[0.1em] text-ink/30 uppercase mt-1">
+              {topProduct.qty} unidades
+            </p>
+          )}
+        </div>
+        <div className="bg-paper border border-ink/8 p-6">
+          <p className="font-mono text-[9px] tracking-[0.2em] uppercase text-ink/40 mb-2">
+            Gasto total
+          </p>
+          <p className="font-heading text-[20px] font-medium leading-none text-ink">
+            {gastoTotal > 0 ? formatARS(gastoTotal) : '—'}
+          </p>
+          {gastoTotal > 0 && (
+            <p className="font-mono text-[9px] tracking-[0.1em] text-ink/30 uppercase mt-1">
+              acumulado
+            </p>
+          )}
+        </div>
+        <div className="bg-paper border border-ink/8 p-6">
+          <p className="font-mono text-[9px] tracking-[0.2em] uppercase text-ink/40 mb-2">
+            Frecuencia promedio
+          </p>
+          <p className="font-heading text-[20px] font-medium leading-none text-ink">
+            {frecuenciaLabel}
+          </p>
+          {allOrders.length >= 2 && (
+            <p className="font-mono text-[9px] tracking-[0.1em] text-ink/30 uppercase mt-1">
+              entre pedidos
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* Historial de compras — gráfico de barras CSS últimos 6 meses */}
+      {(() => {
+        const monthlyData: { month: string; label: string; total: number; count: number }[] = []
+        for (let i = 5; i >= 0; i--) {
+          const d = new Date()
+          d.setDate(1)
+          d.setMonth(d.getMonth() - i)
+          const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+          const label = d.toLocaleDateString('es-AR', { month: 'short' })
+          const monthOrders = allOrders.filter(o => {
+            const od = new Date(o.createdAt)
+            return od.getFullYear() === d.getFullYear() && od.getMonth() === d.getMonth()
+          })
+          monthlyData.push({
+            month: key,
+            label: label.toUpperCase(),
+            total: monthOrders.reduce((s, o) => s + Number(o.totalArs), 0),
+            count: monthOrders.length,
+          })
+        }
+        const maxTotal = Math.max(...monthlyData.map(m => m.total), 1)
+
+        if (!monthlyData.some(m => m.count > 0)) return null
+
+        return (
+          <div className="mb-10">
+            <h2 className="font-mono text-[11px] tracking-[0.2em] uppercase text-ink/60 mb-5">
+              Historial de compras — últimos 6 meses
+            </h2>
+            <div className="bg-paper border border-ink/8 px-6 py-6">
+              <div className="flex items-end gap-3 h-[120px]">
+                {monthlyData.map((m) => {
+                  const heightPct = maxTotal > 0 ? (m.total / maxTotal) * 100 : 0
+                  const isCurrentMonth = m.month === monthlyData[monthlyData.length - 1].month
+                  return (
+                    <div key={m.month} className="flex-1 flex flex-col items-center gap-2">
+                      <div className="w-full flex items-end justify-center" style={{ height: '90px' }}>
+                        <div
+                          className={`w-full transition-all ${isCurrentMonth ? 'bg-red' : 'bg-ink/20'}`}
+                          style={{ height: m.total > 0 ? `${Math.max(heightPct, 4)}%` : '2px' }}
+                          title={m.total > 0 ? formatARS(m.total) : 'Sin pedidos'}
+                        />
+                      </div>
+                      <span className="font-mono text-[8px] tracking-[0.1em] text-ink/40">{m.label}</span>
+                      {m.count > 0 && (
+                        <span className="font-mono text-[7px] text-red">{m.count}p</span>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          </div>
+        )
+      })()}
 
       {/* Recent orders */}
       <div>
@@ -225,6 +384,38 @@ export default async function PortalDashboardPage() {
           </div>
         )}
       </div>
+
+      {/* Reseñas de clientes */}
+      {reviews.length > 0 && (
+        <div className="mt-10">
+          <h2 className="font-mono text-[11px] tracking-[0.2em] uppercase text-ink/60 mb-5">
+            Lo que dicen nuestros clientes
+          </h2>
+          <div className="grid grid-cols-2 gap-4 max-md:grid-cols-1">
+            {reviews.map((r) => {
+              const product = getProductById(r.productId)
+              return (
+                <div key={r.id} className="bg-paper border border-ink/8 px-5 py-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-amber-500 text-[13px]">{'★'.repeat(r.rating)}</span>
+                    <span className="font-mono text-[8px] tracking-[0.1em] text-red uppercase ml-auto">
+                      {product?.name ?? r.productId}
+                    </span>
+                  </div>
+                  {r.comment && (
+                    <p className="font-body text-[13px] text-ink/70 leading-[1.6] mb-3 italic">
+                      &ldquo;{r.comment}&rdquo;
+                    </p>
+                  )}
+                  <p className="font-mono text-[9px] tracking-[0.1em] text-ink/40 uppercase">
+                    — {r.reviewerName}
+                  </p>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
