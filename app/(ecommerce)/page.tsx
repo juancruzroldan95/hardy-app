@@ -87,6 +87,31 @@ const TESTIMONIALS = [
   },
 ]
 
+// Usos / a quién le sirve — fotos reales con overlay de caso de uso
+const USOS = [
+  {
+    src: '/lifestyle/uso-desayuno-miel.png',
+    alt: 'Desayuno con tostadas, banana, miel Hardy y café',
+    eyebrow: 'Tu desayuno',
+    title: 'Tostadas y frutas',
+    desc: 'Tostadas, frutas, café. El clásico que nunca falla.',
+  },
+  {
+    src: '/lifestyle/uso-fit-natural.png',
+    alt: 'Mujer atlética agregando crema de maní Hardy a un bowl de proteína',
+    eyebrow: 'Tu entrenamiento',
+    title: 'Proteína natural',
+    desc: 'Pre y post entrenamiento. Energía real.',
+  },
+  {
+    src: '/lifestyle/uso-miel-bowl.png',
+    alt: 'Miel Hardy cayendo sobre un bowl de yogurt y granola',
+    eyebrow: 'Tu cocina',
+    title: 'Bowls y recetas',
+    desc: 'Bowls, yogures, recetas. Endulzá natural.',
+  },
+]
+
 const PHILOSOPHY = [
   { n: '01', title: 'Un ingrediente, sin excepciones.', desc: 'Maní seleccionado. Miel pura. Nada más.' },
   { n: '02', title: 'Calidad controlada, lote a lote.', desc: 'Trabajamos con estándares claros para cuidar cada producto.' },
@@ -514,6 +539,7 @@ export default function HomePage() {
                     src={r.imagen}
                     alt={r.titulo}
                     fill
+                    sizes="(max-width: 900px) 100vw, 33vw"
                     className="object-cover transition-transform duration-[400ms] group-hover:scale-[1.04]"
                   />
                 </div>
@@ -529,6 +555,48 @@ export default function HomePage() {
                   >
                     Ver receta →
                   </Link>
+                </div>
+              </RevealSection>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── USOS — a quién le sirve / para cada momento ─────────────── */}
+      <section className="py-20 px-10 bg-paper-2 max-md:px-5">
+        <div className="max-w-[1240px] mx-auto">
+          <RevealSection>
+            <div className="mb-12">
+              <p className="font-mono text-[11px] tracking-[0.25em] text-red uppercase mb-[14px]">── Un producto, mil usos</p>
+              <h2
+                className="font-heading font-medium tracking-[-0.02em] m-0"
+                style={{ fontSize: 'clamp(36px, 5vw, 56px)', lineHeight: 1.1 }}
+              >
+                Hardy va con <em className="not-italic text-red">todo.</em>
+              </h2>
+              <p className="mt-4 text-[15px] text-[#555] max-w-[560px] leading-[1.6]">
+                Del desayuno al post entreno, de la cocina al bowl de media tarde. Un solo ingrediente para cada momento del día.
+              </p>
+            </div>
+          </RevealSection>
+
+          <div className="grid grid-cols-3 gap-[2px] max-md:grid-cols-1">
+            {USOS.map((u, i) => (
+              <RevealSection key={u.src} delay={i * 80}>
+                <div className="relative aspect-[4/5] overflow-hidden group">
+                  <Image
+                    src={u.src}
+                    alt={u.alt}
+                    fill
+                    className="object-cover transition-transform duration-700 group-hover:scale-105"
+                    sizes="(max-width: 900px) 100vw, 33vw"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/10 to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-6">
+                    <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-red mb-1">── {u.eyebrow}</p>
+                    <h3 className="font-heading text-[20px] font-medium text-paper mb-1">{u.title}</h3>
+                    <p className="font-body text-[12px] text-paper/70 leading-[1.5]">{u.desc}</p>
+                  </div>
                 </div>
               </RevealSection>
             ))}

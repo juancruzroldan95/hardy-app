@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState, useEffect, useMemo, useState } from 'react'
+import { useActionState, useEffect, useMemo, useRef, useState } from 'react'
 import Image from 'next/image'
 import { Zap, Clock, Warehouse, ClipboardList, AlertTriangle, Info } from 'lucide-react'
 import { createPortalOrder } from '@/lib/actions/orders'
@@ -47,18 +47,26 @@ interface Props {
   deliveryAddresses?: DeliveryAddressProp[]
   stockByProduct?:    Record<string, string>   // productId → 'available'|'low_stock'|'out_of_stock'|'preorder'
   userId?:            string                    // for localStorage draft key
+  clientPhone?:       string                    // admin mode: WA va al cliente
+  clientName?:        string                    // admin mode: nombre del cliente
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const IVA = 0.21
 
-function getShippingCost(method: string, totalCajas: number): number {
+function getShippingCost(method: string, totalFrascoCajas: number, totalBaldes: number): number {
+  // For balde-only orders use balde thresholds (≤4, ≤9, 10+)
+  // For frasco orders or mixed: use frasco thresholds (≤14, ≤25, 25+)
+  const tier = totalBaldes > 0 && totalFrascoCajas === 0
+    ? (totalBaldes <= 4 ? 0 : totalBaldes <= 9 ? 1 : 2)
+    : (totalFrascoCajas <= 14 ? 0 : totalFrascoCajas <= 25 ? 1 : 2)
+
   switch (method) {
     case 'urgente_caba':      return 50000
     case 'urgente_gba':       return 75000
-    case 'sin_urgencia_caba': return totalCajas <= 14 ? 15000 : totalCajas <= 25 ? 25000 : 35000
-    case 'sin_urgencia_gba':  return totalCajas <= 14 ? 25000 : totalCajas <= 25 ? 35000 : 45000
+    case 'sin_urgencia_caba': return [15000, 25000, 35000][tier]
+    case 'sin_urgencia_gba':  return [25000, 35000, 45000][tier]
     case 'retiro_deposito':   return 0
     default:                  return 0
   }
@@ -217,6 +225,8 @@ export default function NuevoPedidoForm({
   deliveryAddresses = [],
   stockByProduct = {},
   userId,
+  clientPhone,
+  clientName,
 }: Props) {
   const [state, action, isPending] = useActionState<CreateOrderState, FormData>(
     overrideAction ?? createPortalOrder,
@@ -234,6 +244,9 @@ export default function NuevoPedidoForm({
     deliveryAddresses.find((a) => a.isDefault)?.id ?? null
   )
   const [hasDraft, setHasDraft] = useState(false)
+  // Tracks whether the component has mounted — prevents the save effect from
+  // overwriting the stored draft with all-zero values on the very first render.
+  const isMounted = useRef(false)
 
   // ── localStorage draft ───────────────────────────────────────────────────────
 
@@ -249,9 +262,14 @@ export default function NuevoPedidoForm({
     } catch {}
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Save draft on every qty change
+  // Save draft on every qty change — skip first render to avoid overwriting
+  // the stored draft with the initial all-zero state.
   useEffect(() => {
     if (!draftKey || initialQtys) return
+    if (!isMounted.current) {
+      isMounted.current = true
+      return
+    }
     try {
       localStorage.setItem(draftKey, JSON.stringify(qtys))
     } catch {}
@@ -307,7 +325,7 @@ export default function NuevoPedidoForm({
 
   const productIVA   = Math.round(total * IVA)
   const totalConIVA  = total + productIVA
-  const shippingCost = selectedShipping ? getShippingCost(selectedShipping, totalCajas) : 0
+  const shippingCost = selectedShipping ? getShippingCost(selectedShipping, totalFrascoCajas, totalBaldes) : 0
   const shippingIVA  = Math.round(shippingCost * IVA)
   const grandTotal   = totalConIVA + shippingCost + shippingIVA
 
@@ -317,9 +335,14 @@ export default function NuevoPedidoForm({
 
   // ── Shipping tier helper ─────────────────────────────────────────────────────
 
-  function getActiveShippingTierIdx(tiers: readonly { cost: number; label: string }[]): number {
-    if (totalCajas <= 14) return 0
-    if (totalCajas <= 25) return 1
+  function getActiveShippingTierIdx(): number {
+    if (totalBaldes > 0 && totalFrascoCajas === 0) {
+      if (totalBaldes <= 4) return 0
+      if (totalBaldes <= 9) return 1
+      return 2
+    }
+    if (totalFrascoCajas <= 14) return 0
+    if (totalFrascoCajas <= 25) return 1
     return 2
   }
 
@@ -341,9 +364,32 @@ export default function NuevoPedidoForm({
     `Hola Hardy! Soy cliente ${roleName} y tengo una consulta sobre mi pedido.`
   )
 
-  // ── WA share (resumen del pedido) ────────────────────────────────────────────
+  // ── WA share ─────────────────────────────────────────────────────────────────
+  // En modo admin (clientPhone), el resumen se envía al cliente para que confirme y abone.
+  // En modo cliente, se envía a Hardy para coordinar.
 
   const waShareText = useMemo(() => {
+    if (clientPhone) {
+      // Admin mode: mensaje dirigido al cliente
+      const lines: string[] = [
+        `Hola${clientName ? ` ${clientName}` : ''}! 👋 Te armamos el siguiente pedido desde Hardy:\n`,
+      ]
+      let hasItems = false
+      for (const p of productos) {
+        const qty = qtys[p.id] ?? 0
+        if (qty > 0) {
+          hasItems = true
+          const pricePerCaja = activePrices.get(p.id) ?? p.b2bPriceCaja
+          lines.push(`• ${p.name} ${p.size} × ${qty} ${p.isBalde ? 'unidades' : 'cajas'} — ${formatARS(pricePerCaja)}/${p.isBalde ? 'unidad' : 'caja'}`)
+        }
+      }
+      if (!hasItems) return null
+      lines.push(`\n*Total estimado (c/IVA 21%):* ${formatARS(totalConIVA)}`)
+      lines.push(`\n¿Lo confirmamos y coordinamos la forma de pago? ✅`)
+      return encodeURIComponent(lines.join('\n'))
+    }
+
+    // Client mode: mensaje dirigido a Hardy
     const lines: string[] = [`Hola Hardy! 👋 Quiero realizar el siguiente pedido (${roleName}):\n`]
     let hasItems = false
     for (const p of productos) {
@@ -358,10 +404,170 @@ export default function NuevoPedidoForm({
     lines.push(`\n*Total estimado (c/IVA 21%):* ${formatARS(totalConIVA)}`)
     lines.push(`\n¿Pueden confirmar disponibilidad y coordinar el envío?`)
     return encodeURIComponent(lines.join('\n'))
-  }, [qtys, productos, activePrices, totalConIVA, roleName])
+  }, [qtys, productos, activePrices, totalConIVA, roleName, clientPhone, clientName])
 
   // Selected delivery address details
   const selectedAddress = deliveryAddresses.find((a) => a.id === selectedAddressId)
+
+  // ── Pricing panel (right column) ─────────────────────────────────────────────
+
+  const pricingPanel = (
+    <div className="bg-paper border border-ink/8">
+      {/* Header */}
+      <div className="px-4 py-3 border-b border-ink/8 flex items-center justify-between bg-paper-2">
+        <p className="font-mono text-[9px] tracking-[0.2em] uppercase text-ink font-semibold">── Precios por volumen</p>
+        <p className="font-mono text-[8px] text-ink/40 uppercase tracking-[0.08em]">sin IVA · 21% aparte</p>
+      </div>
+
+      {tierGroups.length === 0 ? (
+        <div className="px-4 py-6 text-center">
+          <p className="font-mono text-[9px] text-ink/40 leading-[1.6]">
+            Sin precios por volumen<br />configurados para este segmento.
+          </p>
+        </div>
+      ) : (
+        tierGroups.map((group) => {
+          const counter = group.isBalde ? totalBaldes : totalFrascoCajas
+          const activeTierIdx = group.tiers.reduce((idx, tier, i) => counter >= tier.minQty ? i : idx, 0)
+          const unit = group.isBalde ? 'balde' : 'caja'
+
+          return (
+            <div key={group.label} className="border-b border-ink/8 last:border-0">
+              {/* Product group label */}
+              <div className="px-4 pt-3 pb-2">
+                <p className="font-mono text-[8px] tracking-[0.12em] uppercase text-ink font-semibold leading-tight">{group.label}</p>
+                <p className="font-mono text-[7px] tracking-[0.06em] text-ink/40 mt-[2px]">{group.sublabel}</p>
+              </div>
+
+              {/* Tier rows — compact */}
+              <div className="px-3 pb-3 grid gap-[2px]">
+                {group.tiers.map((tier, i) => {
+                  const isActive = i === activeTierIdx && counter > 0
+                  const nextMin  = group.tiers[activeTierIdx + 1]?.minQty
+                  const toUnlock = nextMin ? nextMin - counter : null
+                  const tierLabel = i === group.tiers.length - 1
+                    ? `${tier.minQty}+`
+                    : `${tier.minQty}–${(group.tiers[i + 1]?.minQty ?? 99) - 1}`
+
+                  return (
+                    <div
+                      key={tier.minQty}
+                      className={[
+                        'flex items-center justify-between px-2.5 py-[5px] rounded-[1px] transition-colors',
+                        isActive ? 'bg-ink text-paper' : 'bg-paper-2 text-ink',
+                      ].join(' ')}
+                    >
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        {isActive && <span className="text-red text-[8px] shrink-0">▶</span>}
+                        <span className="font-mono text-[9px] tracking-[0.04em]">{tierLabel} {unit}s</span>
+                        {isActive && toUnlock !== null && toUnlock > 0 && (
+                          <span className="font-mono text-[7px] text-amber-300 font-semibold shrink-0">
+                            ↑ {toUnlock} más
+                          </span>
+                        )}
+                      </div>
+                      <span className={[
+                        'font-mono text-[11px] font-semibold tabular-nums shrink-0 ml-2',
+                        isActive ? 'text-paper' : 'text-red',
+                      ].join(' ')}>
+                        {formatARS(tier.pricePerCaja)}/{unit}
+                      </span>
+                    </div>
+                  )
+                })}
+              </div>
+
+              {/* Nudge */}
+              {(() => {
+                const bestTier = group.tiers[group.tiers.length - 1]
+                if (!bestTier || group.tiers.length < 2) return null
+
+                if (counter === 0) {
+                  return (
+                    <div className="mx-3 mb-3 bg-paper border border-ink/10 px-3 py-2">
+                      <p className="font-mono text-[8px] text-ink/50 leading-[1.5]">
+                        Mejor precio: <span className="text-ink font-semibold">{formatARS(bestTier.pricePerCaja)}/{unit}</span>
+                        {' '}con {bestTier.minQty}+ {unit}s
+                      </p>
+                    </div>
+                  )
+                }
+
+                const nextTier = group.tiers[activeTierIdx + 1]
+                if (!nextTier) {
+                  return (
+                    <div className="mx-3 mb-3 bg-green-50 border border-green-200 px-3 py-2">
+                      <p className="font-mono text-[8px] text-green-700">✓ Precio máximo activo</p>
+                    </div>
+                  )
+                }
+
+                const diff = nextTier.minQty - counter
+                return (
+                  <div className="mx-3 mb-3 bg-red text-paper px-3 py-2">
+                    <p className="font-mono text-[8px] font-semibold">
+                      ↑ Sumá {diff} {unit}{diff > 1 ? 's' : ''} más → {formatARS(nextTier.pricePerCaja)}/{unit}
+                    </p>
+                  </div>
+                )
+              })()}
+            </div>
+          )
+        })
+      )}
+
+      {/* Running total in pricing panel when items selected */}
+      {hasItems && (
+        <div className="bg-ink text-paper px-4 py-4 border-t border-ink/8">
+          <div className="space-y-1.5">
+            <div className="flex justify-between">
+              <span className="font-mono text-[8px] text-paper/40 uppercase tracking-[0.08em]">Productos s/IVA</span>
+              <span className="font-mono text-[10px]">{formatARS(total)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="font-mono text-[8px] text-paper/40 uppercase tracking-[0.08em]">IVA 21%</span>
+              <span className="font-mono text-[10px]">{formatARS(productIVA)}</span>
+            </div>
+            {shippingCost > 0 && (
+              <>
+                <div className="flex justify-between pt-1.5 border-t border-paper/10">
+                  <span className="font-mono text-[8px] text-paper/40 uppercase tracking-[0.08em]">Envío s/IVA</span>
+                  <span className="font-mono text-[10px]">{formatARS(shippingCost)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="font-mono text-[8px] text-paper/40 uppercase tracking-[0.08em]">IVA envío</span>
+                  <span className="font-mono text-[10px]">{formatARS(shippingIVA)}</span>
+                </div>
+              </>
+            )}
+            <div className="pt-2 border-t border-paper/15 flex justify-between items-baseline">
+              <span className="font-mono text-[9px] text-paper/60 uppercase tracking-[0.1em]">Total c/IVA</span>
+              <span className="font-heading text-[20px] font-medium">{formatARS(grandTotal || totalConIVA)}</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Min order notice */}
+      {minTotalCajas > 1 && (
+        <div className={[
+          'px-4 py-3 border-t border-ink/8 flex items-start gap-2',
+          belowMinimum ? 'bg-red/8' : 'bg-paper-2',
+        ].join(' ')}>
+          {belowMinimum
+            ? <AlertTriangle size={12} className="text-red shrink-0 mt-[1px]" />
+            : <Info size={12} className="text-ink/40 shrink-0 mt-[1px]" />
+          }
+          <p className="font-mono text-[8px] tracking-[0.06em] text-ink/60 leading-[1.5]">
+            {belowMinimum
+              ? `Mínimo: ${minTotalCajas} cajas. Tenés ${totalFrascoCajas}.`
+              : `Pedido mínimo: ${minTotalCajas} cajas.`
+            }
+          </p>
+        </div>
+      )}
+    </div>
+  )
 
   return (
     <form action={action} onSubmit={clearDraftOnSubmit}>
@@ -394,109 +600,16 @@ export default function NuevoPedidoForm({
         </div>
       )}
 
-      {/* ── Tabla de precios por volumen ──────────────────────────────── */}
-      {tierGroups.length > 0 && (
-        <div className="mb-6 bg-paper border border-ink/8">
-          <div className="px-5 py-3 border-b border-ink/8 flex items-center justify-between">
-            <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-ink font-semibold">── Precios por volumen</p>
-            <p className="font-mono text-[9px] tracking-[0.1em] text-ink/60 uppercase">Base imponible · +IVA 21%</p>
-          </div>
+      {/* ── Layout 2 columnas: productos (izq) + precios (der sticky) ─── */}
+      <div className="md:grid md:gap-6 md:items-start" style={{ gridTemplateColumns: '1fr 270px' }}>
 
-          {tierGroups.map((group) => {
-            const counter   = group.isBalde ? totalBaldes : totalFrascoCajas
-            const activeTierIdx = group.tiers.reduce((idx, tier, i) => counter >= tier.minQty ? i : idx, 0)
-
-            return (
-              <div key={group.label} className="px-5 py-4 border-b border-ink/8 last:border-0">
-                <div className="mb-3">
-                  <p className="font-mono text-[10px] tracking-[0.12em] uppercase text-ink font-semibold">{group.label}</p>
-                  <p className="font-mono text-[9px] tracking-[0.08em] text-ink/60 mt-[2px]">{group.sublabel}</p>
-                </div>
-
-                <div className="grid gap-[3px]">
-                  {group.tiers.map((tier, i) => {
-                    const isActive   = i === activeTierIdx && counter > 0
-                    const isNext     = !isActive && i === activeTierIdx + 1 && counter > 0
-                    const nextMin    = group.tiers[activeTierIdx + 1]?.minQty
-                    const toUnlock   = nextMin ? nextMin - counter : null
-                    const tierLabel  = i === group.tiers.length - 1
-                      ? `${tier.minQty}+  ${group.isBalde ? 'baldes' : 'cajas'}`
-                      : `${tier.minQty} – ${(group.tiers[i + 1]?.minQty ?? 99) - 1}  ${group.isBalde ? 'baldes' : 'cajas'}`
-
-                    return (
-                      <div
-                        key={tier.minQty}
-                        className={[
-                          'flex items-center justify-between px-3 py-[7px] transition-colors rounded-[1px]',
-                          isActive ? 'bg-ink text-paper' : 'bg-paper-2 text-ink',
-                        ].join(' ')}
-                      >
-                        <div className="flex items-center gap-2">
-                          {isActive && <span className="text-red text-[9px]">▶</span>}
-                          <span className="font-mono text-[10px] tracking-[0.06em]">{tierLabel}</span>
-                          {isActive && toUnlock !== null && toUnlock > 0 && (
-                            <span className="font-mono text-[8px] text-red/70 ml-1">
-                              ({toUnlock} más para bajar precio)
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-4">
-                          <span className={[
-                            'font-mono text-[10px]',
-                            isActive ? 'text-paper/70' : 'text-ink/60',
-                          ].join(' ')}>
-                            {formatARS(tier.pricePerUnit)}/u
-                          </span>
-                          <span className={[
-                            'font-mono text-[13px] font-semibold tabular-nums',
-                            isActive ? 'text-paper' : 'text-red',
-                          ].join(' ')}>
-                            {formatARS(tier.pricePerCaja)}/caja
-                          </span>
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-
-                {/* Progress nudge */}
-                {counter > 0 && (() => {
-                  const nextTier = group.tiers[activeTierIdx + 1]
-                  if (!nextTier) return null
-                  const diff = nextTier.minQty - counter
-                  return (
-                    <p className="font-mono text-[9px] text-red tracking-[0.06em] mt-2">
-                      Sumá {diff} {group.isBalde ? 'balde' : 'caja'}{diff > 1 ? 's' : ''} más
-                      y bajás a {formatARS(nextTier.pricePerCaja)}/caja
-                    </p>
-                  )
-                })()}
-              </div>
-            )
-          })}
+        {/* COLUMNA DERECHA (precios) — aparece primero en DOM = arriba en mobile */}
+        <div className="md:col-start-2 md:row-start-1 md:sticky md:top-4 mb-6 md:mb-0">
+          {pricingPanel}
         </div>
-      )}
 
-      {/* ── Mínimo de pedido ──────────────────────────────────────────── */}
-      {minTotalCajas > 1 && (
-        <div className={[
-          'px-5 py-4 mb-6 border flex items-start gap-3',
-          belowMinimum
-            ? 'bg-red/8 border-red/20'
-            : 'bg-paper-2 border-ink/8',
-        ].join(' ')}>
-          {belowMinimum
-            ? <AlertTriangle size={15} className="text-red shrink-0 mt-[1px]" />
-            : <Info size={15} className="text-ink/50 shrink-0 mt-[1px]" />
-          }
-          <p className="font-mono text-[10px] tracking-[0.08em] text-ink/70">
-            {belowMinimum
-              ? `Pedido mínimo para ${roleName}: ${minTotalCajas} cajas. Actualmente tenés ${totalFrascoCajas} caja${totalFrascoCajas !== 1 ? 's' : ''}.`
-              : `Pedido mínimo para ${roleName}: ${minTotalCajas} cajas de frascos.`
-            }
-          </p>
-        </div>
-      )}
+        {/* COLUMNA IZQUIERDA (formulario) */}
+        <div className="md:col-start-1 md:row-start-1">
 
       {/* ── Productos ────────────────────────────────────────────────── */}
       <div className="bg-paper border border-ink/8 mb-6">
@@ -650,7 +763,7 @@ export default function NuevoPedidoForm({
                 {opt.tiers && (
                   <div className="mt-3 bg-ink/5 border border-ink/8 px-3 py-2 flex flex-col gap-[3px]">
                     {opt.tiers.map((tier, ti) => {
-                      const isActive = selectedShipping === opt.value && getActiveShippingTierIdx(opt.tiers!) === ti
+                      const isActive = selectedShipping === opt.value && getActiveShippingTierIdx() === ti
                       return (
                         <div
                           key={ti}
@@ -666,7 +779,10 @@ export default function NuevoPedidoForm({
                     })}
                     {selectedShipping === opt.value && totalCajas > 0 && (
                       <p className="font-mono text-[9px] text-red mt-1 pt-1 border-t border-ink/10">
-                        Con {totalCajas} {totalCajas > 1 ? 'unidades' : 'unidad'} seleccionada{totalCajas > 1 ? 's' : ''}
+                        {totalBaldes > 0 && totalFrascoCajas === 0
+                          ? `Con ${totalBaldes} balde${totalBaldes !== 1 ? 's' : ''} seleccionado${totalBaldes !== 1 ? 's' : ''}`
+                          : `Con ${totalFrascoCajas} caja${totalFrascoCajas !== 1 ? 's' : ''} seleccionada${totalFrascoCajas !== 1 ? 's' : ''}`
+                        }
                       </p>
                     )}
                   </div>
@@ -901,30 +1017,47 @@ export default function NuevoPedidoForm({
       <div className="mt-4 grid grid-cols-2 gap-3 max-md:grid-cols-1">
 
         {/* Compartir resumen del pedido */}
-        {waShareText ? (
-          <a
-            href={`${WA_NUMBER}?text=${waShareText}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-3 px-5 py-4 bg-[#f0faf0] border border-[#25D366]/30 hover:bg-[#e6f7e6] transition-colors"
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="#25D366" className="shrink-0">
-              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-            </svg>
-            <div className="flex-1 min-w-0">
-              <p className="font-mono text-[10px] tracking-[0.1em] uppercase text-ink/80 font-semibold">Enviar resumen</p>
-              <p className="font-mono text-[8px] text-ink/40 mt-[2px]">Coordiná antes de confirmar</p>
+        {(() => {
+          const waTarget = clientPhone
+            ? `https://wa.me/${clientPhone.replace(/\D/g, '')}?text=${waShareText}`
+            : `${WA_NUMBER}?text=${waShareText}`
+          const label = clientPhone
+            ? `Enviar al cliente${clientName ? ` (${clientName})` : ''}`
+            : 'Enviar resumen'
+          const sublabel = clientPhone
+            ? 'Pedido para que confirme y abone'
+            : 'Coordiná antes de confirmar'
+
+          return waShareText ? (
+            <a
+              href={waTarget}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={[
+                'flex items-center gap-3 px-5 py-4 border hover:bg-[#e6f7e6] transition-colors',
+                clientPhone
+                  ? 'bg-[#e6f7e6] border-[#25D366]/50 col-span-2'
+                  : 'bg-[#f0faf0] border-[#25D366]/30',
+              ].join(' ')}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="#25D366" className="shrink-0">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+              </svg>
+              <div className="flex-1 min-w-0">
+                <p className="font-mono text-[10px] tracking-[0.1em] uppercase text-ink/80 font-semibold">{label}</p>
+                <p className="font-mono text-[8px] text-ink/50 mt-[2px]">{sublabel}</p>
+              </div>
+              <span className="font-mono text-[11px] text-ink/40 shrink-0">→</span>
+            </a>
+          ) : (
+            <div className="flex items-center gap-3 px-5 py-4 bg-paper-2 border border-ink/8 opacity-40">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="#25D366" className="shrink-0">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+              </svg>
+              <p className="font-mono text-[10px] tracking-[0.1em] uppercase text-ink/50">Agregá productos para compartir</p>
             </div>
-            <span className="font-mono text-[11px] text-ink/40 shrink-0">→</span>
-          </a>
-        ) : (
-          <div className="flex items-center gap-3 px-5 py-4 bg-paper-2 border border-ink/8 opacity-40">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="#25D366" className="shrink-0">
-              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-            </svg>
-            <p className="font-mono text-[10px] tracking-[0.1em] uppercase text-ink/50">Agregá productos para compartir</p>
-          </div>
-        )}
+          )
+        })()}
 
         {/* Consultar */}
         <a
@@ -942,6 +1075,8 @@ export default function NuevoPedidoForm({
           </div>
           <span className="font-mono text-[11px] text-ink/30 shrink-0">→</span>
         </a>
+      </div>
+        </div>
       </div>
     </form>
   )

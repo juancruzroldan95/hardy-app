@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { WA_NUMBER } from '@/lib/products'
@@ -140,6 +141,23 @@ export default async function MaterialesPage() {
       <p className="font-body text-[14px] text-ink/50 mb-8">
         Catálogos, fotos y recursos para usar en tu canal. Los archivos marcados con "Solicitar" se envían por WhatsApp.
       </p>
+
+      {/* Lista de precios dinámica — enlace interno */}
+      <div className="bg-ink text-paper px-5 py-4 mb-6 flex items-center justify-between gap-4 flex-wrap">
+        <div>
+          <p className="font-mono text-[9px] tracking-[0.2em] uppercase text-red mb-1">── Nuevo</p>
+          <p className="font-body font-semibold text-[14px] text-paper mb-[2px]">Lista de precios personalizada</p>
+          <p className="font-body text-[12px] text-paper/50">
+            Tu lista de precios actualizada, lista para imprimir o guardar como PDF.
+          </p>
+        </div>
+        <Link
+          href="/portal/precios"
+          className="bg-red text-paper font-mono text-[11px] tracking-[0.15em] uppercase px-5 py-3 hover:bg-red/90 transition-colors shrink-0"
+        >
+          Ver mi lista →
+        </Link>
+      </div>
 
       {/* WA banner */}
       <div className="bg-[#25D366]/10 border border-[#25D366]/30 px-5 py-4 mb-8 flex items-center justify-between gap-4 flex-wrap">

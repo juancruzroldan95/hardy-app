@@ -19,6 +19,9 @@ export async function createPreference(items: MPItem[]): Promise<MPPreference> {
     currency_id: 'ARS',
   }))
 
+  // Total de la orden — se pasa a la URL de éxito para el evento Purchase del Meta Pixel.
+  const orderTotal = items.reduce((sum, item) => sum + Number(item.price) * Number(item.qty), 0)
+
   const response = await fetch('https://api.mercadopago.com/checkout/preferences', {
     method: 'POST',
     headers: {
@@ -28,9 +31,9 @@ export async function createPreference(items: MPItem[]): Promise<MPPreference> {
     body: JSON.stringify({
       items: preferenceItems,
       back_urls: {
-        success: `${BASE_URL}/?payment=success`,
-        failure: `${BASE_URL}/?payment=failure`,
-        pending: `${BASE_URL}/?payment=pending`,
+        success: `${BASE_URL}/gracias?payment=success&value=${orderTotal}`,
+        failure: `${BASE_URL}/gracias?payment=failure`,
+        pending: `${BASE_URL}/gracias?payment=pending`,
       },
       auto_return: 'approved',
       external_reference: `hardy-${Date.now()}`,

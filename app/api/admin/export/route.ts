@@ -5,7 +5,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { db } from '@/lib/db'
-import { orders, orderItems, profiles } from '@/drizzle/schema'
+import { orders, orderItems, profiles, newsletterSubscribers } from '@/drizzle/schema'
 import { and, eq, desc } from 'drizzle-orm'
 
 function escapeCsv(value: string | number | null | undefined): string {
@@ -61,6 +61,32 @@ export async function GET(req: NextRequest) {
       headers: {
         'Content-Type':        'text/csv; charset=utf-8',
         'Content-Disposition': `attachment; filename="hardy-clientes-${now}.csv"`,
+      },
+    })
+  }
+
+  if (type === 'suscriptores') {
+    const subs = await db.query.newsletterSubscribers.findMany({
+      where:   eq(newsletterSubscribers.isDeleted, false),
+      orderBy: [desc(newsletterSubscribers.createdAt)],
+    })
+
+    const headers = ['Email', 'Nombre', 'Origen', 'Activo', 'Fecha']
+    const lines = [
+      headers.join(','),
+      ...subs.map((s) => row([
+        s.email,
+        s.name,
+        s.source,
+        s.isActive ? 'Sí' : 'No',
+        s.createdAt.toLocaleDateString('es-AR'),
+      ])),
+    ]
+
+    return new NextResponse(lines.join('\n'), {
+      headers: {
+        'Content-Type':        'text/csv; charset=utf-8',
+        'Content-Disposition': `attachment; filename="hardy-suscriptores-${now}.csv"`,
       },
     })
   }

@@ -3,6 +3,7 @@
 import { createContext, useContext, useMemo, useState } from 'react'
 import type { CartItem, CartState } from '@/types'
 import { PRODUCTS, formatARS } from '@/lib/products'
+import { trackAddToCart } from '@/lib/meta-pixel'
 
 interface CartContextValue {
   cart: CartState
@@ -44,6 +45,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   function addItem(id: string) {
     setCart((c) => ({ ...c, [id]: (c[id] ?? 0) + 1 }))
     setCartOpen(true)
+    const product = PRODUCTS.find((p) => p.id === id)
+    if (product) {
+      trackAddToCart({ value: product.price, contentName: product.name, contentIds: [product.id] })
+    }
   }
 
   function removeItem(id: string) {

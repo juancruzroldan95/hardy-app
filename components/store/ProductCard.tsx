@@ -5,7 +5,29 @@ import { useCart } from '@/lib/cart-context'
 import { formatARS, WA_NUMBER } from '@/lib/products'
 import type { Product } from '@/types'
 
-export default function ProductCard({ product }: { product: Product }) {
+export interface ProductRating {
+  avg:   number
+  count: number
+}
+
+// Compact star rating — fills whole/half/empty based on avg
+function Stars({ avg, size = 12 }: { avg: number; size?: number }) {
+  return (
+    <span className="inline-flex items-center" aria-hidden="true">
+      {[1, 2, 3, 4, 5].map((i) => {
+        const fill = Math.max(0, Math.min(1, avg - (i - 1)))
+        return (
+          <span key={i} className="relative inline-block leading-none" style={{ width: size, height: size, fontSize: size }}>
+            <span className="absolute inset-0 text-ink/15">★</span>
+            <span className="absolute inset-0 overflow-hidden text-amber-500" style={{ width: `${fill * 100}%` }}>★</span>
+          </span>
+        )
+      })}
+    </span>
+  )
+}
+
+export default function ProductCard({ product, rating }: { product: Product; rating?: ProductRating }) {
   const { addItem } = useCart()
   const [imgIdx,        setImgIdx]        = useState(0)
   const [modalMounted,  setModalMounted]  = useState(false)  // controls DOM presence
@@ -91,6 +113,14 @@ export default function ProductCard({ product }: { product: Product }) {
           <div className="font-heading text-[18px] font-medium mb-[6px] leading-[1.2] group-hover:text-paper transition-colors duration-[220ms]">
             {product.name}
           </div>
+          {rating && rating.count > 0 && (
+            <div className="flex items-center gap-1.5 mb-2">
+              <Stars avg={rating.avg} />
+              <span className="font-mono text-[10px] text-ink/50 group-hover:text-[#aaa] transition-colors duration-[220ms]">
+                {rating.avg.toFixed(1)} · {rating.count}
+              </span>
+            </div>
+          )}
           <div className="text-[13px] leading-[1.5] mb-4 text-[#666] group-hover:text-[#aaa] transition-colors duration-[220ms]">
             {product.desc}
           </div>
@@ -194,6 +224,19 @@ export default function ProductCard({ product }: { product: Product }) {
                 >
                   {product.name}
                 </h3>
+
+                {rating && rating.count > 0 && (
+                  <a
+                    href="/tienda/resenas"
+                    onClick={(e) => e.stopPropagation()}
+                    className="inline-flex items-center gap-2 mb-3 group/r"
+                  >
+                    <Stars avg={rating.avg} size={13} />
+                    <span className="font-mono text-[11px] text-white/60 group-hover/r:text-white transition-colors">
+                      {rating.avg.toFixed(1)} · {rating.count} {rating.count === 1 ? 'reseña' : 'reseñas'} →
+                    </span>
+                  </a>
+                )}
 
                 {product.tagline && (
                   <p className="font-heading text-[13px] text-red italic m-0 mb-[14px]">

@@ -17,6 +17,7 @@ const links = [
   { href: '/a-granel',        label: 'A granel'       },
   { href: '/recetas',         label: 'Recetas'        },
   { href: '/donde-comprar',   label: 'Dónde comprar'  },
+  { href: '/nosotros',        label: 'Nosotros'       },
 ]
 
 export default function Nav({ cartCount = 0, onCartOpen }: NavProps) {

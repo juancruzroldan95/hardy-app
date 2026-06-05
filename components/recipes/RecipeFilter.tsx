@@ -41,7 +41,7 @@ export default function RecipeFilter({ recetas }: { recetas: Receta[] }) {
             {filtered.length} recetas
           </div>
           <div className="grid grid-cols-3 gap-6 max-md:grid-cols-2 max-[600px]:grid-cols-1">
-            {filtered.map((r) => (
+            {filtered.map((r, i) => (
               <div
                 key={r.slug}
                 className="group bg-paper border border-ink/10 overflow-hidden flex flex-col cursor-pointer transition-colors duration-300 hover:bg-ink hover:shadow-[0_8px_32px_rgba(0,0,0,0.2)]"
@@ -52,6 +52,8 @@ export default function RecipeFilter({ recetas }: { recetas: Receta[] }) {
                     alt={r.titulo}
                     width={600}
                     height={450}
+                    priority={i < 3}
+                    sizes="(max-width: 600px) 100vw, (max-width: 900px) 50vw, 33vw"
                     className="w-full h-full object-cover block transition-transform duration-[400ms] group-hover:scale-[1.04]"
                   />
                 </div>

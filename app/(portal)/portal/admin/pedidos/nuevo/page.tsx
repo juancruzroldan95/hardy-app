@@ -191,6 +191,8 @@ export default async function AdminNuevoPedidoPage({ searchParams }: Props) {
 
       <AdminOrderForm
         clientUserId={clientProfile.userId}
+        clientPhone={clientProfile.phone}
+        clientName={clientProfile.displayName ?? clientProfile.company}
         productos={productosOrden}
         minTotalCajas={minTotalCajas}
         roleName={ROLE_LABELS[role] ?? role}

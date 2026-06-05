@@ -1,20 +1,26 @@
 'use client'
 
-import { useActionState } from 'react'
 import { createPortalOrderForClient } from '@/lib/actions/orders'
-import type { CreateOrderState } from '@/lib/actions/orders'
 import NuevoPedidoForm from '@/components/portal/NuevoPedidoForm'
 import type { ProductOrden } from '@/components/portal/NuevoPedidoForm'
 
 interface Props {
   clientUserId:  string
+  clientPhone?:  string | null
+  clientName?:   string | null
   productos:     ProductOrden[]
   minTotalCajas: number
   roleName:      string
 }
 
-export default function AdminOrderForm({ clientUserId, productos, minTotalCajas, roleName }: Props) {
-  // Bind the clientUserId so it's baked into the action
+export default function AdminOrderForm({
+  clientUserId,
+  clientPhone,
+  clientName,
+  productos,
+  minTotalCajas,
+  roleName,
+}: Props) {
   const boundAction = createPortalOrderForClient.bind(null, clientUserId)
 
   return (
@@ -23,6 +29,8 @@ export default function AdminOrderForm({ clientUserId, productos, minTotalCajas,
       minTotalCajas={minTotalCajas}
       roleName={roleName}
       overrideAction={boundAction}
+      clientPhone={clientPhone ?? undefined}
+      clientName={clientName ?? undefined}
     />
   )
 }

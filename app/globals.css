@@ -52,6 +52,19 @@
     max-width: 100%;
     display: block;
   }
+
+  /* Accesibilidad: anillo de foco visible para navegación por teclado.
+     Solo aparece con :focus-visible (teclado), no en clicks de mouse. */
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible,
+  [tabindex]:focus-visible {
+    outline: 2px solid #C0171E;
+    outline-offset: 2px;
+    border-radius: 1px;
+  }
 }
 
 /* ── Scroll reveal ─────────────────────────────────────── */
