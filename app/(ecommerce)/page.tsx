@@ -99,50 +99,41 @@ export default function HomePage() {
       {/* ── 1. HERO (B2B primario) ─────────────────────────────────── */}
       {/* §4.2 — nuevo eyebrow/copy/CTAs, sin "+500" aquí */}
       <section
-        className="relative min-h-screen w-full flex items-center overflow-hidden text-paper"
-        style={{
-          backgroundImage: "url('/lifestyle/hero-coleccion-dark.jpg')",
-          backgroundSize: 'cover',
-          backgroundPosition: 'right center',
-        }}
+        className="relative min-h-screen w-full flex items-center overflow-hidden text-paper [background-image:url('/lifestyle/hero-coleccion-dark.jpg')] [background-size:cover] [background-position:right_center] max-md:[background-position:55%_center]"
       >
-        {/* Overlay negro sutil — garantiza legibilidad del texto sobre la zona izquierda */}
+        {/* En mobile, overlay cubre más para garantizar legibilidad con fondo centrado */}
         <div
           className="absolute inset-0 z-[1]"
           style={{
             background:
-              'linear-gradient(to right, rgba(10,10,10,0.80) 0%, rgba(10,10,10,0.55) 35%, rgba(10,10,10,0.15) 65%, rgba(10,10,10,0) 100%)',
+              'linear-gradient(to right, rgba(10,10,10,0.85) 0%, rgba(10,10,10,0.65) 40%, rgba(10,10,10,0.30) 70%, rgba(10,10,10,0.10) 100%)',
           }}
         />
-        <div className="relative z-[2] px-16 max-w-[720px] max-md:px-6">
-          {/* §4.2 eyebrow — nombra compradores B2B, no incluye "+500" */}
-          <p className="font-mono text-[11px] tracking-[0.25em] text-red uppercase mb-7">
-            ── MANÍ SELECCIONADO Y MIEL PURA · HECHO EN ARGENTINA
+        <div className="relative z-[2] px-16 max-w-[720px] max-md:px-6 max-md:py-24">
+          <p className="font-mono text-[11px] tracking-[0.25em] text-red uppercase mb-7 max-md:text-[10px] max-md:tracking-[0.15em] max-md:mb-5">
+            ── MANÍ Y MIEL PURA · HECHO EN ARGENTINA
           </p>
           <h1
             className="font-heading font-medium tracking-[-0.02em] m-0 text-paper"
-            style={{ fontSize: 'clamp(52px, 8vw, 112px)', lineHeight: 0.92 }}
+            style={{ fontSize: 'clamp(48px, 8vw, 112px)', lineHeight: 0.92 }}
           >
             Alimentá tu
             <br />
             <em className="not-italic text-red">instinto.</em>
           </h1>
-          {/* §4.2 subhead */}
-          <p className="mt-8 text-[17px] leading-[1.6] max-w-[480px] text-[#d0d0d0] font-light">
+          <p className="mt-8 text-[17px] leading-[1.6] max-w-[480px] text-[#d0d0d0] font-light max-md:mt-5 max-md:text-[15px]">
             Crema de maní y miel 100% naturales. Un solo ingrediente, sin aditivos. Hecha en Argentina.
           </p>
-          <div className="mt-9 flex gap-3 flex-wrap">
-            {/* §4.2 CTA primario → /portal */}
+          <div className="mt-9 flex gap-3 max-md:flex-col max-md:mt-7">
             <Link
               href="/portal"
-              className="bg-red text-paper font-mono text-[12px] tracking-[0.15em] uppercase px-8 py-[18px] inline-flex items-center gap-[10px]"
+              className="bg-red text-paper font-mono text-[12px] tracking-[0.15em] uppercase px-8 py-[18px] inline-flex items-center justify-center gap-[10px] max-md:w-full"
             >
               CONSULTAR PRECIO MAYORISTA →
             </Link>
-            {/* §4.2 CTA secundario → /tienda */}
             <Link
               href="/tienda"
-              className="text-paper font-mono text-[12px] tracking-[0.15em] uppercase px-8 py-[18px] border border-white/30"
+              className="text-paper font-mono text-[12px] tracking-[0.15em] uppercase px-8 py-[18px] border border-white/30 text-center max-md:w-full"
               style={{ background: 'rgba(255,255,255,0.08)' }}
             >
               VER PRODUCTOS →
@@ -177,7 +168,7 @@ export default function HomePage() {
                 delay={i * 80}
                 className="group flex flex-col transition-colors duration-200 border-t-[3px] border-transparent bg-paper-2 text-ink hover:bg-ink hover:text-paper hover:border-red"
               >
-                <div className="p-10 flex flex-col flex-1">
+                <div className="p-10 max-md:p-6 flex flex-col flex-1">
                   <div className="font-mono text-[10px] tracking-[0.2em] uppercase text-red mb-[10px]">{f.sublabel}</div>
                   <div className="font-heading text-[28px] font-medium mb-3 leading-[1.1]">{f.label}</div>
                   <div className="text-[14px] leading-[1.6] mb-6 transition-colors text-[#555] group-hover:text-paper/70">
@@ -227,7 +218,7 @@ export default function HomePage() {
               <RevealSection
                 key={s.label}
                 delay={i * 70}
-                className="bg-ink px-8 py-8 flex flex-col items-center justify-center text-center"
+                className="bg-ink px-8 py-8 max-md:px-4 max-md:py-6 flex flex-col items-center justify-center text-center"
               >
                 <div
                   className="font-heading font-medium text-red leading-none mb-2"
@@ -276,28 +267,29 @@ export default function HomePage() {
       {/* §4.5 — sección intacta en contenido y diseño */}
       {/* Imagen como fondo full-bleed con background-blend-mode para mimetizar con bg-ink */}
       <section className="bg-ink text-paper overflow-hidden">
-        <div className="grid grid-cols-2 max-md:grid-cols-1">
+        {/* En mobile: flex-col-reverse pone la imagen arriba y el texto abajo */}
+        <div className="grid grid-cols-2 max-md:flex max-md:flex-col-reverse">
           {/* Mitad izquierda — copy */}
-          <div className="flex items-center px-16 py-20 max-md:px-6 max-md:py-12">
+          <div className="flex items-center px-16 py-20 max-md:px-6 max-md:py-10">
             <RevealSection>
-              <span className="bg-red text-paper font-mono text-[10px] tracking-[0.2em] uppercase px-3 py-[6px] inline-block mb-8">
+              <span className="bg-red text-paper font-mono text-[10px] tracking-[0.2em] uppercase px-3 py-[6px] inline-block mb-5">
                 Nuevo
               </span>
-              <p className="font-mono text-[11px] tracking-[0.25em] text-red uppercase mb-5">
+              <p className="font-mono text-[11px] tracking-[0.25em] text-red uppercase mb-4">
                 ── Lanzamiento · Crema de Maní
               </p>
               <h2
-                className="font-heading font-medium leading-[1.05] m-0 mb-5 tracking-[-0.02em]"
-                style={{ fontSize: 'clamp(38px, 5vw, 64px)' }}
+                className="font-heading font-medium leading-[1.05] m-0 mb-4 tracking-[-0.02em]"
+                style={{ fontSize: 'clamp(36px, 5vw, 64px)' }}
               >
                 Crunchy.
                 <br />
                 <em className="not-italic text-red">Con textura real.</em>
               </h2>
-              <p className="text-[15px] leading-[1.8] mb-8 text-paper/65 max-w-[480px]">
+              <p className="text-[15px] leading-[1.7] mb-6 text-paper/65 max-w-[480px]">
                 La misma base 100% natural con trozos enteros de maní que te recuerdan de dónde viene cada cucharada. Sin aditivos. Sin aceite. Sin azúcar. Solo maní — pero que se siente.
               </p>
-              <div className="flex gap-[2px] mb-8 flex-wrap">
+              <div className="flex gap-[2px] mb-6 flex-wrap">
                 {['100% Maní', 'Trozos enteros', 'Sin aditivos', '380g'].map((tag) => (
                   <span key={tag} className="bg-paper/8 font-mono text-[9px] tracking-[0.15em] uppercase px-3 py-[6px] text-paper/60">
                     {tag}
@@ -306,22 +298,25 @@ export default function HomePage() {
               </div>
               <Link
                 href="/tienda"
-                className="bg-red text-paper font-mono text-[12px] tracking-[0.15em] uppercase px-8 py-[16px] self-start inline-block"
+                className="bg-red text-paper font-mono text-[12px] tracking-[0.15em] uppercase px-8 py-[16px] self-start inline-block w-full max-md:text-center"
               >
                 Comprar Crunchy →
               </Link>
             </RevealSection>
           </div>
-          {/* Mitad derecha — imagen (llena la altura del copy) */}
-          <div className="relative max-md:aspect-[16/9]">
-            <Image
-              src="/lifestyle/crunchy-textura-dark.png"
-              alt="Frasco Hardy Crunchy abierto con cuchara de textura y maníes"
-              fill
-              className="object-contain object-center"
-              sizes="(max-width: 900px) 100vw, 50vw"
-            />
-          </div>
+          {/* Mitad derecha — imagen full-bleed, aspect 16/9 en mobile para ver el frasco completo */}
+          <div
+            className="max-md:aspect-[16/9] max-md:w-full"
+            role="img"
+            aria-label="Frasco Hardy Crunchy abierto con cuchara de textura y maníes"
+            style={{
+              backgroundImage: "url('/lifestyle/crunchy-textura-dark.png')",
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat',
+              backgroundColor: '#1a1a1a',
+            }}
+          />
         </div>
       </section>
 
@@ -353,12 +348,11 @@ export default function HomePage() {
           </RevealSection>
 
           {/* Layout: imagen genérica izquierda + listado de todos los formatos derecha */}
-          {/* NOTA: guardar la foto de los baldes en /public/lifestyle/baldes-duo.png */}
           <RevealSection className="grid grid-cols-2 gap-[2px] max-md:grid-cols-1">
             {/* Imagen — background-blend-mode:multiply para mimetizar con bg-paper-2 */}
             <div
+              className="min-h-[420px] max-md:min-h-[240px]"
               style={{
-                minHeight: '420px',
                 backgroundImage: "url('/products/balde-23-front.png')",
                 backgroundSize: 'contain',
                 backgroundPosition: 'center',
@@ -406,10 +400,10 @@ export default function HomePage() {
                 </div>
               </div>
 
-              <div className="flex gap-3 flex-wrap items-center">
+              <div className="flex gap-3 flex-wrap items-center max-md:flex-col">
                 <Link
                   href="/portal"
-                  className="bg-ink text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-7 py-[14px] inline-block hover:bg-red transition-colors"
+                  className="bg-ink text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-7 py-[14px] inline-block hover:bg-red transition-colors max-md:w-full max-md:text-center"
                 >
                   Portal Cliente →
                 </Link>
@@ -417,7 +411,7 @@ export default function HomePage() {
                   href={`${WA_NUMBER}?text=Hola%20Hardy,%20quiero%20consultar%20por%20volumen%20a%20granel`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="bg-ink text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-7 py-[14px] flex items-center gap-2 hover:bg-red transition-colors"
+                  className="bg-ink text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-7 py-[14px] flex items-center justify-center gap-2 hover:bg-red transition-colors max-md:w-full"
                   aria-label="Consultar por WhatsApp"
                 >
                   Contactanos <MessageCircle size={14} />
@@ -519,7 +513,7 @@ export default function HomePage() {
           <div className="grid grid-cols-3 gap-[2px] max-md:grid-cols-1">
             {USOS.map((u, i) => (
               <RevealSection key={u.src} delay={i * 80}>
-                <div className="relative aspect-square overflow-hidden group">
+                <div className="relative aspect-square max-md:aspect-[4/3] overflow-hidden group">
                   <Image
                     src={u.src}
                     alt={u.alt}
@@ -592,16 +586,16 @@ export default function HomePage() {
                 Accedé a tu portal.
               </h2>
             </div>
-            <div className="flex gap-3 flex-wrap shrink-0">
+            <div className="flex gap-3 flex-wrap shrink-0 max-md:flex-col max-md:w-full">
               <Link
                 href="/portal"
-                className="bg-paper text-ink font-mono text-[11px] tracking-[0.18em] uppercase px-8 py-[16px] inline-block"
+                className="bg-paper text-ink font-mono text-[11px] tracking-[0.18em] uppercase px-8 py-[16px] inline-block text-center max-md:w-full"
               >
                 ACCEDER AL PORTAL →
               </Link>
               <Link
                 href="/portal"
-                className="border border-paper/40 text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-8 py-[16px] inline-block"
+                className="border border-paper/40 text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-8 py-[16px] inline-block text-center max-md:w-full"
               >
                 SOLICITAR ACCESO →
               </Link>

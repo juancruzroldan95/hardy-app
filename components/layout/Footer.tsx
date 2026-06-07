@@ -52,7 +52,7 @@ export default function Footer() {
               <div className="font-display text-[48px] tracking-[0.04em] leading-none">HARDY</div>
               <div className="font-mono text-[10px] tracking-[0.3em] text-red mt-[6px]">ALIMENTÁ TU INSTINTO</div>
               <p className="mt-5 text-[#888] text-[14px] leading-[1.5] max-w-[320px]">
-                Crema de maní y miel artesanal. Un solo ingrediente. La mejor calidad. Hecho en Argentina.
+                Crema de maní y miel natural. Un solo ingrediente. Sin aditivos. Hecho en Argentina.
               </p>
               <div className="mt-8 max-w-[360px]">
                 <NewsletterForm />

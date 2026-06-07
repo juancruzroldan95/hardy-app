@@ -8,7 +8,6 @@ import { notFound, redirect } from 'next/navigation'
 import { createClient } from '@/services/supabase/server'
 import { getProfileByUserId } from '@/repository/queries/profile'
 import { getOrderById } from '@/repository/queries/orders'
-import { formatARS } from '@/consts/products'
 import { HARDY_BANK } from '@/consts/hardy'
 import PrintButton from '@/components/portal/PrintButton'
 

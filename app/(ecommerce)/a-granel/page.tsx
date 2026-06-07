@@ -50,7 +50,7 @@ const USOS_MIEL = ['Endulzante natural', 'Panificados', 'Repostería', 'Bebidas'
 const PARA_QUIEN = [
   { Icon: Coffee,   t: 'Cafés y restaurants', d: 'Insumo para preparaciones, desayunos y carta.' },
   { Icon: ChefHat,  t: 'Reposterías', d: 'Ingrediente para rellenos, coberturas y elaboraciones.' },
-  { Icon: Dumbbell, t: 'Emprendedores', d: 'Barras, snacks proteicos y productos saludables.' },
+  { Icon: Dumbbell, t: 'Emprendedores', d: 'Barras, snacks proteicos y productos naturales.' },
   { Icon: Factory,  t: 'Industria', d: 'Volúmenes altos para elaboración continua.' },
 ]
 
@@ -224,6 +224,47 @@ export default function AGranelPage() {
             {USOS_MIEL.map((u, i) => (
               <span key={i} className="bg-paper-2 px-3 py-1 font-mono text-[9px] tracking-[0.12em] uppercase text-[#666]">{u}</span>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ¿FRASCO O BALDE? — comparador conceptual */}
+      <section className="py-16 px-10 bg-paper max-md:px-6">
+        <div className="max-w-[1100px] mx-auto">
+          <p className="font-mono text-[11px] tracking-[0.25em] text-red uppercase mb-4">── ¿Frasco o balde?</p>
+          <div className="grid grid-cols-[1.4fr_1fr] gap-10 items-center max-md:grid-cols-1 max-md:gap-6">
+            <div>
+              <h2
+                className="font-heading font-medium tracking-[-0.02em] m-0 mb-4 leading-[1.15]"
+                style={{ fontSize: 'clamp(26px,4vw,40px)' }}
+              >
+                Si usás más de 2 frascos <em className="not-italic text-red">por semana,</em> el balde te conviene.
+              </h2>
+              <p className="text-[15px] text-[#555] leading-[1.7] max-w-[560px] mb-7">
+                El balde tiene mejor costo por kilo, dura más y ocupa menos espacio que la misma cantidad en
+                frascos. Para cocinas, cafeterías y producción, es el formato que tiene sentido.
+              </p>
+              <a
+                href={`${WA_NUMBER}?text=${encodeURIComponent('Hola Hardy, quiero saber si me conviene el balde o los frascos')}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block bg-red text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-7 py-[14px]"
+              >
+                Consultanos cuál te conviene →
+              </a>
+            </div>
+            {/* Ícono conceptual frasco vs balde */}
+            <div className="flex items-end justify-center gap-8 bg-paper-2 py-10 px-6 max-md:py-8">
+              <div className="flex flex-col items-center gap-3">
+                <div className="w-12 h-16 border-[3px] border-ink/30 rounded-b-md rounded-t-sm" />
+                <span className="font-mono text-[9px] tracking-[0.18em] uppercase text-[#888]">Frasco</span>
+              </div>
+              <div className="font-mono text-[12px] text-red">vs</div>
+              <div className="flex flex-col items-center gap-3">
+                <div className="w-20 h-24 border-[3px] border-red rounded-b-lg rounded-t-sm" />
+                <span className="font-mono text-[9px] tracking-[0.18em] uppercase text-red">Balde</span>
+              </div>
+            </div>
           </div>
         </div>
       </section>

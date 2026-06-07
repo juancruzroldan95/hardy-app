@@ -44,7 +44,7 @@ const TIMELINE = [
   },
   {
     year: '2025',
-    desc: '+500 puntos de venta. Portal para clientes mayoristas. Hardy sigue siendo Hardy.',
+    desc: 'Presencia nacional. Portal para clientes mayoristas. Hardy sigue siendo Hardy.',
   },
 ]
 
@@ -65,7 +65,7 @@ const VALORES = [
 
 const STATS = [
   { num: '10 años', label: 'de marca' },
-  { num: '+500', label: 'puntos de venta' },
+  { num: '0', label: 'aditivos' },
   { num: '1', label: 'ingrediente' },
   { num: '100%', label: 'natural' },
 ]

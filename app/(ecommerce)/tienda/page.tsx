@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { getProducts, PRODUCTS } from '@/consts/products'
+import { getProducts } from '@/consts/products'
 import { WA_NUMBER } from '@/consts/products'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -30,7 +30,6 @@ export const metadata: Metadata = {
 export default async function TiendaPage() {
   const products = getProducts()
   const frascos = products.filter((p) => p.line === 'frasco')
-  const baldes = products.filter((p) => p.line === 'balde')
 
   // Agregados de reseñas publicadas por producto
   const reviews = await db.query.productReviews.findMany({
@@ -96,15 +95,21 @@ export default async function TiendaPage() {
             ))}
           </div>
 
-          {/* Baldes */}
-          <div className="mt-10 mb-5">
-            <div className="font-mono text-[10px] tracking-[0.2em] uppercase text-red mb-1">── A Granel · Baldes</div>
-            <p className="text-[13px] text-[#888] m-0">Crema de maní y miel · Baldes de 4,5 kg, 6 kg, 23 kg y 30 kg · Uso gastronómico, producción y reventa</p>
-          </div>
-          <div className="grid grid-cols-4 gap-[2px] max-md:grid-cols-2">
-            {baldes.map((p) => (
-              <ProductCard key={p.id} product={p} rating={ratingByProduct.get(p.id)} />
-            ))}
+          {/* Baldes a granel — viven en /a-granel con "Consultar precio".
+              Ver correcciones web HARDY P1.2: la tienda pública queda solo con frascos. */}
+          <div className="mt-10 border border-ink/10 bg-paper-2 px-6 py-7 flex items-center justify-between gap-6 max-md:flex-col max-md:items-start">
+            <div>
+              <div className="font-mono text-[10px] tracking-[0.2em] uppercase text-red mb-1">── A Granel · Baldes</div>
+              <p className="text-[14px] text-ink m-0 max-w-[520px] leading-[1.6]">
+                Crema de maní y miel en baldes de 4,5 kg, 6 kg, 23 kg y 30 kg. Para uso gastronómico, producción y reventa — con precio por volumen.
+              </p>
+            </div>
+            <Link
+              href="/a-granel"
+              className="inline-block bg-ink text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-7 py-[14px] no-underline whitespace-nowrap"
+            >
+              Ver a granel →
+            </Link>
           </div>
 
         </div>
@@ -119,7 +124,7 @@ export default async function TiendaPage() {
             '@type': 'ItemList',
             name: 'Productos Hardy',
             description: 'Crema de maní y miel 100% naturales',
-            itemListElement: PRODUCTS.map((p, i) => ({
+            itemListElement: frascos.map((p, i) => ({
               '@type': 'ListItem',
               position: i + 1,
               item: {

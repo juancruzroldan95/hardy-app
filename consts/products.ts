@@ -70,7 +70,7 @@ export const PRODUCTS: Product[] = [
     desc: 'Maní tostado con trozos enteros.',
     image: '/products/crunchy-380-front.png',
     lifestyle: '/products/crunchy-380-open.png',
-    price: 5400,
+    price: 5200,
     images: [
       '/products/crunchy-380-front.png',
       '/products/crunchy-380-open.png',

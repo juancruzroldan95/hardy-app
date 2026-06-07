@@ -30,7 +30,7 @@ const BENEFICIOS = [
   { n: '02', t: 'Reposición rápida', d: '48-72hs. Coordinamos el envío según tu necesidad.' },
   { n: '03', t: 'Soporte directo', d: 'Un contacto para pedidos y logística.' },
   { n: '04', t: 'Un solo proveedor', d: 'Crema de maní y miel del mismo lugar.' },
-  { n: '05', t: '10 años de marca', d: 'Desde 2015. El consumidor ya busca HARDY por nombre.' },
+  { n: '05', t: 'Marca con recorrido', d: '10 años en el mercado. Un producto que se explica solo: un ingrediente.' },
 ]
 
 export default function MayoristasPage() {
@@ -121,6 +121,23 @@ export default function MayoristasPage() {
           <div className="mt-1 px-5 py-4 bg-paper-2 text-[13px] text-[#555] text-center leading-[1.5]">
             <em>Más volumen = mejor precio por unidad. ¿Movés mucho? <strong className="text-ink">Hablemos.</strong></em>
           </div>
+        </div>
+      </section>
+
+      {/* PRECIO CONGELADO */}
+      <section className="py-16 px-10 bg-ink text-paper max-md:px-6">
+        <div className="max-w-[1100px] mx-auto">
+          <p className="font-mono text-[11px] tracking-[0.25em] text-red uppercase mb-4">── Previsibilidad</p>
+          <h2
+            className="font-heading font-medium m-0 mb-4 leading-[1.1]"
+            style={{ fontSize: 'clamp(26px,4vw,40px)' }}
+          >
+            Precio congelado <em className="not-italic text-red">90 días.</em>
+          </h2>
+          <p className="text-[15px] text-[#bbb] max-w-[620px] leading-[1.7]">
+            Arrancás con un precio fijo durante tres meses. Al cierre del período, ajustamos según tu
+            volumen con un descuento atado a inflación. Sin sorpresas. Sin renegociar cada semana.
+          </p>
         </div>
       </section>
 
