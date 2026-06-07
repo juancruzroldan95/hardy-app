@@ -5,14 +5,6 @@ import { getRecetas } from '@/consts/recetas'
 import { WA_NUMBER } from '@/consts/products'
 import RevealSection from '@/components/ui/RevealSection'
 
-// ── Quick pillars bar (no "+500" — that number lives only in stats)
-const PILLARS = [
-  { title: 'Presencia nacional', sub: 'Dietéticas, gimnasios, cafés' },
-  { title: 'Un solo ingrediente', sub: 'Maní o miel. Nada más.' },
-  { title: '10 años de marca', sub: 'Desde 2015 en Argentina' },
-  { title: '100% Natural', sub: 'Sin conservantes. Sin aditivos.' },
-]
-
 // §4.3 — Columnas en orden: Negocio → A granel → Tu casa
 // Default: todos en gris (bg-paper-2); hover: negro con botón rojo
 const FORMATS = [
@@ -57,58 +49,40 @@ const FORMATS = [
   },
 ]
 
-// §4.4 — Reemplazar "4 VARIEDADES" por "MEJOR PRECIO POR KG EN VOLUMEN"
-// "+500" aparece UNA SOLA VEZ en toda la home — aquí
+// Verdades de producto — sin claims de puntos de venta
 const STATS = [
-  { num: '+500',  label: 'Puntos de venta' },
-  { num: '10',    label: 'Años en el mercado' },
-  { num: 'MEJOR', label: 'Precio por kg en volumen' },
-  { num: '100%',  label: 'Industria argentina' },
-]
-
-const TESTIMONIALS = [
-  {
-    quote: 'Lo pedimos porque nuestros clientes ya lo conocían por Instagram. Se vende solo.',
-    author: 'Dietética Raíces',
-    location: 'Palermo, CABA',
-    tipo: 'Revendedor',
-  },
-  {
-    quote: 'Lo incorporamos al desayuno de la carta y no lo sacamos más. El crunchy con tostadas es el más pedido.',
-    author: 'Café del Mercado',
-    location: 'Belgrano, CABA',
-    tipo: 'Gastronómico',
-  },
-  {
-    quote: 'La crema de maní natural es lo que esperaba: maní, punto. Sin nada raro en la etiqueta.',
-    author: 'Valentina R.',
-    location: 'Buenos Aires',
-    tipo: 'Consumidor',
-  },
+  { num: '1',    label: 'ingrediente', sub: 'Maní o miel. Nada más.' },
+  { num: '0',    label: 'aditivos',    sub: 'Sin azúcar, sin aceite de palma, sin conservantes.' },
+  { num: '10',   label: 'años',        sub: 'De marca, desde 2015.' },
+  { num: '100%', label: 'nacional',    sub: 'Producción argentina.' },
 ]
 
 // Usos / a quién le sirve — fotos reales con overlay de caso de uso
 const USOS = [
   {
-    src: '/lifestyle/uso-desayuno-miel.png',
-    alt: 'Desayuno con tostadas, banana, miel Hardy y café',
+    src: '/lifestyle/uso-tostadas-dark.jpg',
+    alt: 'Tostada integral con crema de maní Hardy, banana y arándanos sobre piedra negra',
     eyebrow: 'Tu desayuno',
     title: 'Tostadas y frutas',
     desc: 'Tostadas, frutas, café. El clásico que nunca falla.',
+    // Imagen 16:9 — el producto está centrado-izquierda; ajustamos para mostrar la tostada
+    objectPosition: 'center center',
   },
   {
-    src: '/lifestyle/uso-fit-natural.png',
-    alt: 'Mujer atlética agregando crema de maní Hardy a un bowl de proteína',
+    src: '/lifestyle/uso-smoothie-dark.jpg',
+    alt: 'Smoothie de crema de maní Hardy en vaso alto con maníes sueltos sobre piedra negra',
     eyebrow: 'Tu entrenamiento',
     title: 'Proteína natural',
     desc: 'Pre y post entrenamiento. Energía real.',
+    objectPosition: 'center center',
   },
   {
-    src: '/lifestyle/uso-miel-bowl.png',
-    alt: 'Miel Hardy cayendo sobre un bowl de yogurt y granola',
+    src: '/lifestyle/uso-bowl-dark.jpg',
+    alt: 'Bowl de yogurt con granola y miel Hardy cayendo en hilo, frasco Miel Líquida al lado',
     eyebrow: 'Tu cocina',
     title: 'Bowls y recetas',
     desc: 'Bowls, yogures, recetas. Endulzá natural.',
+    objectPosition: 'center center',
   },
 ]
 
@@ -131,26 +105,23 @@ export default function HomePage() {
       <section
         className="relative min-h-screen w-full flex items-center overflow-hidden text-paper"
         style={{
-          backgroundImage: "url('/lifestyle/hero-duo-v2.png')",
+          backgroundImage: "url('/lifestyle/hero-coleccion-dark.jpg')",
           backgroundSize: 'cover',
-          backgroundPosition: 'center right',
+          backgroundPosition: 'right center',
         }}
       >
+        {/* Overlay negro sutil — garantiza legibilidad del texto sobre la zona izquierda */}
         <div
           className="absolute inset-0 z-[1]"
           style={{
             background:
-              'linear-gradient(to right, rgba(15,15,15,0.95) 0%, rgba(15,15,15,0.82) 30%, rgba(15,15,15,0.45) 60%, rgba(15,15,15,0) 100%)',
+              'linear-gradient(to right, rgba(10,10,10,0.80) 0%, rgba(10,10,10,0.55) 35%, rgba(10,10,10,0.15) 65%, rgba(10,10,10,0) 100%)',
           }}
-        />
-        <div
-          className="absolute right-[-150px] top-[-150px] w-[600px] h-[600px] z-[1] pointer-events-none"
-          style={{ background: 'radial-gradient(circle, rgba(192,23,30,0.12) 0%, transparent 65%)' }}
         />
         <div className="relative z-[2] px-16 max-w-[720px] max-md:px-6">
           {/* §4.2 eyebrow — nombra compradores B2B, no incluye "+500" */}
           <p className="font-mono text-[11px] tracking-[0.25em] text-red uppercase mb-7">
-            ── ELEGIDA POR DIETÉTICAS, GIMNASIOS Y CAFÉS · ARGENTINA
+            ── MANÍ SELECCIONADO Y MIEL PURA · HECHO EN ARGENTINA
           </p>
           <h1
             className="font-heading font-medium tracking-[-0.02em] m-0 text-paper"
@@ -183,21 +154,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* ── PILLARS (barra rápida sin "+500") ─────────────────────── */}
-      <div className="bg-paper border-t border-ink/15 border-b border-ink/15">
-        <div className="max-w-[1240px] mx-auto grid grid-cols-4 border-l border-ink/15 max-md:grid-cols-2">
-          {PILLARS.map((p) => (
-            <div key={p.title} className="px-8 py-7 border-r border-ink/15 flex gap-[14px] items-center">
-              <div className="w-2 h-2 bg-red flex-shrink-0" />
-              <div>
-                <div className="font-body font-bold text-[14px]">{p.title}</div>
-                <div className="text-[12px] text-[#666] mt-[2px]">{p.sub}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
 
       {/* ── 2. "UN PRODUCTO PARA CADA ESCALA" — SUBE después del hero ── */}
       {/* §4.3 — Columnas reordenadas: Negocio (dark) → A Granel (dark) → Tu Casa (light) */}
@@ -255,25 +211,22 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── 3. PRUEBA SOCIAL — stats + testimonios ──────────────────── */}
-      {/* §4.4 — "+500" SOLO AQUÍ en toda la home; "4 VARIEDADES" eliminado */}
+      {/* ── 3. LEÉ EL DORSO — diferencia en la etiqueta ─────────────── */}
       <section className="py-20 px-10 bg-paper-2 max-md:px-5">
         <div className="max-w-[1240px] mx-auto">
 
           <RevealSection className="mb-12">
-            <p className="font-mono text-[11px] tracking-[0.25em] text-red uppercase mb-[14px]">── Quienes eligen Hardy</p>
+            <p className="font-mono text-[11px] tracking-[0.25em] text-red uppercase mb-[14px]">── La diferencia está en la etiqueta</p>
             <h2
               className="font-heading font-medium tracking-[-0.02em] m-0"
               style={{ fontSize: 'clamp(36px, 5vw, 56px)', lineHeight: 1.1 }}
             >
-              La marca que ya tiene
-              <br />
-              las tiendas de tu <em className="not-italic text-red">barrio.</em>
+              Leé el <em className="not-italic text-red">dorso.</em>
             </h2>
           </RevealSection>
 
-          {/* Stats */}
-          <div className="grid grid-cols-4 gap-[2px] mb-[2px] max-md:grid-cols-2">
+          {/* Stats — verdades de producto */}
+          <div className="grid grid-cols-4 gap-[2px] mb-12 max-md:grid-cols-2">
             {STATS.map((s, i) => (
               <RevealSection
                 key={s.label}
@@ -286,49 +239,39 @@ export default function HomePage() {
                 >
                   {s.num}
                 </div>
-                <div className="font-mono text-[10px] tracking-[0.2em] uppercase text-paper/60">
+                <div className="font-mono text-[10px] tracking-[0.2em] uppercase text-paper/80 mb-2">
                   {s.label}
                 </div>
-              </RevealSection>
-            ))}
-          </div>
-
-          {/* Testimonials */}
-          <div className="grid grid-cols-3 gap-[2px] max-md:grid-cols-1">
-            {TESTIMONIALS.map((t, i) => (
-              <RevealSection
-                key={t.author}
-                delay={i * 80}
-                className="bg-paper px-8 py-9 flex flex-col"
-              >
-                <div className="font-mono text-[9px] tracking-[0.2em] text-red uppercase mb-5">
-                  {t.tipo}
-                </div>
-                <blockquote
-                  className="font-heading font-medium m-0 mb-7 flex-1 leading-[1.3]"
-                  style={{ fontSize: 'clamp(17px, 2vw, 21px)' }}
-                >
-                  &ldquo;{t.quote}&rdquo;
-                </blockquote>
-                <div className="pt-5 border-t border-ink/15">
-                  <div className="font-body font-bold text-[13px]">{t.author}</div>
-                  <div className="font-mono text-[10px] tracking-[0.1em] text-[#888] uppercase mt-[2px]">
-                    {t.location}
-                  </div>
+                <div className="font-body text-[11px] leading-[1.5] text-paper/45 max-w-[200px]">
+                  {s.sub}
                 </div>
               </RevealSection>
             ))}
           </div>
 
-          {/* Store types footer */}
-          <div className="mt-[2px] bg-ink px-8 py-5 flex flex-wrap items-center gap-x-6 gap-y-2">
-            <span className="font-mono text-[10px] tracking-[0.2em] text-red uppercase">Presente en</span>
-            {['Dietéticas', 'Gimnasios', 'Cafeterías', 'Restaurantes', 'Distribuidores'].map((tipo, i, arr) => (
-              <span key={tipo} className="font-mono text-[11px] tracking-[0.1em] text-paper/70 uppercase">
-                {tipo}{i < arr.length - 1 && <span className="text-red mx-3">·</span>}
-              </span>
-            ))}
-          </div>
+          {/* Comparación de etiquetas */}
+          <RevealSection className="grid grid-cols-2 gap-[2px] max-md:grid-cols-1">
+            {/* HARDY */}
+            <div className="bg-paper px-9 py-10 border-t-[3px] border-red flex flex-col max-md:px-6">
+              <div className="font-display text-[28px] tracking-[0.04em] leading-none mb-6">HARDY</div>
+              <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#888] mb-2">Ingredientes</p>
+              <p className="font-heading text-[26px] font-medium m-0 leading-[1.2]">maní.</p>
+            </div>
+            {/* La mayoría */}
+            <div className="bg-[#e8e6e2] px-9 py-10 border-t-[3px] border-[#bbb] flex flex-col max-md:px-6">
+              <div className="font-body text-[18px] font-bold text-[#777] leading-none mb-6">La mayoría</div>
+              <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#999] mb-2">Ingredientes</p>
+              <p className="font-body text-[17px] m-0 leading-[1.5] text-[#777]">
+                maní, azúcar, aceite de palma, sal, estabilizante (E471).
+              </p>
+            </div>
+          </RevealSection>
+
+          <RevealSection delay={120}>
+            <p className="mt-8 font-body text-[15px] leading-[1.7] text-[#555] max-w-[620px]">
+              Esa es toda la diferencia. Lo que dice nuestra etiqueta es lo que hay adentro. Nada más.
+            </p>
+          </RevealSection>
 
         </div>
       </section>
@@ -339,17 +282,15 @@ export default function HomePage() {
       <section
         className="relative text-paper overflow-hidden"
         style={{
-          backgroundImage: "url('/lifestyle/crunchy-380-open.png')",
+          backgroundImage: "url('/lifestyle/crunchy-textura-dark.jpg')",
           backgroundSize: 'cover',
           backgroundPosition: 'right center',
-          backgroundBlendMode: 'multiply',
-          backgroundColor: '#1A1A1A',
         }}
       >
-        {/* Gradiente: oscuro a la izquierda (texto), abre a la derecha (foto) */}
+        {/* Overlay negro sutil — el área derecha del frasco se ve limpia, el texto a la izquierda es legible */}
         <div
           className="absolute inset-0 pointer-events-none"
-          style={{ background: 'linear-gradient(to right, rgba(26,26,26,1) 0%, rgba(26,26,26,0.97) 40%, rgba(26,26,26,0.55) 70%, rgba(26,26,26,0) 100%)' }}
+          style={{ background: 'linear-gradient(to right, rgba(15,15,15,0.90) 0%, rgba(15,15,15,0.70) 35%, rgba(15,15,15,0.20) 65%, rgba(15,15,15,0) 100%)' }}
         />
         <div className="relative z-[1] max-w-[1240px] mx-auto px-16 py-20 max-w-[640px] max-md:px-6 max-md:py-12">
           <div className="absolute top-8 right-8 max-md:top-5 max-md:right-5">
@@ -589,6 +530,7 @@ export default function HomePage() {
                     alt={u.alt}
                     fill
                     className="object-cover transition-transform duration-700 group-hover:scale-105"
+                    style={{ objectPosition: u.objectPosition ?? 'center center' }}
                     sizes="(max-width: 900px) 100vw, 33vw"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/10 to-transparent" />
