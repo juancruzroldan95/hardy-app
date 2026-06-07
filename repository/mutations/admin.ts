@@ -372,6 +372,20 @@ export async function updateClientProfileAdmin(
   redirect('/portal/admin/clientes')
 }
 
+// ─── Imputar pago ─────────────────────────────────────────────────────────────
+
+export async function imputarPago(orderId: string) {
+  await getAdminUser()
+  const order = await db.query.orders.findFirst({ where: eq(orders.id, orderId) })
+  if (!order) return
+  await db.update(orders)
+    .set({ paymentStatus: 'paid', updatedAt: new Date() })
+    .where(eq(orders.id, orderId))
+  revalidatePath('/portal/admin/pedidos')
+  revalidatePath(`/portal/admin/pedidos/${orderId}`)
+  revalidatePath(`/portal/pedidos/${orderId}`)
+}
+
 // ─── Tracking number ──────────────────────────────────────────────────────────
 
 export async function updateTrackingNumber(orderId: string, trackingNumber: string) {

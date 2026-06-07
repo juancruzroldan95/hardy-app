@@ -8,9 +8,39 @@ export function getRecetaBySlug(slug: string): Receta | undefined {
   return RECETAS.find((r) => r.slug === slug)
 }
 
-export const CATEGORIAS = ['Todas', 'Desayuno', 'Fit', 'Snacks'] as const
+export const CATEGORIAS = ['Todas', 'Desayuno', 'Entreno', 'Snacks'] as const
 
 export const RECETAS: Receta[] = [
+  {
+    slug: 'alfajores-mani-sin-azucar',
+    titulo: 'Alfajores de maní sin azúcar',
+    descripcion: 'Un clásico reinventado para vitrinas y cartas naturales.',
+    tiempo: '30 min',
+    porciones: '20 unidades',
+    dificultad: 'Medio',
+    categoria: 'Entreno',
+    imagen: '/lifestyle/recetas/receta-13.png',
+    productos: ['Crema de Maní Natural 380g', 'Miel Líquida 500g'],
+    ingredientes: [
+      '200 g de Crema de Maní Natural HARDY',
+      '150 g de harina de almendras',
+      '80 g de Miel Líquida HARDY',
+      '50 g de cacao amargo en polvo',
+      '1 pizca de sal',
+    ],
+    preparacion: [
+      'Mezclá la crema de maní, la harina de almendras y la miel hasta obtener una masa firme.',
+      'Estirá entre dos papeles de horno hasta ~5 mm de espesor.',
+      'Cortá círculos con cortante de 6 cm.',
+      'Horneá a 170°C por 10-12 minutos. Dejá enfriar.',
+      'Rellená con crema de maní. Rebozá los bordes con cacao.',
+    ],
+    notaB2B: {
+      texto: '¿Hacés esto a escala? El balde de 4,5 kg te rinde ~22 tandas de esta receta.',
+      cta: 'Consultá formato a granel →',
+      href: '/a-granel',
+    },
+  },
   {
     slug: 'tostadas-crema-mani-banana',
     titulo: 'Tostadas con crema de maní y banana',
@@ -42,7 +72,7 @@ export const RECETAS: Receta[] = [
     tiempo: '5 min',
     porciones: '1 porción',
     dificultad: 'Fácil',
-    categoria: 'Fit',
+    categoria: 'Entreno',
     imagen: '/lifestyle/recetas/receta-15.png',
     productos: ['Crema de Maní Crunchy 380g'],
     ingredientes: [
@@ -113,7 +143,7 @@ export const RECETAS: Receta[] = [
   {
     slug: 'bites-banana',
     titulo: 'Bites de banana',
-    descripcion: 'Un snack simple, potente y lleno de energía real.',
+    descripcion: 'Un snack simple y potente. Sin azúcar agregada.',
     tiempo: '20 min',
     porciones: '8-10 bocados',
     dificultad: 'Fácil',
@@ -137,8 +167,8 @@ export const RECETAS: Receta[] = [
     macros: { kcal: 140, proteinas: 3, carbos: 18, grasas: 7 },
   },
   {
-    slug: 'pancakes-saludables',
-    titulo: 'Pancakes saludables',
+    slug: 'pancakes-de-mani',
+    titulo: 'Pancakes de maní',
     descripcion: 'Suaves, nutritivos y con un sabor que eleva tu rutina.',
     tiempo: '15 min',
     porciones: '6-8 pancakes',
@@ -163,7 +193,7 @@ export const RECETAS: Receta[] = [
   {
     slug: 'energy-bites',
     titulo: 'Energy Bites',
-    descripcion: 'Bocados nutritivos, simples y llenos de energía real.',
+    descripcion: 'Bocados nutritivos y simples. Sin azúcar agregada.',
     tiempo: '25 min',
     porciones: '12-15 bolitas',
     dificultad: 'Fácil',
@@ -215,7 +245,7 @@ export const RECETAS: Receta[] = [
   {
     slug: 'barritas-energeticas',
     titulo: 'Barritas energéticas',
-    descripcion: 'Crocantes, nutritivas y cargadas de energía real.',
+    descripcion: 'Crocantes, nutritivas y sin aditivos.',
     tiempo: '45 min',
     porciones: '8-10 barritas',
     dificultad: 'Fácil',
@@ -242,11 +272,11 @@ export const RECETAS: Receta[] = [
   {
     slug: 'smoothie-proteico',
     titulo: 'Smoothie proteico',
-    descripcion: 'Cremoso, nutritivo y lleno de energía real.',
+    descripcion: 'Cremoso, nutritivo y listo en 5 minutos.',
     tiempo: '5 min',
     porciones: '1 vaso grande',
     dificultad: 'Fácil',
-    categoria: 'Fit',
+    categoria: 'Entreno',
     imagen: '/lifestyle/recetas/receta-05.png',
     productos: ['Crema de Maní Crunchy 380g'],
     ingredientes: [
@@ -267,7 +297,7 @@ export const RECETAS: Receta[] = [
   {
     slug: 'parfait-mani',
     titulo: 'Parfait de maní',
-    descripcion: 'Fresco, nutritivo y lleno de energía real.',
+    descripcion: 'Fresco y equilibrado. Para arrancar bien.',
     tiempo: '10 min',
     porciones: '1 frasco',
     dificultad: 'Fácil',
@@ -318,7 +348,7 @@ export const RECETAS: Receta[] = [
   {
     slug: 'waffles-mani',
     titulo: 'Waffles de maní',
-    descripcion: 'Livianos, nutritivos y llenos de energía real.',
+    descripcion: 'Livianos y nutritivos. Sin azúcar ni aceite.',
     tiempo: '20 min',
     porciones: '2 porciones',
     dificultad: 'Medio',
@@ -343,7 +373,7 @@ export const RECETAS: Receta[] = [
   {
     slug: 'yogurt-bowl',
     titulo: 'Yogurt bowl',
-    descripcion: 'Fresco, equilibrado y lleno de energía real.',
+    descripcion: 'Fresco y equilibrado. Listo en 5 minutos.',
     tiempo: '5 min',
     porciones: '1 porción',
     dificultad: 'Fácil',

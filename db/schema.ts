@@ -244,6 +244,7 @@ export const productAvailability = pgTable('product_availability', {
   id:                uuid('id').primaryKey().defaultRandom(),
   productId:         text('product_id').notNull().unique(),
   status:            stockStatusEnum('status').notNull().default('available'),
+  stockQty:          integer('stock_qty'),
   notes:             text('notes'),
   updatedByUserId:   uuid('updated_by_user_id'),
   updatedAt:         timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
@@ -300,6 +301,43 @@ export const productReviews = pgTable('product_reviews', {
   updatedAt:    timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 }, (table) => [
   index('product_reviews_product_id_idx').on(table.productId),
+])
+
+// ─── newsletter_subscribers ───────────────────────────────────────────────────
+// Emails capturados desde el sitio público (newsletter / novedades).
+// Los administra el admin desde el portal, junto a clientes y solicitudes.
+
+export const newsletterSubscribers = pgTable('newsletter_subscribers', {
+  id:        uuid('id').primaryKey().defaultRandom(),
+  email:     text('email').notNull().unique(),
+  name:      text('name'),
+  source:    text('source'),  // dónde se capturó: 'footer', 'home', etc.
+  isActive:  boolean('is_active').notNull().default(true),
+  isDeleted: boolean('is_deleted').notNull().default(false),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+}, (table) => [
+  index('newsletter_subscribers_email_idx').on(table.email),
+])
+
+// ─── costs ────────────────────────────────────────────────────────────────────
+// Costos / gastos del negocio cargados por el admin. Se cruzan con las ventas
+// (orders) para mostrar el resultado contable mensual en el portal.
+
+export const costs = pgTable('costs', {
+  id:        uuid('id').primaryKey().defaultRandom(),
+  concept:   text('concept').notNull(),
+  category:  text('category'),            // 'materia_prima' | 'produccion' | 'logistica' | ...
+  amountArs: numeric('amount_ars', { precision: 12, scale: 2 }).notNull(),
+  costDate:  text('cost_date').notNull(), // 'YYYY-MM-DD' — mes al que se imputa
+  notes:     text('notes'),
+  createdByUserId: uuid('created_by_user_id'),
+  isActive:  boolean('is_active').notNull().default(true),
+  isDeleted: boolean('is_deleted').notNull().default(false),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+}, (table) => [
+  index('costs_cost_date_idx').on(table.costDate),
 ])
 
 // ─── Relations ────────────────────────────────────────────────────────────────
@@ -377,3 +415,7 @@ export type DeliveryAddress       = typeof deliveryAddresses.$inferSelect
 export type NewDeliveryAddress    = typeof deliveryAddresses.$inferInsert
 export type ProductReview         = typeof productReviews.$inferSelect
 export type NewProductReview      = typeof productReviews.$inferInsert
+export type NewsletterSubscriber  = typeof newsletterSubscribers.$inferSelect
+export type NewNewsletterSubscriber = typeof newsletterSubscribers.$inferInsert
+export type Cost                  = typeof costs.$inferSelect
+export type NewCost               = typeof costs.$inferInsert

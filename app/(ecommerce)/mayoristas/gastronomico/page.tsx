@@ -129,6 +129,61 @@ export default function GastronomicoPage() {
         </div>
       </section>
 
+      {/* IDEAS PARA TU CARTA */}
+      <section className="py-20 px-10 bg-paper-2 max-md:px-6">
+        <div className="max-w-[1100px] mx-auto">
+          <p className="font-mono text-[11px] tracking-[0.25em] text-red uppercase mb-3">── Ideas para tu carta</p>
+          <h2
+            className="font-heading font-medium m-0 mb-10 leading-[1.1]"
+            style={{ fontSize: 'clamp(28px,4vw,44px)' }}
+          >
+            Cómo usan Hardy en <em className="not-italic text-red">otros negocios.</em>
+          </h2>
+          <div className="grid grid-cols-3 gap-[2px] max-md:grid-cols-1">
+            {[
+              {
+                icon: '☕',
+                t: 'Desayunos y brunch',
+                d: 'Tostadas con crema de maní, bowls, smoothies. Se prepara en 2 minutos y eleva el ticket promedio.',
+              },
+              {
+                icon: '🎂',
+                t: 'Repostería y pastelería',
+                d: 'Rellenos de alfajores, coberturas, bombones. Rinde más que otras cremas porque no tiene agua ni relleno.',
+              },
+              {
+                icon: '🍦',
+                t: 'Heladerías y postres',
+                d: 'Base para helado de maní, salsa para postres, crumble. Sabor intenso porque es 100% maní.',
+              },
+            ].map((c) => (
+              <div key={c.t} className="bg-paper p-8">
+                <div className="text-[28px] mb-4" aria-hidden>{c.icon}</div>
+                <h3 className="font-heading text-[22px] font-medium m-0 mb-3">{c.t}</h3>
+                <p className="text-[14px] text-[#555] leading-[1.6] m-0">{c.d}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* PRECIO CONGELADO */}
+      <section className="py-16 px-10 bg-paper max-md:px-6">
+        <div className="max-w-[1100px] mx-auto">
+          <p className="font-mono text-[11px] tracking-[0.25em] text-red uppercase mb-4">── Previsibilidad</p>
+          <h2
+            className="font-heading font-medium m-0 mb-4 leading-[1.1]"
+            style={{ fontSize: 'clamp(26px,4vw,40px)' }}
+          >
+            Precio congelado <em className="not-italic text-red">90 días.</em>
+          </h2>
+          <p className="text-[15px] text-[#555] max-w-[620px] leading-[1.7]">
+            Arrancás con un precio fijo durante tres meses. Al cierre del período, ajustamos según tu
+            volumen con un descuento atado a inflación. Sin sorpresas. Sin renegociar cada semana.
+          </p>
+        </div>
+      </section>
+
       {/* CTA */}
       <section className="py-20 px-10 bg-ink text-paper text-center max-md:px-6">
         <div className="max-w-[600px] mx-auto">

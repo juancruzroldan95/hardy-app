@@ -1,10 +1,10 @@
 # Hardy App — Guía para Claude Code
 
-Este proyecto es desarrollado por **dos personas**: un dueño de marca (no programador) que usa Claude Code para agregar features, y un software engineer que revisa y arquitecta.
-
 **Rama de trabajo**: siempre `develop`. Nunca commitear ni pushear a `master`. Nunca crear ramas, siempre trabajar sobre `develop`.
 
 Leer y respetar fuertemente todas las rules mencionadas en **.claude > rules** antes de codear.
+
+**Git workflow**: Ir haciendo commits por feature/task. Cuando detectes que el usuario pide cambios de algo diferente, hacer un git add y un git commit antes de avanzar con el siguiente cambio.
 
 ---
 

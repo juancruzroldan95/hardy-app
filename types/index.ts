@@ -24,13 +24,15 @@ export interface Receta {
   tiempo: string
   porciones: string
   dificultad: 'Fácil' | 'Medio' | 'Difícil'
-  categoria: 'Desayuno' | 'Fit' | 'Snacks'
+  categoria: 'Desayuno' | 'Entreno' | 'Snacks'
   imagen: string
   videoUrl?: string
   productos: string[]
   ingredientes: string[]
   preparacion: string[]
   macros?: { kcal: number; proteinas: number; carbos: number; grasas: number }
+  /** Nota al pie opcional: puente B2C → granel/B2B */
+  notaB2B?: { texto: string; cta: string; href: string }
 }
 
 export interface CartItem extends Product {

@@ -31,18 +31,102 @@ function getDaysSinceLast(createdAt: Date | string): number {
   return Math.floor((Date.now() - new Date(createdAt).getTime()) / 86_400_000)
 }
 
-export default async function AdminClientesPage() {
+// ── Ciclo de vida del contacto ────────────────────────────────────────────────
+// Derivado del historial de compras. Ventana de actividad: 120 días.
+const ACTIVE_WINDOW_DAYS = 120
+
+type Lifecycle = 'prospecto' | 'activo' | 'inactivo'
+
+const LIFECYCLE_META: Record<Lifecycle, { label: string; desc: string; badge: string; card: string }> = {
+  prospecto: {
+    label: 'Prospecto',
+    desc:  'Interesado · sin compras aún',
+    badge: 'text-blue-700  bg-blue-50  border-blue-200',
+    card:  'bg-blue-50 border-blue-200 text-blue-700',
+  },
+  activo: {
+    label: 'Cliente activo',
+    desc:  `Compró en los últimos ${ACTIVE_WINDOW_DAYS} días`,
+    badge: 'text-[#2d6a35] bg-[#e8f4ea] border-[#c6dfc7]',
+    card:  'bg-[#e8f4ea] border-[#c6dfc7] text-[#2d6a35]',
+  },
+  inactivo: {
+    label: 'Cliente inactivo',
+    desc:  `Sin compras hace +${ACTIVE_WINDOW_DAYS} días`,
+    badge: 'text-amber-700 bg-amber-50 border-amber-200',
+    card:  'bg-amber-50 border-amber-200 text-amber-700',
+  },
+}
+
+function getLifecycle(daysSinceLast: number | null): Lifecycle {
+  if (daysSinceLast === null) return 'prospecto'
+  return daysSinceLast <= ACTIVE_WINDOW_DAYS ? 'activo' : 'inactivo'
+}
+
+// Tipos de cliente relevantes para segmentar (B2B)
+const TIPO_FILTERS: { value: string; label: string }[] = [
+  { value: '',             label: 'Todos los tipos' },
+  { value: 'mayorista',    label: 'Mayoristas'      },
+  { value: 'distribuidor', label: 'Distribuidores'  },
+  { value: 'gastronomico', label: 'Gastronómicos'   },
+  { value: 'productor',    label: 'Productores'     },
+]
+
+interface Props {
+  searchParams: Promise<{ estado?: string; tipo?: string }>
+}
+
+export default async function AdminClientesPage({ searchParams }: Props) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
   const adminProfile = await getProfileByUserId(user.id)
+  const { estado: estadoFilter, tipo: tipoFilter } = await searchParams
+
   if (adminProfile?.role !== 'admin') redirect('/portal')
 
   // ── Fetch all non-admin clients with their orders + alerts ──────────────────
   const allProfiles = await getAllClientsWithOrdersAndAlerts()
 
-  const clients = allProfiles.filter((p) => p.role !== 'admin')
+  // Enriquecer cada contacto con su ciclo de vida (derivado del último pedido)
+  const enriched = allProfiles
+    .filter((p) => p.role !== 'admin')
+    .map((p) => {
+      const lastOrder = (p.orders ?? [])[0] ?? null
+      const daysSinceLast = lastOrder
+        ? Math.floor((Date.now() - new Date(lastOrder.createdAt).getTime()) / 86_400_000)
+        : null
+      return { ...p, lifecycle: getLifecycle(daysSinceLast) }
+    })
+
+  // Conteos por ciclo de vida (sobre el universo completo, respetando el filtro de tipo)
+  const tipoScoped = tipoFilter
+    ? enriched.filter((c) => c.role === tipoFilter)
+    : enriched
+  const counts = {
+    prospecto: tipoScoped.filter((c) => c.lifecycle === 'prospecto').length,
+    activo:    tipoScoped.filter((c) => c.lifecycle === 'activo').length,
+    inactivo:  tipoScoped.filter((c) => c.lifecycle === 'inactivo').length,
+  }
+
+  // Aplicar filtros (estado + tipo)
+  const clients = enriched.filter((c) => {
+    if (estadoFilter && c.lifecycle !== estadoFilter) return false
+    if (tipoFilter && c.role !== tipoFilter) return false
+    return true
+  })
+
+  // Helper para construir URLs de filtro preservando el otro parámetro
+  function filterUrl(next: { estado?: string; tipo?: string }) {
+    const params = new URLSearchParams()
+    const e = next.estado !== undefined ? next.estado : (estadoFilter ?? '')
+    const t = next.tipo   !== undefined ? next.tipo   : (tipoFilter ?? '')
+    if (e) params.set('estado', e)
+    if (t) params.set('tipo', t)
+    const qs = params.toString()
+    return qs ? `/portal/admin/clientes?${qs}` : '/portal/admin/clientes'
+  }
 
   return (
     <div className="max-w-[1000px]">
@@ -53,6 +137,68 @@ export default async function AdminClientesPage() {
       <p className="font-body text-[14px] text-ink/40 mb-6">
         Historial de compras, alertas y gestión de cuenta por cliente.
       </p>
+
+      {/* ── Segmentación por ciclo de vida ──────────────────────────── */}
+      <div className="grid grid-cols-3 gap-3 mb-5 max-md:grid-cols-1">
+        {(['prospecto', 'activo', 'inactivo'] as const).map((stage) => {
+          const meta     = LIFECYCLE_META[stage]
+          const isActive = estadoFilter === stage
+          return (
+            <Link
+              key={stage}
+              href={filterUrl({ estado: isActive ? '' : stage })}
+              className={[
+                'border p-4 transition-all',
+                isActive ? meta.card + ' ring-1 ring-current' : 'bg-paper border-ink/8 hover:border-ink/25',
+              ].join(' ')}
+            >
+              <div className="flex items-center justify-between mb-1">
+                <p className={`font-mono text-[9px] tracking-[0.15em] uppercase ${isActive ? '' : 'text-ink/40'}`}>
+                  {meta.label}
+                </p>
+                {isActive && <span className="font-mono text-[8px] uppercase tracking-[0.1em]">● Filtrando</span>}
+              </div>
+              <p className={`font-heading text-[28px] font-medium leading-none ${isActive ? '' : 'text-ink'}`}>
+                {counts[stage]}
+              </p>
+              <p className={`font-mono text-[8px] tracking-[0.06em] mt-1 ${isActive ? 'opacity-70' : 'text-ink/35'}`}>
+                {meta.desc}
+              </p>
+            </Link>
+          )
+        })}
+      </div>
+
+      {/* ── Filtro por tipo de cliente ──────────────────────────────── */}
+      <div className="flex items-center gap-2 flex-wrap mb-6">
+        <span className="font-mono text-[9px] tracking-[0.15em] uppercase text-ink/40 mr-1">Tipo:</span>
+        {TIPO_FILTERS.map((opt) => {
+          const isActive = (tipoFilter ?? '') === opt.value
+          return (
+            <Link
+              key={opt.value}
+              href={filterUrl({ tipo: opt.value })}
+              className={[
+                'font-mono text-[9px] tracking-[0.12em] uppercase px-3 py-1.5 border transition-all',
+                isActive
+                  ? 'bg-ink text-paper border-ink'
+                  : 'bg-paper border-ink/15 text-ink/50 hover:text-ink hover:border-ink/40',
+              ].join(' ')}
+            >
+              {opt.label}
+            </Link>
+          )
+        })}
+        {(estadoFilter || tipoFilter) && (
+          <Link
+            href="/portal/admin/clientes"
+            className="font-mono text-[9px] tracking-[0.1em] uppercase text-red hover:text-ink transition-colors ml-1"
+          >
+            × Limpiar filtros
+          </Link>
+        )}
+      </div>
+
       <div className="flex justify-end mb-6">
         <Link
           href="/portal/admin/clientes/nuevo"
@@ -64,7 +210,11 @@ export default async function AdminClientesPage() {
 
       {clients.length === 0 ? (
         <div className="bg-paper border border-ink/8 p-10 text-center">
-          <p className="font-body text-[14px] text-ink/40">No hay clientes registrados todavía.</p>
+          <p className="font-body text-[14px] text-ink/40">
+            {estadoFilter || tipoFilter
+              ? 'No hay contactos que coincidan con este segmento.'
+              : 'No hay clientes registrados todavía.'}
+          </p>
         </div>
       ) : (
         <div className="flex flex-col gap-6">
@@ -94,6 +244,9 @@ export default async function AdminClientesPage() {
                       </span>
                       <span className="font-mono text-[8px] tracking-[0.15em] uppercase text-red bg-[#fdecea] px-2 py-[3px]">
                         {ROLE_LABELS[client.role]}
+                      </span>
+                      <span className={`font-mono text-[8px] tracking-[0.12em] uppercase border px-2 py-[3px] ${LIFECYCLE_META[client.lifecycle].badge}`}>
+                        {LIFECYCLE_META[client.lifecycle].label}
                       </span>
                       {pendingAlerts.length > 0 && (
                         <span className="font-mono text-[8px] tracking-[0.12em] uppercase text-amber-700 bg-amber-50 border border-amber-200 px-2 py-[3px]">

@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { MessageCircle } from 'lucide-react'
 import { WA_NUMBER } from '@/consts/products'
+import NewsletterForm from '@/components/layout/NewsletterForm'
 
 interface FooterLink {
   label: string
@@ -22,9 +23,10 @@ const columns: { title: string; links: FooterLink[] }[] = [
   {
     title: 'Marca',
     links: [
-      { label: 'Filosofía', href: '/' },
-      { label: 'Productos', href: '/tienda' },
-      { label: 'Usos', href: '/#usos' },
+      { label: 'Nuestra historia',      href: '/nosotros'       },
+      { label: 'Productos',             href: '/tienda'         },
+      { label: 'Preguntas frecuentes',  href: '/faq'            },
+      { label: 'Reseñas',               href: '/tienda/resenas' },
     ],
   },
   {
@@ -50,8 +52,11 @@ export default function Footer() {
               <div className="font-display text-[48px] tracking-[0.04em] leading-none">HARDY</div>
               <div className="font-mono text-[10px] tracking-[0.3em] text-red mt-[6px]">ALIMENTÁ TU INSTINTO</div>
               <p className="mt-5 text-[#888] text-[14px] leading-[1.5] max-w-[320px]">
-                Crema de maní y miel artesanal. Un solo ingrediente. La mejor calidad. Hecho en Argentina.
+                Crema de maní y miel natural. Un solo ingrediente. Sin aditivos. Hecho en Argentina.
               </p>
+              <div className="mt-8 max-w-[360px]">
+                <NewsletterForm />
+              </div>
             </div>
 
             {/* Columns */}
@@ -88,7 +93,11 @@ export default function Footer() {
           {/* Bottom bar */}
           <div className="border-t border-[#2a2a2a] pt-[30px] flex justify-between items-center text-[#666] text-[12px] font-mono tracking-[0.1em] flex-wrap gap-3">
             <div>© 2026 HARDY · hardy.ar</div>
-            <div>ALIMENTÁ TU INSTINTO</div>
+            <div className="flex items-center gap-6 flex-wrap">
+              <Link href="/privacidad" className="hover:text-paper transition-colors">Privacidad</Link>
+              <Link href="/terminos" className="hover:text-paper transition-colors">Términos</Link>
+              <span>ALIMENTÁ TU INSTINTO</span>
+            </div>
           </div>
         </div>
       </footer>

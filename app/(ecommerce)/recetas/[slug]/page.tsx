@@ -193,6 +193,23 @@ export default async function RecetaDetallePage({ params }: Props) {
         </div>
       </section>
 
+      {/* Nota al pie — puente B2B (granel) */}
+      {receta.notaB2B && (
+        <section className="px-10 pt-8 bg-paper-2 max-md:px-5">
+          <div className="max-w-[1100px] mx-auto bg-ink text-paper px-7 py-6 flex items-center justify-between gap-5 flex-wrap">
+            <p className="font-body text-[14px] text-paper/80 leading-[1.6] m-0 max-w-[640px]">
+              {receta.notaB2B.texto}
+            </p>
+            <Link
+              href={receta.notaB2B.href}
+              className="font-mono text-[11px] tracking-[0.15em] uppercase text-paper border-b border-red pb-[2px] no-underline whitespace-nowrap"
+            >
+              {receta.notaB2B.cta}
+            </Link>
+          </div>
+        </section>
+      )}
+
       {/* Video UGC */}
       {receta.videoUrl && (
         <section className="py-14 px-10 bg-ink max-md:px-5">

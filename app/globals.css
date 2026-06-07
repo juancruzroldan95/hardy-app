@@ -52,6 +52,19 @@
     max-width: 100%;
     display: block;
   }
+
+  /* Accesibilidad: anillo de foco visible para navegación por teclado.
+     Solo aparece con :focus-visible (teclado), no en clicks de mouse. */
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible,
+  [tabindex]:focus-visible {
+    outline: 2px solid #C0171E;
+    outline-offset: 2px;
+    border-radius: 1px;
+  }
 }
 
 /* ── Scroll reveal ─────────────────────────────────────── */
@@ -95,4 +108,9 @@
   .animate-zoom-in {
     animation: zoomIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
   }
+}
+
+/* Mapa de puntos de venta — estilo neutro/grayscale para los tiles base */
+.leaflet-tile-pane {
+  filter: grayscale(1) contrast(0.95) brightness(1.03);
 }

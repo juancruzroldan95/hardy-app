@@ -4,7 +4,7 @@ import RecipeFilter from '@/components/recipes/RecipeFilter'
 
 export const metadata: Metadata = {
   title: 'Recetas',
-  description: 'Recetas con crema de maní y miel HARDY. Desayunos, snacks fit y más ideas simples y naturales.',
+  description: 'Recetas con crema de maní y miel HARDY. Desayunos, snacks de entreno y más ideas simples y naturales.',
 }
 
 export default function RecetasPage() {

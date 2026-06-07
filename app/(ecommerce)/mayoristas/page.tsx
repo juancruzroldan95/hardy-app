@@ -30,7 +30,7 @@ const BENEFICIOS = [
   { n: '02', t: 'Reposición rápida', d: '48-72hs. Coordinamos el envío según tu necesidad.' },
   { n: '03', t: 'Soporte directo', d: 'Un contacto para pedidos y logística.' },
   { n: '04', t: 'Un solo proveedor', d: 'Crema de maní y miel del mismo lugar.' },
-  { n: '05', t: '10 años de marca', d: 'Desde 2015. El consumidor ya busca HARDY por nombre.' },
+  { n: '05', t: 'Marca con recorrido', d: '10 años en el mercado. Un producto que se explica solo: un ingrediente.' },
 ]
 
 export default function MayoristasPage() {
@@ -124,6 +124,23 @@ export default function MayoristasPage() {
         </div>
       </section>
 
+      {/* PRECIO CONGELADO */}
+      <section className="py-16 px-10 bg-ink text-paper max-md:px-6">
+        <div className="max-w-[1100px] mx-auto">
+          <p className="font-mono text-[11px] tracking-[0.25em] text-red uppercase mb-4">── Previsibilidad</p>
+          <h2
+            className="font-heading font-medium m-0 mb-4 leading-[1.1]"
+            style={{ fontSize: 'clamp(26px,4vw,40px)' }}
+          >
+            Precio congelado <em className="not-italic text-red">90 días.</em>
+          </h2>
+          <p className="text-[15px] text-[#bbb] max-w-[620px] leading-[1.7]">
+            Arrancás con un precio fijo durante tres meses. Al cierre del período, ajustamos según tu
+            volumen con un descuento atado a inflación. Sin sorpresas. Sin renegociar cada semana.
+          </p>
+        </div>
+      </section>
+
       {/* DISTRIBUIDORES */}
       <section className="py-16 px-10 bg-paper-2 max-md:px-6">
         <div className="max-w-[1100px] mx-auto grid grid-cols-2 gap-10 items-start max-md:grid-cols-1 max-md:gap-6">
@@ -198,7 +215,7 @@ export default function MayoristasPage() {
       </section>
 
       {/* FORMULARIO DE SOLICITUD */}
-      <section id="solicitar" className="py-20 px-10 bg-paper max-md:px-5">
+      <section id="solicitar" className="py-20 px-10 bg-paper-2 max-md:px-5">
         <div className="max-w-[1100px] mx-auto grid grid-cols-2 gap-20 items-start max-md:grid-cols-1 max-md:gap-10">
 
           <div className="sticky top-[100px] max-md:static">
@@ -244,7 +261,7 @@ export default function MayoristasPage() {
             </p>
           </div>
 
-          <div>
+          <div className="bg-paper border border-ink/8 p-8 max-md:p-5">
             <SolicitudForm />
           </div>
 

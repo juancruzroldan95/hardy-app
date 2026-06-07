@@ -20,13 +20,14 @@ export default async function AdminStockPage() {
   const recordMap = new Map(records.map((r) => [r.productId, r]))
 
   const items = products.map((p) => ({
-    id:       p.id,
-    name:     p.name,
-    variant:  p.variant,
-    size:     p.size,
-    image:    p.image,
-    status:   (recordMap.get(p.id)?.status ?? 'available') as string,
-    notes:    recordMap.get(p.id)?.notes ?? null,
+    id:        p.id,
+    name:      p.name,
+    variant:   p.variant,
+    size:      p.size,
+    image:     p.image,
+    status:    (recordMap.get(p.id)?.status ?? 'available') as string,
+    stockQty:  recordMap.get(p.id)?.stockQty ?? null,
+    notes:     recordMap.get(p.id)?.notes ?? null,
     updatedAt: recordMap.get(p.id)?.updatedAt ?? null,
   }))
 

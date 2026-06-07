@@ -1,179 +1,125 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { ShoppingBag, Store, Handshake } from 'lucide-react'
 import { WA_NUMBER } from '@/consts/products'
+import PdvMap from '@/components/store/PdvMap'
 
 export const metadata: Metadata = {
-  title: 'Dónde comprar Hardy — Puntos de venta en Argentina',
-  description: 'Encontrá crema de maní y miel Hardy en más de 200 tiendas, dietéticas y comercios en toda Argentina.',
+  title: 'Comprá Hardy',
+  description: 'Comprá crema de maní y miel Hardy online o sumá la marca a tu negocio. Envíos a todo Argentina.',
+  openGraph: {
+    title: 'Comprá Hardy | HARDY',
+    description: 'Comprá crema de maní y miel Hardy online o sumá la marca a tu negocio. Envíos a todo Argentina.',
+  },
 }
 
-interface Punto {
-  nombre:    string
-  tipo:      string
-  barrio?:   string
-  ciudad:    string
-  provincia: string
-  instagram?: string
-}
-
-const PUNTOS_DE_VENTA: Punto[] = [
-  // BUENOS AIRES — CABA
-  { nombre: 'El Granero Integral',  tipo: 'Dietética',    barrio: 'Palermo',   ciudad: 'CABA',        provincia: 'Buenos Aires' },
-  { nombre: 'Bio Store',            tipo: 'Naturista',     barrio: 'Belgrano',  ciudad: 'CABA',        provincia: 'Buenos Aires' },
-  { nombre: 'La Naturista',         tipo: 'Dietética',     barrio: 'Caballito', ciudad: 'CABA',        provincia: 'Buenos Aires' },
-  { nombre: 'Mundo Natural',        tipo: 'Naturista',     barrio: 'Villa Crespo', ciudad: 'CABA',    provincia: 'Buenos Aires' },
-  { nombre: 'GreenFood Market',     tipo: 'Tienda natural', barrio: 'Núñez',    ciudad: 'CABA',        provincia: 'Buenos Aires' },
-  { nombre: 'Fit & Natural',        tipo: 'Suplementos',   barrio: 'Flores',    ciudad: 'CABA',        provincia: 'Buenos Aires' },
-  { nombre: 'La Integral',          tipo: 'Dietética',     barrio: 'Almagro',   ciudad: 'CABA',        provincia: 'Buenos Aires' },
-  { nombre: 'Eco Tienda',           tipo: 'Naturista',     barrio: 'San Telmo', ciudad: 'CABA',        provincia: 'Buenos Aires' },
-  // GBA
-  { nombre: 'Dieta Sana',           tipo: 'Dietética',     ciudad: 'Palermo',   provincia: 'Buenos Aires' },
-  { nombre: 'Vida Natural',         tipo: 'Naturista',     ciudad: 'Avellaneda', provincia: 'Buenos Aires' },
-  { nombre: 'NutriMax',             tipo: 'Suplementos',   ciudad: 'Quilmes',   provincia: 'Buenos Aires' },
-  { nombre: 'El Rincón Natural',    tipo: 'Dietética',     ciudad: 'Morón',     provincia: 'Buenos Aires' },
-  { nombre: 'Salud & Sabor',        tipo: 'Dietética',     ciudad: 'Tigre',     provincia: 'Buenos Aires' },
-  // CÓRDOBA
-  { nombre: 'El Girasol',           tipo: 'Dietética',     ciudad: 'Córdoba Capital', provincia: 'Córdoba' },
-  { nombre: 'Natural Córdoba',      tipo: 'Naturista',     ciudad: 'Córdoba Capital', provincia: 'Córdoba' },
-  { nombre: 'Vida Sana',            tipo: 'Dietética',     ciudad: 'Río Cuarto', provincia: 'Córdoba' },
-  // ROSARIO
-  { nombre: 'La Naturalia',         tipo: 'Dietética',     ciudad: 'Rosario',   provincia: 'Santa Fe' },
-  { nombre: 'Bio Rosario',          tipo: 'Naturista',     ciudad: 'Rosario',   provincia: 'Santa Fe' },
-  { nombre: 'Salud Natural SF',     tipo: 'Dietética',     ciudad: 'Santa Fe Capital', provincia: 'Santa Fe' },
-  // MENDOZA
-  { nombre: 'El Monte Verde',       tipo: 'Naturista',     ciudad: 'Mendoza Capital',  provincia: 'Mendoza' },
-  { nombre: 'NutriCuyo',            tipo: 'Suplementos',   ciudad: 'San Rafael',        provincia: 'Mendoza' },
+const CARDS = [
+  {
+    Icon: ShoppingBag,
+    title: 'Online — directo a tu casa',
+    desc: 'Comprá en nuestra tienda con envío a todo el país. Pagás con Mercado Pago.',
+    cta: 'Ir a la tienda →',
+    href: '/tienda',
+    external: false,
+  },
+  {
+    Icon: Store,
+    title: 'Mayorista o gastronómico',
+    desc: 'Si tenés un negocio, accedé a precios por volumen y formatos a granel.',
+    cta: 'Acceder al portal →',
+    href: '/portal',
+    external: false,
+  },
+  {
+    Icon: Handshake,
+    title: '¿Querés vender Hardy en tu local?',
+    desc: 'Sumá Hardy a tu dietética, gimnasio, café o tienda. Te armamos una propuesta.',
+    cta: 'Escribinos →',
+    href: `${WA_NUMBER}?text=${encodeURIComponent('Hola Hardy, tengo un negocio y quiero vender sus productos')}`,
+    external: true,
+  },
 ]
 
-const PROVINCES = [...new Set(PUNTOS_DE_VENTA.map((p) => p.provincia))].sort()
-
-const TIPO_COLORS: Record<string, string> = {
-  'Dietética':     'bg-green-100 text-green-700',
-  'Naturista':     'bg-blue-100 text-blue-700',
-  'Suplementos':   'bg-purple-100 text-purple-700',
-  'Tienda natural': 'bg-amber-100 text-amber-700',
-  'Supermercado':  'bg-gray-100 text-gray-600',
-}
-
 export default function DondeComprarPage() {
-  const total = PUNTOS_DE_VENTA.length
-
   return (
     <div className="min-h-screen bg-paper">
 
       {/* Hero */}
       <section className="bg-ink text-paper py-16 px-8 max-md:px-5">
         <div className="max-w-[1100px] mx-auto">
-          <p className="font-mono text-[11px] tracking-[0.25em] text-red uppercase mb-4">── Hardy · Puntos de venta</p>
+          <p className="font-mono text-[11px] tracking-[0.25em] text-red uppercase mb-4">── Cómo comprar Hardy</p>
           <h1 className="font-heading text-[clamp(36px,5vw,56px)] font-medium leading-[1.1] tracking-[-0.02em] mb-4">
-            Encontranos en tu <em className="not-italic text-red">barrio.</em>
+            Comprá <em className="not-italic text-red">HARDY.</em>
           </h1>
           <p className="font-body text-[16px] text-paper/60 max-w-[600px] leading-[1.7]">
-            Hardy está en más de {total}+ tiendas, dietéticas y comercios en toda Argentina.
-            Si no encontrás un punto cercano, podés comprar online o escribirnos.
+            Hoy llegás a Hardy de tres formas. Elegí la que te quede mejor.
           </p>
-          <div className="flex items-center gap-4 mt-8 flex-wrap">
-            <Link
-              href="/tienda"
-              className="bg-red text-paper font-mono text-[12px] tracking-[0.15em] uppercase px-8 py-[14px] hover:bg-red/90 transition-colors"
-            >
-              Comprar online →
-            </Link>
-            <a
-              href={`${WA_NUMBER}?text=${encodeURIComponent('Hola Hardy! ¿Dónde puedo comprar en mi zona?')}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="border border-paper/30 text-paper font-mono text-[12px] tracking-[0.15em] uppercase px-8 py-[14px] hover:bg-paper/10 transition-colors"
-            >
-              Consultar por WA →
-            </a>
-          </div>
         </div>
       </section>
 
-      {/* Online stores note */}
-      <section className="py-8 px-8 border-b border-ink/10 max-md:px-5">
-        <div className="max-w-[1100px] mx-auto flex items-center gap-6 flex-wrap">
-          <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-ink/50">También en</p>
-          {[
-            { name: 'Mercado Libre', href: 'https://www.mercadolibre.com.ar' },
-            { name: 'Tienda Nube (propia)', href: '/tienda' },
-          ].map((store) => (
-            <a
-              key={store.name}
-              href={store.href}
-              target={store.href.startsWith('http') ? '_blank' : '_self'}
-              rel="noopener noreferrer"
-              className="font-mono text-[11px] tracking-[0.1em] uppercase text-ink border-b border-ink/30 hover:text-red hover:border-red transition-colors"
+      {/* Cards */}
+      <section className="py-14 px-8 max-md:px-5">
+        <div className="max-w-[1100px] mx-auto grid grid-cols-3 gap-[2px] max-md:grid-cols-1">
+          {CARDS.map((c) => (
+            <div
+              key={c.title}
+              className="group bg-paper-2 hover:bg-ink transition-colors border-t-[3px] border-transparent hover:border-red flex flex-col px-7 py-8"
             >
-              {store.name} →
-            </a>
+              <c.Icon size={24} className="text-red mb-5" />
+              <h2 className="font-heading text-[22px] font-medium leading-[1.15] m-0 mb-3 group-hover:text-paper transition-colors">
+                {c.title}
+              </h2>
+              <p className="font-body text-[14px] text-[#666] group-hover:text-[#aaa] leading-[1.6] m-0 mb-7 flex-1 transition-colors">
+                {c.desc}
+              </p>
+              {c.external ? (
+                <a
+                  href={c.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block self-start border border-red text-red group-hover:bg-red group-hover:text-paper font-mono text-[11px] tracking-[0.15em] uppercase px-5 py-[11px] transition-colors"
+                >
+                  {c.cta}
+                </a>
+              ) : (
+                <Link
+                  href={c.href}
+                  className="inline-block self-start border border-red text-red group-hover:bg-red group-hover:text-paper font-mono text-[11px] tracking-[0.15em] uppercase px-5 py-[11px] transition-colors"
+                >
+                  {c.cta}
+                </Link>
+              )}
+            </div>
           ))}
         </div>
       </section>
 
-      {/* Store list by province */}
-      <section className="py-12 px-8 max-md:px-5">
+      {/* Presencia nacional — mapa de puntos de venta */}
+      <section className="pb-20 px-8 max-md:px-5">
         <div className="max-w-[1100px] mx-auto">
-          <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-ink/50 mb-8">
-            {total} puntos de venta en {PROVINCES.length} provincias
+          <p className="font-mono text-[11px] tracking-[0.25em] text-red uppercase mb-4">── Presencia nacional</p>
+          <h2 className="font-heading text-[clamp(32px,4.5vw,52px)] font-medium leading-[1.1] tracking-[-0.02em] mb-4">
+            De Ushuaia a <em className="not-italic text-red">Formosa.</em>
+          </h2>
+          <p className="font-body text-[16px] text-[#555] max-w-[600px] leading-[1.7] mb-9">
+            Hardy está en dietéticas, gimnasios, distribuidoras y tiendas de todo el país. Y seguimos sumando.
           </p>
 
-          <div className="space-y-10">
-            {PROVINCES.map((province) => {
-              const stores = PUNTOS_DE_VENTA.filter((p) => p.provincia === province)
-              return (
-                <div key={province}>
-                  <h2 className="font-mono text-[11px] tracking-[0.25em] uppercase text-red mb-4">
-                    ── {province} <span className="text-ink/30">({stores.length})</span>
-                  </h2>
-                  <div className="grid grid-cols-2 gap-3 max-md:grid-cols-1">
-                    {stores.map((store, i) => (
-                      <div
-                        key={i}
-                        className="bg-paper border border-ink/8 px-5 py-4 flex items-start justify-between gap-3"
-                      >
-                        <div>
-                          <div className="font-body font-semibold text-[14px] mb-1">{store.nombre}</div>
-                          <div className="font-body text-[12px] text-ink/50">
-                            {store.barrio ? `${store.barrio}, ` : ''}{store.ciudad}
-                          </div>
-                        </div>
-                        <span className={`font-mono text-[8px] tracking-[0.1em] uppercase px-2 py-1 shrink-0 ${TIPO_COLORS[store.tipo] ?? 'bg-gray-100 text-gray-600'}`}>
-                          {store.tipo}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )
-            })}
-          </div>
+          <PdvMap />
 
-          {/* Not found CTA */}
-          <div className="mt-12 bg-ink text-paper px-8 py-8 flex items-center justify-between gap-6 flex-wrap">
-            <div>
-              <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-red mb-2">¿No encontrás tu zona?</p>
-              <p className="font-body text-[15px] text-paper/80">
-                Escribinos y te decimos el punto más cercano, o comprá online con envío a todo el país.
-              </p>
-            </div>
-            <div className="flex gap-3">
-              <a
-                href={`${WA_NUMBER}?text=${encodeURIComponent('Hola Hardy! Busco dónde comprar en mi zona:')}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-red text-paper font-mono text-[11px] tracking-[0.15em] uppercase px-6 py-3 hover:bg-red/90 transition-colors"
-              >
-                WhatsApp →
-              </a>
-              <Link
-                href="/tienda"
-                className="border border-paper/30 text-paper font-mono text-[11px] tracking-[0.15em] uppercase px-6 py-3 hover:bg-paper/10 transition-colors"
-              >
-                Tienda online
-              </Link>
-            </div>
+          {/* CTA — sumar puntos de venta */}
+          <div className="mt-10 bg-ink text-paper px-8 py-8 flex items-center justify-between gap-6 flex-wrap max-md:px-6">
+            <p className="font-heading text-[clamp(20px,2.5vw,28px)] font-medium m-0 max-w-[520px] leading-[1.2]">
+              ¿Querés ser punto de venta en tu zona?
+            </p>
+            <a
+              href={`${WA_NUMBER}?text=${encodeURIComponent('Hola Hardy, quiero ser punto de venta en mi zona')}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-red text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-7 py-[14px] whitespace-nowrap"
+            >
+              Escribinos →
+            </a>
           </div>
         </div>
       </section>

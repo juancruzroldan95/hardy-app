@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
-import { MessageCircle } from 'lucide-react'
+import { MessageCircle, Coffee, ChefHat, Dumbbell, Factory } from 'lucide-react'
 import { WA_NUMBER } from '@/consts/products'
 
 export const metadata: Metadata = {
@@ -14,14 +14,14 @@ const BALDES_MANI = [
   {
     tag: 'Crema de Maní · 4,5 kg',
     title: 'Balde 4,5 kg',
-    img: '/products/balde-45-front.png',
+    img: '/products/balde-45-open.png',
     desc: 'Para cafeterías, cocinas, gimnasios y repostería. 100% maní seleccionado, sin azúcar, sin aceites, sin conservantes.',
     waText: 'Hola Hardy, quiero info del balde de crema de maní de 4.5kg',
   },
   {
     tag: 'Crema de Maní · 23 kg',
     title: 'Balde 23 kg',
-    img: '/products/balde-23-front.png',
+    img: '/products/balde-23-open.png',
     desc: 'Para producción continua, barras energéticas, helados y panificados. Mejor costo por kg de la línea.',
     waText: 'Hola Hardy, quiero info del balde de crema de maní de 23kg',
   },
@@ -48,10 +48,10 @@ const USOS_MANI = ['Bowls', 'Toppings', 'Rellenos', 'Barras', 'Repostería', 'He
 const USOS_MIEL = ['Endulzante natural', 'Panificados', 'Repostería', 'Bebidas', 'Salsas', 'Toppings', 'Producción']
 
 const PARA_QUIEN = [
-  { icon: '☕', t: 'Cafés y restaurants', d: 'Insumo para preparaciones, desayunos y carta.' },
-  { icon: '🎂', t: 'Reposterías', d: 'Ingrediente para rellenos, coberturas y elaboraciones.' },
-  { icon: '💪', t: 'Emprendedores', d: 'Barras, snacks proteicos y productos saludables.' },
-  { icon: '🏭', t: 'Industria', d: 'Volúmenes altos para elaboración continua.' },
+  { Icon: Coffee,   t: 'Cafés y restaurants', d: 'Insumo para preparaciones, desayunos y carta.' },
+  { Icon: ChefHat,  t: 'Reposterías', d: 'Ingrediente para rellenos, coberturas y elaboraciones.' },
+  { Icon: Dumbbell, t: 'Emprendedores', d: 'Barras, snacks proteicos y productos naturales.' },
+  { Icon: Factory,  t: 'Industria', d: 'Volúmenes altos para elaboración continua.' },
 ]
 
 function BaldeCard({
@@ -138,11 +138,54 @@ export default function AGranelPage() {
                 key={i}
                 className="group bg-paper hover:bg-ink transition-colors border-t-[3px] border-transparent hover:border-red px-5 py-6 cursor-default"
               >
-                <div className="text-[22px] mb-3">{c.icon}</div>
+                <c.Icon size={22} className="text-red mb-3" />
                 <h3 className="font-heading text-[16px] font-medium m-0 mb-[6px] group-hover:text-paper transition-colors">{c.t}</h3>
                 <p className="text-[12px] text-[#666] group-hover:text-[#aaa] leading-[1.5] m-0 transition-colors">{c.d}</p>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* PRODUCTO EN ACCIÓN */}
+      <section className="bg-ink text-paper py-14 px-10 max-md:px-6">
+        <div className="max-w-[1100px] mx-auto">
+          <p className="font-mono text-[11px] tracking-[0.25em] text-red uppercase mb-3">── En tu cocina</p>
+          <h2
+            className="font-heading font-medium tracking-[-0.02em] leading-[1.1] m-0 mb-8"
+            style={{ fontSize: 'clamp(28px,4vw,44px)' }}
+          >
+            Pensado para el <em className="not-italic text-red">uso profesional.</em>
+          </h2>
+          <div className="grid grid-cols-2 gap-[2px] max-md:grid-cols-1">
+            <div className="relative aspect-[16/10] overflow-hidden">
+              <Image
+                src="/lifestyle/granel-cocina.png"
+                alt="Balde de crema de maní abierto en una cocina profesional"
+                fill
+                className="object-cover"
+                sizes="(max-width: 900px) 100vw, 50vw"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-ink/70 to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 p-5">
+                <p className="font-heading text-[18px] font-medium text-paper m-0">Cocinas y cafeterías</p>
+                <p className="font-body text-[12px] text-paper/70 m-0">Rendimiento y consistencia en cada preparación.</p>
+              </div>
+            </div>
+            <div className="relative aspect-[16/10] overflow-hidden">
+              <Image
+                src="/lifestyle/granel-reposteria.png"
+                alt="Chef de repostería incorporando crema de maní del balde a un bowl"
+                fill
+                className="object-cover"
+                sizes="(max-width: 900px) 100vw, 50vw"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-ink/70 to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 p-5">
+                <p className="font-heading text-[18px] font-medium text-paper m-0">Repostería y producción</p>
+                <p className="font-body text-[12px] text-paper/70 m-0">El mejor costo por kilo para elaborar a escala.</p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -181,6 +224,47 @@ export default function AGranelPage() {
             {USOS_MIEL.map((u, i) => (
               <span key={i} className="bg-paper-2 px-3 py-1 font-mono text-[9px] tracking-[0.12em] uppercase text-[#666]">{u}</span>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ¿FRASCO O BALDE? — comparador conceptual */}
+      <section className="py-16 px-10 bg-paper max-md:px-6">
+        <div className="max-w-[1100px] mx-auto">
+          <p className="font-mono text-[11px] tracking-[0.25em] text-red uppercase mb-4">── ¿Frasco o balde?</p>
+          <div className="grid grid-cols-[1.4fr_1fr] gap-10 items-center max-md:grid-cols-1 max-md:gap-6">
+            <div>
+              <h2
+                className="font-heading font-medium tracking-[-0.02em] m-0 mb-4 leading-[1.15]"
+                style={{ fontSize: 'clamp(26px,4vw,40px)' }}
+              >
+                Si usás más de 2 frascos <em className="not-italic text-red">por semana,</em> el balde te conviene.
+              </h2>
+              <p className="text-[15px] text-[#555] leading-[1.7] max-w-[560px] mb-7">
+                El balde tiene mejor costo por kilo, dura más y ocupa menos espacio que la misma cantidad en
+                frascos. Para cocinas, cafeterías y producción, es el formato que tiene sentido.
+              </p>
+              <a
+                href={`${WA_NUMBER}?text=${encodeURIComponent('Hola Hardy, quiero saber si me conviene el balde o los frascos')}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block bg-red text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-7 py-[14px]"
+              >
+                Consultanos cuál te conviene →
+              </a>
+            </div>
+            {/* Ícono conceptual frasco vs balde */}
+            <div className="flex items-end justify-center gap-8 bg-paper-2 py-10 px-6 max-md:py-8">
+              <div className="flex flex-col items-center gap-3">
+                <div className="w-12 h-16 border-[3px] border-ink/30 rounded-b-md rounded-t-sm" />
+                <span className="font-mono text-[9px] tracking-[0.18em] uppercase text-[#888]">Frasco</span>
+              </div>
+              <div className="font-mono text-[12px] text-red">vs</div>
+              <div className="flex flex-col items-center gap-3">
+                <div className="w-20 h-24 border-[3px] border-red rounded-b-lg rounded-t-sm" />
+                <span className="font-mono text-[9px] tracking-[0.18em] uppercase text-red">Balde</span>
+              </div>
+            </div>
           </div>
         </div>
       </section>
