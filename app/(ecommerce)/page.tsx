@@ -60,29 +60,25 @@ const STATS = [
 // Usos / a quién le sirve — fotos reales con overlay de caso de uso
 const USOS = [
   {
-    src: '/lifestyle/uso-tostadas-dark.jpg',
+    src: '/lifestyle/uso-tostadas-dark.png',
     alt: 'Tostada integral con crema de maní Hardy, banana y arándanos sobre piedra negra',
     eyebrow: 'Tu desayuno',
     title: 'Tostadas y frutas',
     desc: 'Tostadas, frutas, café. El clásico que nunca falla.',
-    // Imagen 16:9 — el producto está centrado-izquierda; ajustamos para mostrar la tostada
-    objectPosition: 'center center',
   },
   {
-    src: '/lifestyle/uso-smoothie-dark.jpg',
+    src: '/lifestyle/uso-smoothie-dark.png',
     alt: 'Smoothie de crema de maní Hardy en vaso alto con maníes sueltos sobre piedra negra',
     eyebrow: 'Tu entrenamiento',
     title: 'Proteína natural',
     desc: 'Pre y post entrenamiento. Energía real.',
-    objectPosition: 'center center',
   },
   {
-    src: '/lifestyle/uso-bowl-dark.jpg',
+    src: '/lifestyle/uso-bowl-dark.png',
     alt: 'Bowl de yogurt con granola y miel Hardy cayendo en hilo, frasco Miel Líquida al lado',
     eyebrow: 'Tu cocina',
     title: 'Bowls y recetas',
     desc: 'Bowls, yogures, recetas. Endulzá natural.',
-    objectPosition: 'center center',
   },
 ]
 
@@ -282,7 +278,7 @@ export default function HomePage() {
       <section
         className="relative text-paper overflow-hidden"
         style={{
-          backgroundImage: "url('/lifestyle/crunchy-textura-dark.jpg')",
+          backgroundImage: "url('/lifestyle/crunchy-textura-dark.png')",
           backgroundSize: 'cover',
           backgroundPosition: 'right center',
         }}
@@ -524,12 +520,12 @@ export default function HomePage() {
           <div className="grid grid-cols-3 gap-[2px] max-md:grid-cols-1">
             {USOS.map((u, i) => (
               <RevealSection key={u.src} delay={i * 80}>
-                <div className="relative aspect-[4/3] overflow-hidden group" style={{ backgroundColor: '#000' }}>
+                <div className="relative aspect-[4/3] overflow-hidden group">
                   <Image
                     src={u.src}
                     alt={u.alt}
                     fill
-                    className="object-contain transition-transform duration-700 group-hover:scale-105"
+                    className="object-cover transition-transform duration-700 group-hover:scale-105"
                     sizes="(max-width: 900px) 100vw, 33vw"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/10 to-transparent" />
