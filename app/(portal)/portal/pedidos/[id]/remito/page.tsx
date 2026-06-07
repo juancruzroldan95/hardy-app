@@ -9,6 +9,7 @@ import { createClient } from '@/services/supabase/server'
 import { getProfileByUserId } from '@/repository/queries/profile'
 import { getOrderById } from '@/repository/queries/orders'
 import { HARDY_BANK } from '@/consts/hardy'
+import { formatARS } from '@/consts/products'
 import PrintButton from '@/components/portal/PrintButton'
 
 const SHIPPING_LABELS: Record<string, string> = {
