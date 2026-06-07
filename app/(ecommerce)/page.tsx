@@ -280,7 +280,7 @@ export default function HomePage() {
         style={{
           backgroundImage: "url('/lifestyle/crunchy-textura-dark.png')",
           backgroundSize: 'cover',
-          backgroundPosition: 'right center',
+          backgroundPosition: 'center center',
         }}
       >
         {/* Overlay negro sutil — el área derecha del frasco se ve limpia, el texto a la izquierda es legible */}
@@ -520,12 +520,12 @@ export default function HomePage() {
           <div className="grid grid-cols-3 gap-[2px] max-md:grid-cols-1">
             {USOS.map((u, i) => (
               <RevealSection key={u.src} delay={i * 80}>
-                <div className="relative aspect-[4/3] overflow-hidden group">
+                <div className="relative aspect-[4/3] overflow-hidden group" style={{ backgroundColor: '#000' }}>
                   <Image
                     src={u.src}
                     alt={u.alt}
                     fill
-                    className="object-cover transition-transform duration-700 group-hover:scale-105"
+                    className="object-contain transition-transform duration-700 group-hover:scale-105"
                     sizes="(max-width: 900px) 100vw, 33vw"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/10 to-transparent" />
