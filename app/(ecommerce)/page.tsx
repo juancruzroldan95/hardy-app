@@ -276,53 +276,54 @@ export default function HomePage() {
       {/* §4.5 — sección intacta en contenido y diseño */}
       {/* Imagen como fondo full-bleed con background-blend-mode para mimetizar con bg-ink */}
       <section
-        className="relative text-paper overflow-hidden"
+        className="relative text-paper overflow-hidden bg-ink"
         style={{
           backgroundImage: "url('/lifestyle/crunchy-textura-dark.png')",
-          backgroundSize: 'cover',
-          backgroundPosition: 'center 60%',
+          backgroundSize: '55% auto',
+          backgroundPosition: 'right center',
+          backgroundRepeat: 'no-repeat',
         }}
       >
-        {/* Overlay negro sutil — el área derecha del frasco se ve limpia, el texto a la izquierda es legible */}
+        {/* Gradiente para garantizar legibilidad del texto sobre la zona izquierda */}
         <div
-          className="absolute inset-0 pointer-events-none"
-          style={{ background: 'linear-gradient(to right, rgba(15,15,15,0.90) 0%, rgba(15,15,15,0.70) 35%, rgba(15,15,15,0.20) 65%, rgba(15,15,15,0) 100%)' }}
+          className="absolute inset-0 pointer-events-none z-[0]"
+          style={{ background: 'linear-gradient(to right, rgba(20,20,20,1) 0%, rgba(20,20,20,1) 40%, rgba(20,20,20,0.4) 65%, transparent 85%)' }}
         />
-        <div className="relative z-[1] max-w-[1240px] mx-auto px-16 py-20 max-w-[640px] max-md:px-6 max-md:py-12">
-          <div className="absolute top-8 right-8 max-md:top-5 max-md:right-5">
-            <span className="bg-red text-paper font-mono text-[10px] tracking-[0.2em] uppercase px-3 py-[6px]">
-              Nuevo
-            </span>
+        <div className="relative z-[1] max-w-[1240px] mx-auto px-16 py-20 max-md:px-6 max-md:py-12">
+          <div className="max-w-[540px]">
+            <RevealSection>
+              <span className="bg-red text-paper font-mono text-[10px] tracking-[0.2em] uppercase px-3 py-[6px] inline-block mb-8">
+                Nuevo
+              </span>
+              <p className="font-mono text-[11px] tracking-[0.25em] text-red uppercase mb-5">
+                ── Lanzamiento · Crema de Maní
+              </p>
+              <h2
+                className="font-heading font-medium leading-[1.05] m-0 mb-5 tracking-[-0.02em]"
+                style={{ fontSize: 'clamp(38px, 5vw, 64px)' }}
+              >
+                Crunchy.
+                <br />
+                <em className="not-italic text-red">Con textura real.</em>
+              </h2>
+              <p className="text-[15px] leading-[1.8] mb-8 text-paper/65 max-w-[480px]">
+                La misma base 100% natural con trozos enteros de maní que te recuerdan de dónde viene cada cucharada. Sin aditivos. Sin aceite. Sin azúcar. Solo maní — pero que se siente.
+              </p>
+              <div className="flex gap-[2px] mb-8 flex-wrap">
+                {['100% Maní', 'Trozos enteros', 'Sin aditivos', '380g'].map((tag) => (
+                  <span key={tag} className="bg-paper/8 font-mono text-[9px] tracking-[0.15em] uppercase px-3 py-[6px] text-paper/60">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+              <Link
+                href="/tienda"
+                className="bg-red text-paper font-mono text-[12px] tracking-[0.15em] uppercase px-8 py-[16px] self-start inline-block"
+              >
+                Comprar Crunchy →
+              </Link>
+            </RevealSection>
           </div>
-          <RevealSection>
-            <p className="font-mono text-[11px] tracking-[0.25em] text-red uppercase mb-5">
-              ── Lanzamiento · Crema de Maní
-            </p>
-            <h2
-              className="font-heading font-medium leading-[1.05] m-0 mb-5 tracking-[-0.02em]"
-              style={{ fontSize: 'clamp(38px, 5vw, 64px)' }}
-            >
-              Crunchy.
-              <br />
-              <em className="not-italic text-red">Con textura real.</em>
-            </h2>
-            <p className="text-[15px] leading-[1.8] mb-8 text-paper/65 max-w-[480px]">
-              La misma base 100% natural con trozos enteros de maní que te recuerdan de dónde viene cada cucharada. Sin aditivos. Sin aceite. Sin azúcar. Solo maní — pero que se siente.
-            </p>
-            <div className="flex gap-[2px] mb-8 flex-wrap">
-              {['100% Maní', 'Trozos enteros', 'Sin aditivos', '380g'].map((tag) => (
-                <span key={tag} className="bg-paper/8 font-mono text-[9px] tracking-[0.15em] uppercase px-3 py-[6px] text-paper/60">
-                  {tag}
-                </span>
-              ))}
-            </div>
-            <Link
-              href="/tienda"
-              className="bg-red text-paper font-mono text-[12px] tracking-[0.15em] uppercase px-8 py-[16px] self-start inline-block"
-            >
-              Comprar Crunchy →
-            </Link>
-          </RevealSection>
         </div>
       </section>
 
