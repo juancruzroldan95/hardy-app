@@ -520,12 +520,12 @@ export default function HomePage() {
           <div className="grid grid-cols-3 gap-[2px] max-md:grid-cols-1">
             {USOS.map((u, i) => (
               <RevealSection key={u.src} delay={i * 80}>
-                <div className="relative aspect-[4/3] overflow-hidden group" style={{ backgroundColor: '#000' }}>
+                <div className="relative aspect-[4/3] overflow-hidden group">
                   <Image
                     src={u.src}
                     alt={u.alt}
                     fill
-                    className="object-contain transition-transform duration-700 group-hover:scale-105"
+                    className="object-cover transition-transform duration-700 group-hover:scale-105"
                     sizes="(max-width: 900px) 100vw, 33vw"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/10 to-transparent" />
