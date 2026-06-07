@@ -275,22 +275,10 @@ export default function HomePage() {
       {/* ── 4. LANZAMIENTO CRUNCHY — BAJA debajo de prueba social ──── */}
       {/* §4.5 — sección intacta en contenido y diseño */}
       {/* Imagen como fondo full-bleed con background-blend-mode para mimetizar con bg-ink */}
-      <section
-        className="relative text-paper overflow-hidden bg-ink"
-        style={{
-          backgroundImage: "url('/lifestyle/crunchy-textura-dark.png')",
-          backgroundSize: '55% auto',
-          backgroundPosition: 'right center',
-          backgroundRepeat: 'no-repeat',
-        }}
-      >
-        {/* Gradiente para garantizar legibilidad del texto sobre la zona izquierda */}
-        <div
-          className="absolute inset-0 pointer-events-none z-[0]"
-          style={{ background: 'linear-gradient(to right, rgba(20,20,20,1) 0%, rgba(20,20,20,1) 40%, rgba(20,20,20,0.4) 65%, transparent 85%)' }}
-        />
-        <div className="relative z-[1] max-w-[1240px] mx-auto px-16 py-20 max-md:px-6 max-md:py-12">
-          <div className="max-w-[540px]">
+      <section className="bg-ink text-paper overflow-hidden">
+        <div className="grid grid-cols-2 max-md:grid-cols-1">
+          {/* Mitad izquierda — copy */}
+          <div className="flex items-center px-16 py-20 max-md:px-6 max-md:py-12">
             <RevealSection>
               <span className="bg-red text-paper font-mono text-[10px] tracking-[0.2em] uppercase px-3 py-[6px] inline-block mb-8">
                 Nuevo
@@ -323,6 +311,16 @@ export default function HomePage() {
                 Comprar Crunchy →
               </Link>
             </RevealSection>
+          </div>
+          {/* Mitad derecha — imagen (llena la altura del copy) */}
+          <div className="relative max-md:aspect-[16/9]">
+            <Image
+              src="/lifestyle/crunchy-textura-dark.png"
+              alt="Frasco Hardy Crunchy abierto con cuchara de textura y maníes"
+              fill
+              className="object-contain object-center"
+              sizes="(max-width: 900px) 100vw, 50vw"
+            />
           </div>
         </div>
       </section>
