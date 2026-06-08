@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Image from 'next/image'
 import { WA_NUMBER } from '@/consts/products'
+import WhatsAppLink from '@/components/analytics/WhatsAppLink'
 
 export const metadata: Metadata = {
   title: 'Gastronómico — Hardy',
@@ -32,14 +33,12 @@ export default function GastronomicoPage() {
             Crema de maní y miel en formato balde. Menor costo por kilo, calidad constante, sin aditivos.
             El insumo que tu cocina necesita.
           </p>
-          <a
+          <WhatsAppLink
             href={`${WA_NUMBER}?text=Hola%20Hardy,%20tengo%20un%20negocio%20gastronómico%20y%20quiero%20información`}
-            target="_blank"
-            rel="noopener noreferrer"
             className="inline-block bg-red text-paper font-mono text-[12px] tracking-[0.2em] uppercase px-8 py-4"
           >
             Consultar por WhatsApp →
-          </a>
+          </WhatsAppLink>
         </div>
       </section>
 
@@ -196,14 +195,12 @@ export default function GastronomicoPage() {
           <p className="text-[#bbb] text-[16px] mb-8 leading-[1.6]">
             Contactanos y te armamos una propuesta según tu volumen de consumo.
           </p>
-          <a
+          <WhatsAppLink
             href={`${WA_NUMBER}?text=Hola%20Hardy,%20tengo%20un%20negocio%20gastronómico%20y%20quiero%20una%20propuesta`}
-            target="_blank"
-            rel="noopener noreferrer"
             className="inline-block bg-red text-paper font-mono text-[12px] tracking-[0.2em] uppercase px-10 py-4"
           >
             Escribir por WhatsApp →
-          </a>
+          </WhatsAppLink>
         </div>
       </section>
 

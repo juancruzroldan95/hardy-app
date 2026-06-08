@@ -3,6 +3,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { MessageCircle, Coffee, ChefHat, Dumbbell, Factory } from 'lucide-react'
 import { WA_NUMBER } from '@/consts/products'
+import WhatsAppLink from '@/components/analytics/WhatsAppLink'
 
 export const metadata: Metadata = {
   title: 'A Granel — Hardy',
@@ -109,15 +110,13 @@ export default function AGranelPage() {
             Crema de maní y miel en volumen para gastronomía, repostería, cafeterías, producción e industria.
           </p>
           <div className="flex gap-3 flex-wrap items-center">
-            <a
+            <WhatsAppLink
               href={`${WA_NUMBER}?text=Hola%20Hardy,%20quiero%20información%20de%20productos%20a%20granel`}
-              target="_blank"
-              rel="noopener noreferrer"
               className="inline-flex items-center gap-2 bg-red text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-7 py-[13px]"
               aria-label="Consultar por WhatsApp"
             >
               Contactanos por WhatsApp <MessageCircle size={14} />
-            </a>
+            </WhatsAppLink>
             <Link
               href="/mayoristas#solicitar"
               className="bg-paper/10 border border-white/20 text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-7 py-[13px] inline-block"
@@ -281,15 +280,13 @@ export default function AGranelPage() {
           <p className="text-[#bbb] text-[14px] mb-7 leading-[1.6]">
             Te asesoramos según el producto, el formato y la cantidad que necesitás.
           </p>
-          <a
+          <WhatsAppLink
             href={`${WA_NUMBER}?text=Hola%20Hardy,%20quiero%20consultar%20por%20volumen%20a%20granel`}
-            target="_blank"
-            rel="noopener noreferrer"
             className="bg-red text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-8 py-[16px] inline-flex items-center gap-2 mx-auto"
             aria-label="Consultar por WhatsApp"
           >
             Contactanos <MessageCircle size={16} />
-          </a>
+          </WhatsAppLink>
         </div>
       </section>
 

@@ -4,6 +4,7 @@ import { MessageCircle } from 'lucide-react'
 import { getRecetas } from '@/consts/recetas'
 import { WA_NUMBER } from '@/consts/products'
 import RevealSection from '@/components/ui/RevealSection'
+import WhatsAppLink from '@/components/analytics/WhatsAppLink'
 
 // §4.3 — Columnas en orden: Negocio → A granel → Tu casa
 // Default: todos en gris (bg-paper-2); hover: negro con botón rojo
@@ -407,15 +408,13 @@ export default function HomePage() {
                 >
                   Ver formatos a granel →
                 </Link>
-                <a
+                <WhatsAppLink
                   href={`${WA_NUMBER}?text=Hola%20Hardy,%20quiero%20consultar%20por%20volumen%20a%20granel`}
-                  target="_blank"
-                  rel="noopener noreferrer"
                   className="bg-ink text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-7 py-[14px] flex items-center justify-center gap-2 hover:bg-red transition-colors max-md:w-full"
                   aria-label="Consultar por WhatsApp"
                 >
                   Contactanos <MessageCircle size={14} />
-                </a>
+                </WhatsAppLink>
               </div>
             </div>
           </RevealSection>

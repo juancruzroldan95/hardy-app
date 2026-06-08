@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { MessageCircle } from 'lucide-react'
 import { WA_NUMBER, ESCALAS } from '@/consts/products'
 import SolicitudForm from '@/components/mayoristas/SolicitudForm'
+import WhatsAppLink from '@/components/analytics/WhatsAppLink'
 
 export const metadata: Metadata = {
   title: 'Mayoristas — Hardy',
@@ -176,15 +177,13 @@ export default function MayoristasPage() {
               >
                 Portal Cliente →
               </Link>
-              <a
+              <WhatsAppLink
                 href={`${WA_NUMBER}?text=Hola%20Hardy,%20quiero%20información%20mayorista`}
-                target="_blank"
-                rel="noopener noreferrer"
                 className="bg-paper/10 border border-white/20 text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-6 py-[14px] flex items-center gap-2"
                 aria-label="WhatsApp"
               >
                 Contactanos <MessageCircle size={14} />
-              </a>
+              </WhatsAppLink>
             </div>
           </div>
         </div>
@@ -249,15 +248,13 @@ export default function MayoristasPage() {
             </div>
             <p className="font-mono text-[10px] tracking-[0.1em] text-ink/40 uppercase">
               ¿Preferís escribirnos directo?{' '}
-              <a
+              <WhatsAppLink
                 href={`${WA_NUMBER}?text=Hola%20Hardy,%20quiero%20acceso%20al%20portal%20mayorista`}
-                target="_blank"
-                rel="noopener noreferrer"
                 className="text-ink inline-flex items-center gap-1 align-middle border-b border-ink"
                 aria-label="WhatsApp"
               >
                 Contactanos <MessageCircle size={12} className="inline" />
-              </a>
+              </WhatsAppLink>
             </p>
           </div>
 

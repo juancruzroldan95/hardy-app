@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { CheckCircle, Clock, XCircle, Package } from 'lucide-react'
 import PurchaseTracker from '@/components/analytics/PurchaseTracker'
 import { getStoreOrderById } from '@/repository/queries/storeOrders'
+import WhatsAppLink from '@/components/analytics/WhatsAppLink'
 
 export const metadata: Metadata = {
   title: 'Gracias por tu compra · Hardy',
@@ -134,14 +135,12 @@ export default async function GraciasPage({ searchParams }: Props) {
               >
                 Intentar de nuevo →
               </Link>
-              <a
+              <WhatsAppLink
                 href="https://wa.me/5491135736956"
-                target="_blank"
-                rel="noopener noreferrer"
                 className="border border-paper/30 text-paper font-mono text-[11px] tracking-[0.15em] uppercase px-8 py-[16px] hover:bg-paper/8 transition-colors"
               >
                 Contactar por WhatsApp →
-              </a>
+              </WhatsAppLink>
             </>
           )}
         </div>

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Image from 'next/image'
 import { WA_NUMBER } from '@/consts/products'
+import WhatsAppLink from '@/components/analytics/WhatsAppLink'
 
 export const metadata: Metadata = {
   title: 'Productores — Hardy',
@@ -32,14 +33,12 @@ export default function ProductorPage() {
             Crema de maní y miel pura en formatos a granel. El ingrediente limpio que tu elaboración
             necesita — sin aditivos, sin azúcar agregada, sin vueltas.
           </p>
-          <a
+          <WhatsAppLink
             href={`${WA_NUMBER}?text=Hola%20Hardy,%20soy%20productor%20y%20quiero%20información%20de%20formatos%20a%20granel`}
-            target="_blank"
-            rel="noopener noreferrer"
             className="inline-block bg-red text-paper font-mono text-[12px] tracking-[0.2em] uppercase px-8 py-4"
           >
             Consultar por WhatsApp →
-          </a>
+          </WhatsAppLink>
         </div>
       </section>
 
@@ -135,14 +134,12 @@ export default function ProductorPage() {
           <p className="text-[#bbb] text-[16px] mb-8 leading-[1.6]">
             Hablemos de volumen, frecuencia y logística. Te armamos una propuesta para ambos productos.
           </p>
-          <a
+          <WhatsAppLink
             href={`${WA_NUMBER}?text=Hola%20Hardy,%20soy%20productor%20y%20quiero%20una%20propuesta%20para%20crema%20de%20maní%20y%20miel`}
-            target="_blank"
-            rel="noopener noreferrer"
             className="inline-block bg-red text-paper font-mono text-[12px] tracking-[0.2em] uppercase px-10 py-4"
           >
             Escribir por WhatsApp →
-          </a>
+          </WhatsAppLink>
         </div>
       </section>
 

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import WhatsAppLink from '@/components/analytics/WhatsAppLink'
 
 export const metadata: Metadata = {
   title: 'Preguntas frecuentes · Hardy',
@@ -154,14 +155,12 @@ export default function FAQPage() {
           <p className="font-body text-[15px] text-ink/60 leading-[1.6] mb-7 max-w-[480px]">
             Escribinos por WhatsApp y te respondemos a la brevedad.
           </p>
-          <Link
+          <WhatsAppLink
             href={WA_URL}
-            target="_blank"
-            rel="noopener noreferrer"
             className="inline-block bg-red text-paper font-mono text-[12px] tracking-[0.15em] uppercase px-8 py-[18px] hover:opacity-90 transition-opacity"
           >
             Escribinos →
-          </Link>
+          </WhatsAppLink>
         </div>
       </section>
     </div>
