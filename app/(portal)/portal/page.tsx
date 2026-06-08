@@ -346,9 +346,15 @@ export default async function PortalDashboardPage() {
 
         {recentOrders.length === 0 ? (
           <div className="bg-paper border border-ink/8 p-10 text-center">
-            <p className="font-body text-[14px] text-ink/40">
+            <p className="font-body text-[14px] text-ink/40 mb-4">
               Todavía no hay pedidos registrados.
             </p>
+            <Link
+              href="/portal/catalogo"
+              className="inline-block bg-red text-paper font-mono text-[11px] tracking-[0.15em] uppercase px-6 py-[12px]"
+            >
+              Ver catálogo y precios →
+            </Link>
           </div>
         ) : (
           <div className="bg-paper border border-ink/8 divide-y divide-ink/8">
