@@ -128,7 +128,7 @@ export default function ProductCard({ product, rating }: { product: Product; rat
             {product.desc}
           </div>
           <div className="flex-1" />
-          <div className="pt-[14px] border-t border-ink/15 group-hover:border-white/15 flex justify-between items-center transition-colors duration-[220ms]">
+          <div className="pt-[14px] border-t border-ink/15 group-hover:border-white/15 flex justify-between items-center gap-2 transition-colors duration-[220ms] max-md:flex-col max-md:items-stretch max-md:gap-3">
             {product.price ? (
               <>
                 <div className="font-heading text-[22px] font-medium whitespace-nowrap group-hover:text-paper transition-colors duration-[220ms]">
@@ -136,7 +136,7 @@ export default function ProductCard({ product, rating }: { product: Product; rat
                 </div>
                 <button
                   onClick={(e) => { e.stopPropagation(); addItem(product.id) }}
-                  className="bg-red text-paper font-mono text-[10px] tracking-[0.08em] uppercase px-[14px] py-[10px] whitespace-nowrap flex-shrink-0 cursor-pointer border-none"
+                  className="bg-red text-paper font-mono text-[10px] tracking-[0.08em] uppercase px-[14px] py-[10px] whitespace-nowrap flex-shrink-0 cursor-pointer border-none max-md:w-full"
                 >
                   + Agregar
                 </button>
@@ -151,7 +151,7 @@ export default function ProductCard({ product, rating }: { product: Product; rat
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={(e) => e.stopPropagation()}
-                  className="bg-red text-paper font-mono text-[10px] tracking-[0.08em] uppercase px-[14px] py-[10px] whitespace-nowrap flex-shrink-0 no-underline"
+                  className="bg-red text-paper font-mono text-[10px] tracking-[0.08em] uppercase px-[14px] py-[10px] whitespace-nowrap flex-shrink-0 no-underline text-center max-md:w-full"
                 >
                   Consultar →
                 </a>
