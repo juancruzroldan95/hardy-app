@@ -211,9 +211,11 @@ export default async function NuevoPedidoPage({ searchParams }: Props) {
       }).then(async (o) => {
         if (!o) return null
         // Verify it's from same role
-        const p = await db.query.profiles.findFirst({
-          where: and(eq(profiles.userId, o.userId), eq(profiles.isDeleted, false)),
-        })
+        const p = o.userId
+          ? await db.query.profiles.findFirst({
+              where: and(eq(profiles.userId, o.userId), eq(profiles.isDeleted, false)),
+            })
+          : null
         return p?.role === role ? o : null
       })
 

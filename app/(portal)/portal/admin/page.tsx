@@ -62,6 +62,7 @@ export default async function AdminDashboardPage() {
   const allOrdersFull = await getAllOrdersForRevenueTracking()
   const revenuePerUser = new Map<string, number>()
   for (const o of allOrdersFull) {
+    if (!o.userId) continue
     revenuePerUser.set(o.userId, (revenuePerUser.get(o.userId) ?? 0) + Number(o.totalArs))
   }
   const topClients = allProfiles
@@ -169,7 +170,7 @@ export default async function AdminDashboardPage() {
           </div>
           <div className="bg-paper border border-ink/8 divide-y divide-ink/8">
             {recentOrders.map((order) => {
-              const clientProfile = profileMap.get(order.userId)
+              const clientProfile = order.userId ? profileMap.get(order.userId) : undefined
               return (
                 <Link
                   key={order.id}

@@ -119,7 +119,8 @@ export const profiles = pgTable('profiles', {
 
 export const orders = pgTable('orders', {
   id:              uuid('id').primaryKey().defaultRandom(),
-  userId:          uuid('user_id').notNull(),
+  userId:          uuid('user_id'),                        // nullable — B2C guest orders
+  channel:         text('channel').default('b2b'),        // 'b2b' | 'b2c'
   status:          orderStatusEnum('status').notNull().default('pending'),
   paymentStatus:   paymentStatusEnum('payment_status').notNull().default('unpaid'),
   totalArs:        numeric('total_ars', { precision: 12, scale: 2 }).notNull(),
@@ -127,9 +128,16 @@ export const orders = pgTable('orders', {
   paymentMethod:   paymentMethodEnum('payment_method'),
   notes:           text('notes'),
   shippingAddress: text('shipping_address'),
+  shippingCp:      text('shipping_cp'),
+  shippingCost:    numeric('shipping_cost', { precision: 10, scale: 2 }),
   trackingNumber:       text('tracking_number'),
+  andreaniNroEnvio:     text('andreani_nro_envio'),
   purchaseOrderNumber:  text('purchase_order_number'),
   requestedDeliveryDate: text('requested_delivery_date'), // 'YYYY-MM-DD'
+  // Guest buyer info (B2C — no Supabase user)
+  guestName:       text('guest_name'),
+  guestEmail:      text('guest_email'),
+  guestPhone:      text('guest_phone'),
   isActive:             boolean('is_active').notNull().default(true),
   isDeleted:       boolean('is_deleted').notNull().default(false),
   createdAt:       timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
@@ -138,6 +146,8 @@ export const orders = pgTable('orders', {
   index('orders_user_id_idx').on(table.userId),
   index('orders_status_idx').on(table.status),
   index('orders_created_at_idx').on(table.createdAt),
+  index('orders_guest_email_idx').on(table.guestEmail),
+  index('orders_channel_idx').on(table.channel),
 ])
 
 // ─── order_items ──────────────────────────────────────────────────────────────

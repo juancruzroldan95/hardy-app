@@ -47,7 +47,7 @@ export default async function AdminPedidosPage({ searchParams }: Props) {
 
   // Filter by role if selected
   const filteredOrders = roleFilter
-    ? allOrders.filter((o) => profileMap.get(o.userId)?.role === roleFilter)
+    ? allOrders.filter((o) => o.userId && profileMap.get(o.userId)?.role === roleFilter)
     : allOrders
 
   const pending   = filteredOrders.filter((o) => o.status === 'pending').length
@@ -138,7 +138,7 @@ export default async function AdminPedidosPage({ searchParams }: Props) {
 
           <div className="divide-y divide-ink/8">
             {filteredOrders.map((order) => {
-              const p = profileMap.get(order.userId)
+              const p = order.userId ? profileMap.get(order.userId) : undefined
               const roleName = p?.role ? (ROLE_LABELS[p.role as UserRole] ?? p.role) : '—'
               const isUnpaid = order.paymentStatus === 'unpaid'
               return (

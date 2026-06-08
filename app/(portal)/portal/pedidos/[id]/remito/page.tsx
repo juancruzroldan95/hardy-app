@@ -60,7 +60,7 @@ export default async function RemitoPage({ params }: Props) {
   if (profile?.role !== 'admin' && order.userId !== user.id) notFound()
 
   // Get client profile for display
-  const clientProfile = order.userId !== user.id
+  const clientProfile = order.userId && order.userId !== user.id
     ? await getProfileByUserId(order.userId)
     : profile
 

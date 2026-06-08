@@ -70,9 +70,11 @@ export default async function AdminPedidoDetailPage({ params }: Props) {
   ])
   if (!order) notFound()
 
-  const clientProfile = await db.query.profiles.findFirst({
-    where: and(eq(profiles.userId, order.userId), eq(profiles.isDeleted, false)),
-  })
+  const clientProfile = order.userId
+    ? await db.query.profiles.findFirst({
+        where: and(eq(profiles.userId, order.userId), eq(profiles.isDeleted, false)),
+      })
+    : null
 
   async function handleStatusUpdate(formData: FormData) {
     'use server'
@@ -253,12 +255,22 @@ export default async function AdminPedidoDetailPage({ params }: Props) {
         </p>
       </div>
 
-      {/* Remito link */}
-      <div className="mb-6">
+      {/* Remito + Etiqueta Andreani */}
+      <div className="mb-6 flex flex-wrap gap-3">
         <Link href={`/portal/pedidos/${id}/remito`} target="_blank"
           className="font-mono text-[10px] tracking-[0.12em] uppercase text-ink/50 border border-ink/15 px-4 py-3 hover:bg-paper-2 transition-colors inline-block">
           Ver remito →
         </Link>
+        {order.andreaniNroEnvio && (
+          <a
+            href={`/api/andreani/etiqueta/${order.andreaniNroEnvio}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-mono text-[10px] tracking-[0.12em] uppercase text-red border border-red px-4 py-3 hover:bg-red hover:text-paper transition-colors inline-block"
+          >
+            Etiqueta Andreani ({order.andreaniNroEnvio}) →
+          </a>
+        )}
       </div>
 
       {/* Message thread */}
