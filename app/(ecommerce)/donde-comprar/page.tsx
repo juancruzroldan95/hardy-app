@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { ShoppingBag, Store, Handshake } from 'lucide-react'
 import { WA_NUMBER } from '@/consts/products'
 import PdvMap from '@/components/store/PdvMap'
+import WhatsAppLink from '@/components/analytics/WhatsAppLink'
 
 export const metadata: Metadata = {
   title: 'Comprá Hardy',
@@ -13,6 +14,8 @@ export const metadata: Metadata = {
   },
 }
 
+// primary: true → CTA con fondo rojo sólido (acción principal de la página)
+// primary: false → CTA con borde rojo (acción secundaria)
 const CARDS = [
   {
     Icon: ShoppingBag,
@@ -21,6 +24,7 @@ const CARDS = [
     cta: 'Ir a la tienda →',
     href: '/tienda',
     external: false,
+    primary: true,   // CTA principal de la página
   },
   {
     Icon: Store,
@@ -29,6 +33,7 @@ const CARDS = [
     cta: 'Acceder al portal →',
     href: '/portal',
     external: false,
+    primary: false,
   },
   {
     Icon: Handshake,
@@ -37,6 +42,7 @@ const CARDS = [
     cta: 'Escribinos →',
     href: `${WA_NUMBER}?text=${encodeURIComponent('Hola Hardy, tengo un negocio y quiero vender sus productos')}`,
     external: true,
+    primary: false,
   },
 ]
 
@@ -47,7 +53,7 @@ export default function DondeComprarPage() {
       {/* Hero */}
       <section className="bg-ink text-paper py-16 px-8 max-md:px-5">
         <div className="max-w-[1100px] mx-auto">
-          <p className="font-mono text-[11px] tracking-[0.25em] text-red uppercase mb-4">── Cómo comprar Hardy</p>
+          <p className="font-mono text-[11px] tracking-[0.25em] text-red uppercase mb-4">── Dónde comprar Hardy</p>
           <h1 className="font-heading text-[clamp(36px,5vw,56px)] font-medium leading-[1.1] tracking-[-0.02em] mb-4">
             Comprá <em className="not-italic text-red">HARDY.</em>
           </h1>
@@ -63,28 +69,49 @@ export default function DondeComprarPage() {
           {CARDS.map((c) => (
             <div
               key={c.title}
-              className="group bg-paper-2 hover:bg-ink transition-colors border-t-[3px] border-transparent hover:border-red flex flex-col px-7 py-8"
+              className={`group transition-colors border-t-[3px] flex flex-col px-7 py-8 ${
+                c.primary
+                  ? 'bg-ink text-paper border-red'
+                  : 'bg-paper-2 hover:bg-ink border-transparent hover:border-red'
+              }`}
             >
-              <c.Icon size={24} className="text-red mb-5" />
-              <h2 className="font-heading text-[22px] font-medium leading-[1.15] m-0 mb-3 group-hover:text-paper transition-colors">
+              <c.Icon
+                size={24}
+                className={`mb-5 ${c.primary ? 'text-red' : 'text-red'}`}
+              />
+              <h2
+                className={`font-heading text-[22px] font-medium leading-[1.15] m-0 mb-3 transition-colors ${
+                  c.primary ? 'text-paper' : 'group-hover:text-paper'
+                }`}
+              >
                 {c.title}
               </h2>
-              <p className="font-body text-[14px] text-[#666] group-hover:text-[#aaa] leading-[1.6] m-0 mb-7 flex-1 transition-colors">
+              <p
+                className={`font-body text-[14px] leading-[1.6] m-0 mb-7 flex-1 transition-colors ${
+                  c.primary ? 'text-paper/60' : 'text-[#666] group-hover:text-[#aaa]'
+                }`}
+              >
                 {c.desc}
               </p>
               {c.external ? (
-                <a
+                <WhatsAppLink
                   href={c.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-block self-start border border-red text-red group-hover:bg-red group-hover:text-paper font-mono text-[11px] tracking-[0.15em] uppercase px-5 py-[11px] transition-colors"
+                  className={`inline-block self-start font-mono text-[11px] tracking-[0.15em] uppercase px-5 py-[11px] transition-colors ${
+                    c.primary
+                      ? 'bg-red text-paper hover:opacity-90'
+                      : 'border border-red text-red group-hover:bg-red group-hover:text-paper'
+                  }`}
                 >
                   {c.cta}
-                </a>
+                </WhatsAppLink>
               ) : (
                 <Link
                   href={c.href}
-                  className="inline-block self-start border border-red text-red group-hover:bg-red group-hover:text-paper font-mono text-[11px] tracking-[0.15em] uppercase px-5 py-[11px] transition-colors"
+                  className={`inline-block self-start font-mono text-[11px] tracking-[0.15em] uppercase px-5 py-[11px] transition-colors ${
+                    c.primary
+                      ? 'bg-red text-paper hover:opacity-90'
+                      : 'border border-red text-red group-hover:bg-red group-hover:text-paper'
+                  }`}
                 >
                   {c.cta}
                 </Link>
@@ -112,14 +139,12 @@ export default function DondeComprarPage() {
             <p className="font-heading text-[clamp(20px,2.5vw,28px)] font-medium m-0 max-w-[520px] leading-[1.2]">
               ¿Querés ser punto de venta en tu zona?
             </p>
-            <a
+            <WhatsAppLink
               href={`${WA_NUMBER}?text=${encodeURIComponent('Hola Hardy, quiero ser punto de venta en mi zona')}`}
-              target="_blank"
-              rel="noopener noreferrer"
               className="bg-red text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-7 py-[14px] whitespace-nowrap"
             >
               Escribinos →
-            </a>
+            </WhatsAppLink>
           </div>
         </div>
       </section>

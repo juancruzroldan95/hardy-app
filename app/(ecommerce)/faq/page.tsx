@@ -87,6 +87,19 @@ const sections = [
       },
     ],
   },
+  {
+    label: 'Precio y marca',
+    items: [
+      {
+        q: '¿Por qué Hardy cuesta más que otras cremas de maní?',
+        a: 'Porque no tiene relleno. La mayoría de las cremas "de maní" llevan aceite de girasol, azúcar o emulsionantes que bajan el costo pero diluyen el producto. Hardy es 100% maní — sin nada que no sea maní. Eso sube el costo y sube el valor nutricional. Pagás más por kilo de maní real, no por marketing.',
+      },
+      {
+        q: '¿Hardy tiene alguna relación con otra marca anterior?',
+        a: 'Hardy es una marca independiente fundada en 2015. Arrancamos en Córdoba, hoy estamos en más de 200 puntos de venta en todo el país. No hay versión anterior ni marca paraguas — lo que ves es lo que es desde el día uno.',
+      },
+    ],
+  },
 ]
 
 export default function FAQPage() {
