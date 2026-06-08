@@ -165,7 +165,7 @@ export default function ProductCard({ product, rating }: { product: Product; rat
       {modalMounted && (
         <div
           className={[
-            'fixed inset-0 z-[300] flex items-center justify-center p-5 overflow-y-auto',
+            'fixed inset-0 z-[300] flex items-center justify-center p-5 overflow-y-auto max-md:items-start',
             'transition-opacity duration-[260ms]',
             modalVisible ? 'opacity-100' : 'opacity-0',
           ].join(' ')}
@@ -174,11 +174,10 @@ export default function ProductCard({ product, rating }: { product: Product; rat
         >
           <div
             className={[
-              'bg-ink max-w-[920px] w-full grid grid-cols-2 max-md:grid-cols-1 rounded-[2px] overflow-hidden relative',
+              'bg-ink max-w-[920px] w-full grid grid-cols-2 max-md:grid-cols-1 rounded-[2px] overflow-hidden relative md:max-h-[92vh] max-md:overflow-visible',
               'transition-all duration-[260ms]',
               modalVisible ? 'scale-100 translate-y-0' : 'scale-[0.96] translate-y-4',
             ].join(' ')}
-            style={{ maxHeight: '92vh' }}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Image panel */}
