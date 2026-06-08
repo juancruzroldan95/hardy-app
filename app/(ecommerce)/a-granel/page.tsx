@@ -109,21 +109,21 @@ export default function AGranelPage() {
             Crema de maní y miel en volumen para gastronomía, repostería, cafeterías, producción e industria.
           </p>
           <div className="flex gap-3 flex-wrap items-center">
-            <Link
-              href="/portal"
-              className="inline-block bg-red text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-7 py-[13px]"
-            >
-              Acceder a Portal Cliente →
-            </Link>
             <a
               href={`${WA_NUMBER}?text=Hola%20Hardy,%20quiero%20información%20de%20productos%20a%20granel`}
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-paper/10 border border-white/20 text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-7 py-[13px] flex items-center gap-2"
+              className="inline-flex items-center gap-2 bg-red text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-7 py-[13px]"
               aria-label="Consultar por WhatsApp"
             >
-              Contactanos <MessageCircle size={14} />
+              Contactanos por WhatsApp <MessageCircle size={14} />
             </a>
+            <Link
+              href="/mayoristas#solicitar"
+              className="bg-paper/10 border border-white/20 text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-7 py-[13px] inline-block"
+            >
+              Solicitar acceso mayorista →
+            </Link>
           </div>
         </div>
       </section>
