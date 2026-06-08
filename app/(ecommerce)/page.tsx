@@ -1,7 +1,6 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { MessageCircle } from 'lucide-react'
-import { getRecetas } from '@/consts/recetas'
 import { WA_NUMBER } from '@/consts/products'
 import RevealSection from '@/components/ui/RevealSection'
 import WhatsAppLink from '@/components/analytics/WhatsAppLink'
@@ -91,9 +90,6 @@ const PHILOSOPHY = [
 ]
 
 export default function HomePage() {
-  const recetas  = getRecetas()
-  const featuredRecetas = recetas.slice(0, 3)
-
   return (
     <div className="bg-paper text-ink">
 
@@ -418,76 +414,6 @@ export default function HomePage() {
               </div>
             </div>
           </RevealSection>
-        </div>
-      </section>
-
-      {/* ── 5. RECETAS — BAJA debajo de Crunchy ─────────────────────── */}
-      {/* §4.5 — sección intacta en contenido y diseño */}
-      <section className="py-20 px-10 bg-paper max-md:px-5">
-        <div className="max-w-[1240px] mx-auto">
-          <RevealSection>
-            <div className="flex justify-between items-end mb-12 flex-wrap gap-4">
-              <div>
-                <p className="font-mono text-[11px] tracking-[0.25em] text-red uppercase mb-[14px]">── Recetas</p>
-                <h2
-                  className="font-heading font-medium tracking-[-0.02em] m-0"
-                  style={{ fontSize: 'clamp(36px, 5vw, 56px)', lineHeight: 1.1 }}
-                >
-                  Recetas con <em className="not-italic text-red">Hardy.</em>
-                </h2>
-                <p className="mt-[14px] text-[15px] text-[#555] max-w-[520px] leading-[1.6]">
-                  Ideas simples para usar crema de maní y miel en desayunos, bowls, snacks y cocina diaria.
-                </p>
-              </div>
-              <Link
-                href="/recetas"
-                className="font-mono text-[11px] tracking-[0.15em] uppercase text-ink border-b border-ink pb-[2px] whitespace-nowrap"
-              >
-                Ver todas las recetas →
-              </Link>
-            </div>
-          </RevealSection>
-
-          <div className="grid grid-cols-3 gap-[2px] max-md:grid-cols-1">
-            {featuredRecetas.map((r, i) => (
-              <RevealSection
-                key={r.slug}
-                delay={i * 70}
-                className="bg-paper-2 overflow-hidden flex flex-col group"
-              >
-                <div className="relative aspect-[4/3] overflow-hidden">
-                  <div className="absolute top-[14px] left-[14px] z-[2] bg-ink text-paper font-mono text-[9px] tracking-[0.15em] uppercase px-[10px] py-1">
-                    {r.categoria}
-                  </div>
-                  {r.videoUrl && (
-                    <div className="absolute top-[14px] right-[14px] z-[2] bg-red text-paper font-mono text-[9px] tracking-[0.1em] uppercase px-[10px] py-1">
-                      ▶ Video
-                    </div>
-                  )}
-                  <Image
-                    src={r.imagen}
-                    alt={r.titulo}
-                    fill
-                    sizes="(max-width: 900px) 100vw, 33vw"
-                    className="object-cover transition-transform duration-[400ms] group-hover:scale-[1.04]"
-                  />
-                </div>
-                <div className="p-6 pb-7 flex-1 flex flex-col">
-                  <div className="font-mono text-[9px] tracking-[0.15em] text-red uppercase mb-2">
-                    {r.productos[0]}
-                  </div>
-                  <h3 className="font-heading text-[18px] font-medium m-0 mb-2 leading-[1.2]">{r.titulo}</h3>
-                  <p className="text-[13px] text-[#666] leading-[1.5] m-0 mb-5 flex-1">{r.descripcion}</p>
-                  <Link
-                    href={`/recetas/${r.slug}`}
-                    className="font-mono text-[10px] tracking-[0.15em] uppercase text-ink border-b border-ink pb-[1px] self-start"
-                  >
-                    Ver receta →
-                  </Link>
-                </div>
-              </RevealSection>
-            ))}
-          </div>
         </div>
       </section>
 
