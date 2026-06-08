@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { createClient } from '@/services/supabase/server'
 import { getProfileByUserId } from '@/repository/queries/profile'
 import { getActivePriceOverrides } from '@/repository/queries/stock'
-import { getProducts } from '@/consts/products'
+import { getProducts, formatARS } from '@/consts/products'
 import { ROLE_LABELS } from '@/consts/roles'
 
 export default async function CatalogoPage() {
@@ -109,7 +109,7 @@ export default async function CatalogoPage() {
               />
               <div className="flex-1 min-w-0">
                 <div className="font-body font-semibold text-[14px] text-ink truncate">{p.name}</div>
-                <div className="font-mono text-[9px] tracking-[0.15em] text-red uppercase mt-[2px]">
+                <div className={`font-mono text-[9px] tracking-[0.15em] uppercase mt-[2px] ${p.variant === 'Natural' ? 'text-red' : 'text-ink/50'}`}>
                   {p.variant} · {p.size}
                 </div>
                 {p.diferencial && (
@@ -118,9 +118,19 @@ export default async function CatalogoPage() {
                   </div>
                 )}
               </div>
-              <span className="font-mono text-[11px] text-ink/30 group-hover:text-red transition-colors shrink-0">
-                Ver detalle →
-              </span>
+              <div className="text-right shrink-0">
+                <div className="font-mono text-[14px] font-medium text-ink">
+                  {p.hasOverride
+                    ? formatARS(p.b2bPrice)
+                    : <span className="text-ink/30 text-[11px]">Consultar</span>
+                  }
+                </div>
+                {p.hasOverride && p.unitsPerBox && p.line === 'frasco' && (
+                  <div className="font-mono text-[9px] text-ink/40 mt-[2px]">
+                    caja × {p.unitsPerBox} = {formatARS(p.b2bPrice * p.unitsPerBox)}
+                  </div>
+                )}
+              </div>
             </Link>
           ))}
         </div>
@@ -148,7 +158,7 @@ export default async function CatalogoPage() {
                 />
                 <div className="flex-1 min-w-0">
                   <div className="font-body font-semibold text-[14px] text-ink truncate">{p.name}</div>
-                  <div className="font-mono text-[9px] tracking-[0.15em] text-red uppercase mt-[2px]">
+                  <div className="font-mono text-[9px] tracking-[0.15em] text-ink/50 uppercase mt-[2px]">
                     {p.variant} · {p.size}
                   </div>
                   {p.diferencial && (
@@ -157,9 +167,14 @@ export default async function CatalogoPage() {
                     </div>
                   )}
                 </div>
-                <span className="font-mono text-[11px] text-ink/30 group-hover:text-red transition-colors shrink-0">
-                  Ver detalle →
-                </span>
+                <div className="text-right shrink-0">
+                  <div className="font-mono text-[14px] font-medium text-ink">
+                    {p.hasOverride
+                      ? formatARS(p.b2bPrice)
+                      : <span className="text-ink/30 text-[11px]">Consultar</span>
+                    }
+                  </div>
+                </div>
               </Link>
             ))}
           </div>

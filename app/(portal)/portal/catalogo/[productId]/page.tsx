@@ -2,7 +2,9 @@ import { notFound, redirect } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import { createClient } from '@/services/supabase/server'
-import { getProductById, formatARS } from '@/consts/products'
+import { getProductById, formatARS, WA_NUMBER } from '@/consts/products'
+import { getProfileByUserId } from '@/repository/queries/profile'
+import { getActivePriceOverrides } from '@/repository/queries/stock'
 
 interface Props {
   params: Promise<{ productId: string }>
@@ -16,6 +18,17 @@ export default async function ProductoDetailPage({ params }: Props) {
   const { productId } = await params
   const product = getProductById(productId)
   if (!product) notFound()
+
+  const [profile, overrides] = await Promise.all([
+    getProfileByUserId(user.id),
+    getActivePriceOverrides(),
+  ])
+
+  const role = profile?.role ?? 'consumer'
+  const roleOverrides = overrides.filter((o) => o.role === role && o.productId === product.id)
+  roleOverrides.sort((a, b) => a.minQty - b.minQty)
+  const baseOverride = roleOverrides[0] ?? null
+  const b2bPrice = baseOverride ? Number(baseOverride.priceArs) : null
 
   const isBalde = product.line === 'balde'
 
@@ -75,21 +88,62 @@ export default async function ProductoDetailPage({ params }: Props) {
             </div>
           )}
 
-          {/* PVP */}
-          <div className="bg-ink text-paper px-5 py-4 mb-4">
-            <p className="font-mono text-[8px] tracking-[0.2em] uppercase text-paper/40 mb-1">
-              Precio de venta al público (PVP)
+          {/* Precio B2B principal */}
+          {b2bPrice ? (
+            <div className="bg-ink text-paper px-5 py-4 mb-3">
+              <p className="font-mono text-[8px] tracking-[0.2em] uppercase text-paper/40 mb-1">
+                Tu precio
+              </p>
+              <p className="font-heading text-[32px] font-medium">{formatARS(b2bPrice)}</p>
+              <p className="font-mono text-[9px] tracking-[0.1em] text-paper/40 mt-[2px]">
+                {isBalde ? 'por unidad' : 'por frasco · sin IVA'}
+              </p>
+              {!isBalde && product.unitsPerBox && (
+                <p className="font-mono text-[10px] tracking-[0.1em] text-red mt-3">
+                  Caja × {product.unitsPerBox} = {formatARS(b2bPrice * product.unitsPerBox)}
+                </p>
+              )}
+            </div>
+          ) : (
+            <div className="bg-paper-2 border border-ink/10 px-5 py-4 mb-3">
+              <p className="font-mono text-[8px] tracking-[0.2em] uppercase text-ink/40 mb-1">
+                Precio mayorista
+              </p>
+              <p className="font-body text-[15px] text-ink/60">Precio no configurado para tu segmento.</p>
+              <a
+                href={`${WA_NUMBER}?text=Hola%20Hardy%2C%20soy%20cliente%20del%20portal%20y%20quiero%20consultar%20el%20precio%20de%20${encodeURIComponent(product.name)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block mt-2 font-mono text-[10px] tracking-[0.12em] uppercase text-red border-b border-red pb-[1px]"
+              >
+                Consultar por WhatsApp →
+              </a>
+            </div>
+          )}
+
+          {/* PVP — solo referencia para el revendedor */}
+          <div className="bg-paper-2 border border-ink/8 px-5 py-3 mb-4">
+            <p className="font-mono text-[8px] tracking-[0.15em] uppercase text-ink/30 mb-[2px]">
+              PVP sugerido para reventa
             </p>
-            <p className="font-heading text-[28px] font-medium">{formatARS(product.price)}</p>
-            <p className="font-mono text-[9px] tracking-[0.1em] text-paper/40 mt-[2px]">
-              {isBalde ? 'por unidad' : 'por frasco'}
-            </p>
+            <p className="font-mono text-[13px] text-ink/60">{formatARS(product.price)}</p>
           </div>
 
-          {!isBalde && (
-            <p className="font-mono text-[9px] tracking-[0.1em] text-ink/40 mb-6">
-              Caja de {product.unitsPerBox ?? (product.variant?.toLowerCase().includes('miel') ? 12 : 15)} unidades
-            </p>
+          {/* Escalas de precio por volumen */}
+          {roleOverrides.length > 1 && (
+            <div className="bg-paper border border-ink/8 px-5 py-3 mb-4">
+              <p className="font-mono text-[8px] tracking-[0.15em] uppercase text-ink/40 mb-3">
+                Descuentos por volumen
+              </p>
+              <div className="flex flex-col gap-2">
+                {roleOverrides.map((tier, i) => (
+                  <div key={i} className="flex items-center justify-between">
+                    <span className="font-mono text-[10px] text-ink/50">Desde {tier.minQty} u.</span>
+                    <span className="font-mono text-[12px] text-ink font-medium">{formatARS(Number(tier.priceArs))}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
           )}
 
           <Link
