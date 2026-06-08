@@ -12,8 +12,8 @@ const FORMATS = [
     label: 'Para tu negocio',
     sublabel: 'Mayoristas y distribuidores',
     desc: 'Sumá Hardy a tu dietética, gimnasio, cafetería o red de distribución. Cajas mayoristas con precio por volumen.',
-    cta: 'ACCEDER AL PORTAL',
-    href: '/portal',
+    cta: 'QUIERO VENDER HARDY',
+    href: '/mayoristas#solicitar',
     items: [
       'Dietéticas y tiendas naturales',
       'Gimnasios y centros de salud',
@@ -26,7 +26,7 @@ const FORMATS = [
     sublabel: 'Uso profesional / Gastronómico',
     desc: 'Baldes de 4,5 kg, 6 kg, 23 kg y 30 kg para gastronomía, repostería y producción. Mejor costo por kilo.',
     cta: 'CONSULTAR A GRANEL',
-    href: '/portal',
+    href: '/a-granel',
     items: [
       'Baldes crema de maní 4,5 kg y 23 kg',
       'Baldes miel líquida 6 kg y 30 kg',
@@ -126,7 +126,7 @@ export default function HomePage() {
           </p>
           <div className="mt-9 flex gap-3 max-md:flex-col max-md:mt-7">
             <Link
-              href="/portal"
+              href="/mayoristas#solicitar"
               className="bg-red text-paper font-mono text-[12px] tracking-[0.15em] uppercase px-8 py-[18px] inline-flex items-center justify-center gap-[10px] max-md:w-full"
             >
               CONSULTAR PRECIO MAYORISTA →
@@ -402,10 +402,10 @@ export default function HomePage() {
 
               <div className="flex gap-3 flex-wrap items-center max-md:flex-col">
                 <Link
-                  href="/portal"
+                  href="/a-granel"
                   className="bg-ink text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-7 py-[14px] inline-block hover:bg-red transition-colors max-md:w-full max-md:text-center"
                 >
-                  Portal Cliente →
+                  Ver formatos a granel →
                 </Link>
                 <a
                   href={`${WA_NUMBER}?text=Hola%20Hardy,%20quiero%20consultar%20por%20volumen%20a%20granel`}
@@ -588,16 +588,16 @@ export default function HomePage() {
             </div>
             <div className="flex gap-3 flex-wrap shrink-0 max-md:flex-col max-md:w-full">
               <Link
-                href="/portal"
+                href="/login"
                 className="bg-paper text-ink font-mono text-[11px] tracking-[0.18em] uppercase px-8 py-[16px] inline-block text-center max-md:w-full"
               >
-                ACCEDER AL PORTAL →
+                YA SOY CLIENTE → INGRESAR
               </Link>
               <Link
-                href="/portal"
+                href="/mayoristas#solicitar"
                 className="border border-paper/40 text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-8 py-[16px] inline-block text-center max-md:w-full"
               >
-                SOLICITAR ACCESO →
+                QUIERO SERLO → SOLICITAR ACCESO
               </Link>
             </div>
           </div>

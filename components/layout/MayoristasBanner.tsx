@@ -48,7 +48,7 @@ export default function MayoristasBanner() {
           Lista de precios exclusiva por volumen para revendedores, gastronómicos y distribuidores.
         </p>
         <Link
-          href="/portal"
+          href="/mayoristas#solicitar"
           className="inline-flex items-center gap-2 bg-red text-paper font-mono text-[11px] tracking-[0.15em] uppercase px-5 py-[11px] hover:opacity-90 transition-opacity"
           onClick={dismiss}
         >
