@@ -91,8 +91,8 @@ const sections = [
     label: 'Precio y marca',
     items: [
       {
-        q: '¿Por qué Hardy cuesta más que otras cremas de maní?',
-        a: 'Porque no tiene relleno. La mayoría de las cremas "de maní" llevan aceite de girasol, azúcar o emulsionantes que bajan el costo pero diluyen el producto. Hardy es 100% maní — sin nada que no sea maní. Eso sube el costo y sube el valor nutricional. Pagás más por kilo de maní real, no por marketing.',
+        q: '¿Por qué Hardy tiene mejor precio que otras cremas de maní naturales?',
+        a: 'Porque trabajamos directo con productores y sin intermediarios. Hardy es 100% maní — sin azúcar, sin aceites vegetales, sin emulsionantes. Sin relleno que encarezca el proceso y encarezca el producto. Obtenés más maní real por el mismo precio.',
       },
       {
         q: '¿Hardy tiene alguna relación con otra marca anterior?',
