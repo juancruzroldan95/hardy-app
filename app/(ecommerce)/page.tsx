@@ -54,7 +54,7 @@ const FORMATS = [
 const STATS = [
   { num: '1',    label: 'ingrediente', sub: 'Maní o miel. Nada más.' },
   { num: '0',    label: 'aditivos',    sub: 'Sin azúcar, sin aceite de palma, sin conservantes.' },
-  { num: '10',   label: 'años',        sub: 'De marca, desde 2015.' },
+  { num: '11',   label: 'años',        sub: 'Fundados en 2015.' },
   { num: '100%', label: 'nacional',    sub: 'Producción argentina.' },
 ]
 

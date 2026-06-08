@@ -16,7 +16,7 @@ const links = [
   { href: '/mayoristas',      label: 'Mayoristas'     },
   { href: '/a-granel',        label: 'A granel'       },
   { href: '/recetas',         label: 'Recetas'        },
-  { href: '/donde-comprar',   label: 'Cómo comprar'  },
+  { href: '/donde-comprar',   label: 'Dónde comprar' },
   { href: '/nosotros',        label: 'Nosotros'       },
 ]
 

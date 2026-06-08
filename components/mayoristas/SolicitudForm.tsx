@@ -16,7 +16,6 @@ const TIPOS = [
   { value: 'otro',         label: 'Otro' },
 ]
 
-// Mapeo tipo → segmento visible (espeja la lógica del server)
 type Segmento = 'mayorista' | 'gastronomico' | 'distribuidor' | null
 
 function resolveSegmento(tipo: string): Segmento {
@@ -69,8 +68,17 @@ export default function SolicitudForm() {
     submitSolicitud,
     undefined,
   )
-  const [tipoSeleccionado, setTipoSeleccionado] = useState('')
+
+  // Control del paso: false = solo paso 1 visible, true = todo el form visible
+  const [expandido, setExpandido] = useState(false)
+
+  // Valores del paso 1 (controlados para validar antes de expandir)
+  const [nombre,           setNombre]           = useState('')
+  const [whatsapp,         setWhatsapp]          = useState('')
+  const [tipoSeleccionado, setTipoSeleccionado]  = useState('')
+
   const segmento = resolveSegmento(tipoSeleccionado)
+  const paso1Completo = nombre.trim() !== '' && whatsapp.trim() !== '' && tipoSeleccionado !== ''
 
   // Disparar evento Lead en Meta Pixel al enviar con éxito
   useEffect(() => {
@@ -105,10 +113,33 @@ export default function SolicitudForm() {
 
   return (
     <form action={action} className="flex flex-col gap-5 max-w-[700px]">
-      <div className="grid grid-cols-2 gap-5 max-md:grid-cols-1">
-        <Field label="Nombre y apellido" name="nombre" placeholder="Tu nombre completo" />
-        <Field label="Empresa / Negocio" name="empresa" placeholder="Nombre del negocio" />
-      </div>
+
+      {/* ── PASO 1: campos mínimos ───────────────────────────── */}
+      <Field label="Nombre y apellido" name="nombre" placeholder="Tu nombre completo">
+        <input
+          id="nombre"
+          name="nombre"
+          type="text"
+          placeholder="Tu nombre completo"
+          required
+          value={nombre}
+          onChange={(e) => setNombre(e.target.value)}
+          className="w-full bg-paper border border-ink/15 text-ink font-body text-[15px] px-4 py-3 outline-none focus:border-ink transition-colors"
+        />
+      </Field>
+
+      <Field label="WhatsApp" name="whatsapp" type="tel" placeholder="+54 11 ...">
+        <input
+          id="whatsapp"
+          name="whatsapp"
+          type="tel"
+          placeholder="+54 11 ..."
+          required
+          value={whatsapp}
+          onChange={(e) => setWhatsapp(e.target.value)}
+          className="w-full bg-paper border border-ink/15 text-ink font-body text-[15px] px-4 py-3 outline-none focus:border-ink transition-colors"
+        />
+      </Field>
 
       {/* Tipo de negocio + badge de segmento */}
       <div>
@@ -128,7 +159,7 @@ export default function SolicitudForm() {
           </select>
         </Field>
 
-        {/* Badge: confirmación de segmento y catálogo que recibirá */}
+        {/* Badge: confirmación de segmento */}
         {segmento && (
           <div
             className="mt-2 flex items-start gap-2 px-3 py-2 border-l-2"
@@ -149,53 +180,82 @@ export default function SolicitudForm() {
         )}
       </div>
 
-      <div className="grid grid-cols-2 gap-5 max-md:grid-cols-1">
-        <Field label="Ciudad" name="ciudad" placeholder="Ciudad" />
-        <Field label="Provincia" name="provincia" placeholder="Provincia" />
-      </div>
-
-      <div className="grid grid-cols-2 gap-5 max-md:grid-cols-1">
-        <Field label="Email" name="email" type="email" placeholder="tu@email.com" />
-        <Field label="WhatsApp" name="whatsapp" type="tel" placeholder="+54 11 ..." />
-      </div>
-
-      {/* CUIT: obligatorio para distribuidores, opcional para el resto */}
-      <Field
-        label="CUIT / CUIL"
-        name="cuit"
-        placeholder="20-12345678-9"
-        required={tipoSeleccionado === 'distribuidor'}
-      />
-
-      <Field label="Mensaje adicional" name="mensaje" required={false}>
-        <textarea
-          id="mensaje"
-          name="mensaje"
-          rows={3}
-          placeholder="Contanos más sobre tu negocio (opcional)"
-          className="w-full bg-paper border border-ink/15 text-ink font-body text-[15px] px-4 py-3 outline-none focus:border-ink transition-colors resize-none"
-        />
-      </Field>
-
-      {state && 'error' in state && (
-        <p className="font-mono text-[11px] tracking-[0.1em] text-red">
-          {state.error}
-        </p>
+      {/* ── Botón "Continuar" del paso 1 ────────────────────── */}
+      {!expandido && (
+        <div className="pt-1">
+          <button
+            type="button"
+            disabled={!paso1Completo}
+            onClick={() => setExpandido(true)}
+            className="bg-red text-paper font-mono text-[12px] tracking-[0.15em] uppercase px-10 py-[18px] disabled:opacity-40 transition-opacity"
+          >
+            Continuar →
+          </button>
+          <p className="font-mono text-[9px] tracking-[0.1em] text-ink/35 uppercase mt-3">
+            * Completá los tres campos para continuar.
+          </p>
+        </div>
       )}
 
-      <div className="pt-2">
-        <button
-          type="submit"
-          disabled={isPending}
-          className="bg-red text-paper font-mono text-[12px] tracking-[0.15em] uppercase px-10 py-[18px] disabled:opacity-50 transition-opacity inline-flex items-center gap-2"
-        >
-          {isPending ? 'Enviando...' : 'Enviar solicitud →'}
-        </button>
-      </div>
+      {/* ── PASO 2: datos adicionales (visible tras continuar) ── */}
+      {expandido && (
+        <>
+          <div className="grid grid-cols-2 gap-5 max-md:grid-cols-1">
+            <Field label="Empresa / Negocio" name="empresa" placeholder="Nombre del negocio" />
+            <Field label="Email" name="email" type="email" placeholder="tu@email.com" />
+          </div>
 
-      <p className="font-mono text-[9px] tracking-[0.1em] text-ink/40 uppercase">
-        * Campos obligatorios. No compartimos tu información con terceros.
-      </p>
+          <div className="grid grid-cols-2 gap-5 max-md:grid-cols-1">
+            <Field label="Ciudad" name="ciudad" placeholder="Ciudad" />
+            <Field label="Provincia" name="provincia" placeholder="Provincia" />
+          </div>
+
+          {/* CUIT: obligatorio para distribuidores */}
+          <Field
+            label="CUIT / CUIL"
+            name="cuit"
+            placeholder="20-12345678-9"
+            required={tipoSeleccionado === 'distribuidor'}
+          />
+
+          <Field label="Mensaje adicional" name="mensaje" required={false}>
+            <textarea
+              id="mensaje"
+              name="mensaje"
+              rows={3}
+              placeholder="Contanos más sobre tu negocio (opcional)"
+              className="w-full bg-paper border border-ink/15 text-ink font-body text-[15px] px-4 py-3 outline-none focus:border-ink transition-colors resize-none"
+            />
+          </Field>
+
+          {state && 'error' in state && (
+            <p className="font-mono text-[11px] tracking-[0.1em] text-red">
+              {state.error}
+            </p>
+          )}
+
+          <div className="pt-2 flex items-center gap-4 flex-wrap">
+            <button
+              type="submit"
+              disabled={isPending}
+              className="bg-red text-paper font-mono text-[12px] tracking-[0.15em] uppercase px-10 py-[18px] disabled:opacity-50 transition-opacity inline-flex items-center gap-2"
+            >
+              {isPending ? 'Enviando...' : 'Enviar solicitud →'}
+            </button>
+            <button
+              type="button"
+              onClick={() => setExpandido(false)}
+              className="font-mono text-[10px] tracking-[0.1em] text-ink/40 uppercase hover:text-ink/70 transition-colors"
+            >
+              ← Volver
+            </button>
+          </div>
+
+          <p className="font-mono text-[9px] tracking-[0.1em] text-ink/40 uppercase">
+            * Campos obligatorios. No compartimos tu información con terceros.
+          </p>
+        </>
+      )}
     </form>
   )
 }
