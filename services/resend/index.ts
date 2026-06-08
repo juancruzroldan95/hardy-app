@@ -346,6 +346,131 @@ const ALERT_TIPO_LABELS: Record<string, string> = {
   custom:     'Nota',
 }
 
+// ─── B2C store order confirmation ─────────────────────────────────────────────
+
+export interface StoreOrderConfirmationData {
+  to:          string
+  orderNumber: string
+  guestName:   string
+  items: {
+    productName: string
+    variant:     string
+    size:        string
+    qty:         number
+    subtotalArs: number
+  }[]
+  shippingAddress: string
+  shippingCp:      string
+  nroEnvio:        string
+  total:           number
+  shippingCost:    number
+}
+
+export async function sendStoreOrderConfirmation(data: StoreOrderConfirmationData): Promise<void> {
+  if (!process.env.RESEND_API_KEY || process.env.RESEND_API_KEY.startsWith('re_REPLACE')) {
+    console.warn('[email] RESEND_API_KEY no configurado — saltando email de tienda')
+    return
+  }
+
+  const trackingUrl = `https://www.andreani.com/envios/rastrear?nroEnvio=${data.nroEnvio}`
+
+  const itemRows = data.items
+    .map(
+      (i) => `
+    <tr style="border-bottom:1px solid #e8e6e2;">
+      <td style="padding:10px 0;font-family:'Courier New',monospace;font-size:13px;color:#1a1a1a;">${i.productName} · ${i.variant} · ${i.size}</td>
+      <td style="padding:10px 0;font-family:'Courier New',monospace;font-size:13px;text-align:center;color:#555;">${i.qty}</td>
+      <td style="padding:10px 0;font-family:'Courier New',monospace;font-size:13px;text-align:right;color:#1a1a1a;font-weight:600;">${formatARS(i.subtotalArs)}</td>
+    </tr>`
+    )
+    .join('')
+
+  const html = `<!DOCTYPE html>
+<html lang="es">
+<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/></head>
+<body style="margin:0;padding:0;background:#f1efe9;font-family:'Helvetica Neue',Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f1efe9;padding:40px 20px;">
+  <tr><td align="center">
+    <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
+      <tr><td style="background:#1a1a1a;padding:28px 36px;">
+        <span style="font-family:'Courier New',monospace;font-size:22px;font-weight:900;letter-spacing:0.08em;color:#fafaf8;text-transform:uppercase;">HARDY</span>
+        <br/><span style="font-family:'Courier New',monospace;font-size:10px;letter-spacing:0.25em;color:#C0171E;text-transform:uppercase;">── Tu pedido está en camino</span>
+      </td></tr>
+      <tr><td style="background:#fafaf8;padding:36px;">
+        <p style="font-family:'Courier New',monospace;font-size:11px;letter-spacing:0.2em;color:#C0171E;text-transform:uppercase;margin:0 0 8px 0;">── Pedido confirmado</p>
+        <h1 style="font-family:Georgia,serif;font-size:26px;font-weight:600;color:#1a1a1a;margin:0 0 4px 0;">¡Gracias, ${data.guestName}!</h1>
+        <p style="font-family:Helvetica,Arial,sans-serif;font-size:14px;color:#777;margin:0 0 28px 0;">Ref. #${data.orderNumber}</p>
+
+        <!-- Items -->
+        <table width="100%" cellpadding="0" cellspacing="0" style="border-top:2px solid #1a1a1a;margin-bottom:0;">
+          <thead><tr style="border-bottom:1px solid #e8e6e2;">
+            <th style="padding:8px 0;font-family:'Courier New',monospace;font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:#999;text-align:left;font-weight:400;">Producto</th>
+            <th style="padding:8px 0;font-family:'Courier New',monospace;font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:#999;text-align:center;font-weight:400;">Cant.</th>
+            <th style="padding:8px 0;font-family:'Courier New',monospace;font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:#999;text-align:right;font-weight:400;">Subtotal</th>
+          </tr></thead>
+          <tbody>${itemRows}</tbody>
+        </table>
+
+        <!-- Totals -->
+        <table width="100%" style="border-top:1px solid #e8e6e2;margin-bottom:24px;">
+          <tr><td style="padding:8px 0;font-family:'Courier New',monospace;font-size:12px;color:#555;">Envío Andreani</td>
+              <td style="padding:8px 0;font-family:'Courier New',monospace;font-size:12px;color:#555;text-align:right;">${formatARS(data.shippingCost)}</td></tr>
+        </table>
+        <div style="background:#1a1a1a;padding:16px 20px;margin-bottom:28px;">
+          <table width="100%"><tr>
+            <td style="font-family:'Courier New',monospace;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:rgba(250,250,248,0.5);">Total</td>
+            <td style="font-family:Georgia,serif;font-size:22px;font-weight:600;color:#fafaf8;text-align:right;">${formatARS(data.total)}</td>
+          </tr></table>
+        </div>
+
+        <!-- Shipping info -->
+        <table width="100%" style="border:1px solid #e8e6e2;margin-bottom:24px;">
+          <tr style="border-bottom:1px solid #e8e6e2;">
+            <td style="padding:10px 14px;font-family:'Courier New',monospace;font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:#999;width:35%;background:#f1efe9;">Dirección</td>
+            <td style="padding:10px 14px;font-family:Helvetica,Arial,sans-serif;font-size:13px;color:#1a1a1a;">${data.shippingAddress} (CP ${data.shippingCp})</td>
+          </tr>
+          <tr>
+            <td style="padding:10px 14px;font-family:'Courier New',monospace;font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:#999;background:#f1efe9;">Nro. envío</td>
+            <td style="padding:10px 14px;font-family:'Courier New',monospace;font-size:13px;color:#C0171E;font-weight:600;">${data.nroEnvio}</td>
+          </tr>
+        </table>
+
+        <!-- Tracking CTA -->
+        <div style="text-align:center;margin-bottom:28px;">
+          <a href="${trackingUrl}" style="display:inline-block;background:#C0171E;color:#fafaf8;font-family:'Courier New',monospace;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;padding:14px 28px;text-decoration:none;">
+            Rastrear mi envío →
+          </a>
+        </div>
+
+      </td></tr>
+      <tr><td style="padding:20px 36px;background:#f1efe9;border-top:1px solid #e0ddd8;">
+        <p style="font-family:'Courier New',monospace;font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:#aaa;margin:0;">
+          HARDY · Alimentá tu instinto · hardyfoods.com.ar
+        </p>
+      </td></tr>
+    </table>
+  </td></tr>
+</table>
+</body></html>`
+
+  await Promise.allSettled([
+    resend.emails.send({
+      from:    FROM_ADDRESS,
+      to:      data.to,
+      subject: `Hardy — Pedido #${data.orderNumber} confirmado · Nro. envío ${data.nroEnvio}`,
+      html,
+    }),
+    resend.emails.send({
+      from:    FROM_ADDRESS,
+      to:      WAREHOUSE_EMAIL,
+      subject: `[Tienda] Nuevo pedido #${data.orderNumber} — ${data.guestName} (${data.to})`,
+      html,
+    }),
+  ])
+}
+
+// ─── Scheduled alert reminder email (to admins) ───────────────────────────────
+
 export async function sendAlertReminder(alerts: AlertReminderData[]): Promise<void> {
   if (!process.env.RESEND_API_KEY || process.env.RESEND_API_KEY.startsWith('re_REPLACE')) {
     console.warn('[email] RESEND_API_KEY not configured — skipping alert reminder')

@@ -1,7 +1,7 @@
 'use client'
 
 import { createContext, useContext, useMemo, useState } from 'react'
-import type { CartItem, CartState } from '@/types'
+import type { CartItem, CartState, ShippingData } from '@/types'
 import { PRODUCTS, formatARS } from '@/consts/products'
 import { trackAddToCart } from '@/consts/meta-pixel'
 
@@ -12,6 +12,8 @@ interface CartContextValue {
   cartTotal: number
   cartOpen: boolean
   checkoutOpen: boolean
+  shippingData: ShippingData | null
+  setShippingData: (data: ShippingData | null) => void
   addItem: (id: string) => void
   removeItem: (id: string) => void
   updateQty: (id: string, delta: number) => void
@@ -29,6 +31,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [cart, setCart] = useState<CartState>({})
   const [cartOpen, setCartOpen] = useState(false)
   const [checkoutOpen, setCheckoutOpen] = useState(false)
+  const [shippingData, setShippingData] = useState<ShippingData | null>(null)
 
   const cartItems = useMemo<CartItem[]>(() =>
     Object.entries(cart).flatMap(([id, qty]) => {
@@ -71,6 +74,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   function clearCart() {
     setCart({})
+    setShippingData(null)
   }
 
   return (
@@ -82,6 +86,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         cartTotal,
         cartOpen,
         checkoutOpen,
+        shippingData,
+        setShippingData,
         addItem,
         removeItem,
         updateQty,
@@ -89,7 +95,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         openCart: () => setCartOpen(true),
         closeCart: () => setCartOpen(false),
         openCheckout: () => { setCartOpen(false); setCheckoutOpen(true) },
-        closeCheckout: () => setCheckoutOpen(false),
+        closeCheckout: () => { setCheckoutOpen(false); setShippingData(null) },
         formatARS,
       }}
     >

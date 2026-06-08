@@ -41,3 +41,18 @@ export interface CartItem extends Product {
 }
 
 export type CartState = Record<string, number>
+
+export interface ShippingData {
+  nombre:    string
+  email:     string
+  telefono:  string
+  calle:     string
+  numero:    string
+  cp:        string
+  ciudad:    string
+  provincia: string
+  // Resultado de la cotización Andreani
+  shippingCost: number
+  diasHabiles:  number
+  servicio:     string
+}

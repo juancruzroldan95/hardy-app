@@ -74,9 +74,11 @@ export async function updateOrderStatus(
       const clientEmail = (result as unknown as Array<{ email: string }>)[0]?.email
 
       if (clientEmail) {
-        const clientProfile = await db.query.profiles.findFirst({
-          where: and(eq(profiles.userId, order.userId), eq(profiles.isDeleted, false)),
-        })
+        const clientProfile = order.userId
+          ? await db.query.profiles.findFirst({
+              where: and(eq(profiles.userId, order.userId), eq(profiles.isDeleted, false)),
+            })
+          : null
         await sendOrderStatusUpdate({
           orderId:     order.id,
           orderDate:   order.createdAt,

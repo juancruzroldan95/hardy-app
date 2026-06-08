@@ -108,7 +108,7 @@ export async function GET(req: NextRequest) {
   const lines = [
     headers.join(','),
     ...allOrders.map((o) => {
-      const p = profileMap.get(o.userId)
+      const p = o.userId ? profileMap.get(o.userId) : undefined
       const productos = o.items.map((i) => `${i.productName} x${i.qty}`).join(' | ')
       return row([
         o.createdAt.toLocaleDateString('es-AR'),
