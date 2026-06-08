@@ -7,7 +7,7 @@ import { db } from '@/db'
 import { profiles, orders, solicitudes, novedades, clientAlerts, orderMessages } from '@/db/schema'
 import { and, eq, sql as drizzleSql } from 'drizzle-orm'
 import type { EstadoSolicitud, OrderStatus, PaymentStatus, AlertTipo, UserRole } from '@/db/schema'
-import { sendOrderStatusUpdate } from '@/services/resend'
+import { sendOrderStatusUpdate, sendReviewRequest } from '@/services/resend'
 import { createAdminClient } from '@/services/supabase/admin'
 
 // ─── Guard ─────────────────────────────────────────────────────────────────────
@@ -87,6 +87,25 @@ export async function updateOrderStatus(
           newStatus:   status,
           totalArs:    Number(order.totalArs),
         })
+
+        // Cuando el pedido se entrega → pedir reseña
+        if (status === 'delivered') {
+          const orderWithItems = await db.query.orders.findFirst({
+            where: eq(orders.id, id),
+            with: { items: true },
+          })
+          if (orderWithItems?.items?.length) {
+            await sendReviewRequest({
+              to:          clientEmail,
+              clientName:  clientProfile?.displayName ?? clientProfile?.company ?? clientEmail,
+              orderNumber: order.id.slice(-8).toUpperCase(),
+              items:       orderWithItems.items.map((i) => ({
+                productName: i.productName,
+                productId:   i.productId,
+              })),
+            })
+          }
+        }
       }
     } catch (e) {
       console.error('[email] Error al enviar estado de pedido:', e)

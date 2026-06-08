@@ -54,3 +54,11 @@ export function trackPurchase(p: { value: number; contentIds?: string[] }) {
     content_type: 'product',
   })
 }
+
+export function trackLead(p?: { contentName?: string }) {
+  track('Lead', { content_name: p?.contentName })
+}
+
+export function trackContact() {
+  track('Contact')
+}
