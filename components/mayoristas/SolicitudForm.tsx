@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState, useEffect } from 'react'
+import { useActionState, useEffect, useState } from 'react'
 import { submitSolicitud } from '@/repository/mutations/solicitudes'
 import type { SolicitudState } from '@/repository/mutations/solicitudes'
 import { trackLead } from '@/consts/meta-pixel'
@@ -15,6 +15,22 @@ const TIPOS = [
   { value: 'almacen',      label: 'Almacén / Dietética barrial' },
   { value: 'otro',         label: 'Otro' },
 ]
+
+// Mapeo tipo → segmento visible (espeja la lógica del server)
+type Segmento = 'mayorista' | 'gastronomico' | 'distribuidor' | null
+
+function resolveSegmento(tipo: string): Segmento {
+  if (tipo === 'distribuidor') return 'distribuidor'
+  if (tipo === 'cafeteria' || tipo === 'restaurante') return 'gastronomico'
+  if (tipo) return 'mayorista'
+  return null
+}
+
+const SEGMENTO_INFO: Record<NonNullable<Segmento>, { label: string; catalogo: string; color: string }> = {
+  mayorista:    { label: 'Mayorista',    catalogo: 'Catálogo Mayorista',    color: '#2d6a35' },
+  gastronomico: { label: 'Gastronómico', catalogo: 'Catálogo Gastronómico', color: '#b35c00' },
+  distribuidor: { label: 'Distribuidor', catalogo: 'Catálogo Distribuidor', color: '#1a5fa6' },
+}
 
 function Field({
   label, name, type = 'text', placeholder, required = true, children,
@@ -53,6 +69,8 @@ export default function SolicitudForm() {
     submitSolicitud,
     undefined,
   )
+  const [tipoSeleccionado, setTipoSeleccionado] = useState('')
+  const segmento = resolveSegmento(tipoSeleccionado)
 
   // Disparar evento Lead en Meta Pixel al enviar con éxito
   useEffect(() => {
@@ -78,6 +96,8 @@ export default function SolicitudForm() {
         <p className="font-body text-[14px] leading-[1.7]" style={{ color: 'rgba(250,250,248,0.65)' }}>
           Revisamos tu solicitud y te contactamos por WhatsApp y email con
           tu usuario y contraseña para acceder al portal.
+          <br className="mb-2" />
+          <strong style={{ color: 'rgba(250,250,248,0.9)' }}>Revisá tu casilla — te enviamos el catálogo ahora mismo.</strong>
         </p>
       </div>
     )
@@ -90,19 +110,44 @@ export default function SolicitudForm() {
         <Field label="Empresa / Negocio" name="empresa" placeholder="Nombre del negocio" />
       </div>
 
-      <Field label="Tipo de negocio" name="tipoNegocio">
-        <select
-          id="tipoNegocio"
-          name="tipoNegocio"
-          required
-          className="w-full bg-paper border border-ink/15 text-ink font-body text-[15px] px-4 py-3 outline-none focus:border-ink transition-colors"
-        >
-          <option value="">Seleccioná una opción</option>
-          {TIPOS.map((t) => (
-            <option key={t.value} value={t.value}>{t.label}</option>
-          ))}
-        </select>
-      </Field>
+      {/* Tipo de negocio + badge de segmento */}
+      <div>
+        <Field label="Tipo de negocio" name="tipoNegocio">
+          <select
+            id="tipoNegocio"
+            name="tipoNegocio"
+            required
+            value={tipoSeleccionado}
+            onChange={(e) => setTipoSeleccionado(e.target.value)}
+            className="w-full bg-paper border border-ink/15 text-ink font-body text-[15px] px-4 py-3 outline-none focus:border-ink transition-colors"
+          >
+            <option value="">Seleccioná una opción</option>
+            {TIPOS.map((t) => (
+              <option key={t.value} value={t.value}>{t.label}</option>
+            ))}
+          </select>
+        </Field>
+
+        {/* Badge: confirmación de segmento y catálogo que recibirá */}
+        {segmento && (
+          <div
+            className="mt-2 flex items-start gap-2 px-3 py-2 border-l-2"
+            style={{ borderColor: SEGMENTO_INFO[segmento].color, background: 'rgba(0,0,0,0.03)' }}
+          >
+            <div>
+              <span
+                className="font-mono text-[9px] tracking-[0.15em] uppercase font-semibold"
+                style={{ color: SEGMENTO_INFO[segmento].color }}
+              >
+                Segmento: {SEGMENTO_INFO[segmento].label}
+              </span>
+              <p className="font-body text-[12px] text-ink/50 mt-[2px]">
+                Al enviar recibís el <strong className="text-ink/70">{SEGMENTO_INFO[segmento].catalogo}</strong> en tu email.
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
 
       <div className="grid grid-cols-2 gap-5 max-md:grid-cols-1">
         <Field label="Ciudad" name="ciudad" placeholder="Ciudad" />
@@ -114,7 +159,13 @@ export default function SolicitudForm() {
         <Field label="WhatsApp" name="whatsapp" type="tel" placeholder="+54 11 ..." />
       </div>
 
-      <Field label="CUIT / CUIL" name="cuit" placeholder="20-12345678-9" required={false} />
+      {/* CUIT: obligatorio para distribuidores, opcional para el resto */}
+      <Field
+        label="CUIT / CUIL"
+        name="cuit"
+        placeholder="20-12345678-9"
+        required={tipoSeleccionado === 'distribuidor'}
+      />
 
       <Field label="Mensaje adicional" name="mensaje" required={false}>
         <textarea
