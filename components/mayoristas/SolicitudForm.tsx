@@ -1,8 +1,9 @@
 'use client'
 
-import { useActionState } from 'react'
+import { useActionState, useEffect } from 'react'
 import { submitSolicitud } from '@/repository/mutations/solicitudes'
 import type { SolicitudState } from '@/repository/mutations/solicitudes'
+import { trackLead } from '@/consts/meta-pixel'
 
 const TIPOS = [
   { value: 'dietetica',    label: 'Dietética' },
@@ -52,6 +53,13 @@ export default function SolicitudForm() {
     submitSolicitud,
     undefined,
   )
+
+  // Disparar evento Lead en Meta Pixel al enviar con éxito
+  useEffect(() => {
+    if (state && 'success' in state) {
+      trackLead({ contentName: 'Solicitud Mayorista' })
+    }
+  }, [state])
 
   if (state && 'success' in state) {
     return (

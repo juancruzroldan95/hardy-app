@@ -4,6 +4,7 @@ import { db } from '@/db'
 import { orders, orderItems } from '@/db/schema'
 import { eq } from 'drizzle-orm'
 import type { ShippingData } from '@/types'
+import { sendReviewRequest } from '@/services/resend'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -80,6 +81,33 @@ export async function updateOrderPaymentStatus(
       updatedAt: new Date(),
     })
     .where(eq(orders.id, orderId))
+}
+
+// ─── markB2COrderDelivered ────────────────────────────────────────────────────
+// Marca el pedido como entregado y dispara el email de pedido de reseña.
+
+export async function markB2COrderDelivered(orderId: string): Promise<void> {
+  await db
+    .update(orders)
+    .set({ status: 'delivered', updatedAt: new Date() })
+    .where(eq(orders.id, orderId))
+
+  const order = await db.query.orders.findFirst({
+    where: eq(orders.id, orderId),
+    with: { items: true },
+  })
+
+  if (order?.guestEmail && order.items?.length) {
+    await sendReviewRequest({
+      to:          order.guestEmail,
+      clientName:  order.guestName ?? order.guestEmail,
+      orderNumber: order.id.slice(-8).toUpperCase(),
+      items:       order.items.map((i) => ({
+        productName: i.productName,
+        productId:   i.productId,
+      })),
+    }).catch((e) => console.error('[review-request]', e))
+  }
 }
 
 // ─── updateOrderAndreani ──────────────────────────────────────────────────────

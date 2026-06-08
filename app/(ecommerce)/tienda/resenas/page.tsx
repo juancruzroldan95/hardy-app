@@ -51,50 +51,58 @@ export default async function ResenasPage() {
           {reviews.length} reseña{reviews.length !== 1 ? 's' : ''} verificada{reviews.length !== 1 ? 's' : ''} de clientes reales.
         </p>
 
-        {/* Reviews by product */}
+        {/* Reviews by product — siempre se muestran todos los productos */}
         {frascos.map((product) => {
           const productRevs = reviewsByProduct.get(product.id) ?? []
           const avg = avgByProduct.get(product.id)
-          if (productRevs.length === 0) return null
           return (
             <div key={product.id} className="mb-12">
-              <div className="flex items-center gap-3 mb-6">
+              <div className="flex items-center gap-3 mb-6 flex-wrap">
                 <h2 className="font-heading text-[20px] font-medium">{product.name}</h2>
                 <span className="font-mono text-[9px] tracking-[0.1em] text-red uppercase">{product.size}</span>
-                {avg && (
+                {avg ? (
                   <div className="flex items-center gap-1 ml-auto">
                     <Stars rating={Math.round(avg)} />
-                    <span className="font-mono text-[11px] text-ink/50 ml-1">{avg.toFixed(1)}</span>
+                    <span className="font-mono text-[11px] text-ink/50 ml-1">
+                      {avg.toFixed(1)} · {productRevs.length} reseña{productRevs.length !== 1 ? 's' : ''}
+                    </span>
                   </div>
+                ) : (
+                  <span className="ml-auto font-mono text-[10px] text-ink/30 tracking-[0.1em] uppercase">
+                    Sin reseñas aún
+                  </span>
                 )}
               </div>
-              <div className="space-y-4">
-                {productRevs.map((r) => (
-                  <div key={r.id} className="bg-paper border border-ink/8 px-5 py-4">
-                    <div className="flex items-start justify-between gap-3 mb-2">
-                      <div>
-                        <span className="font-body font-semibold text-[14px]">{r.reviewerName}</span>
-                        <span className="font-mono text-[9px] text-ink/30 ml-2">
-                          {new Date(r.createdAt).toLocaleDateString('es-AR', { month: 'short', year: 'numeric' })}
-                        </span>
+
+              {productRevs.length > 0 ? (
+                <div className="space-y-4">
+                  {productRevs.map((r) => (
+                    <div key={r.id} className="bg-paper border border-ink/8 px-5 py-4">
+                      <div className="flex items-start justify-between gap-3 mb-2">
+                        <div>
+                          <span className="font-body font-semibold text-[14px]">{r.reviewerName}</span>
+                          <span className="font-mono text-[9px] text-ink/30 ml-2">
+                            {new Date(r.createdAt).toLocaleDateString('es-AR', { month: 'short', year: 'numeric' })}
+                          </span>
+                        </div>
+                        <Stars rating={r.rating} />
                       </div>
-                      <Stars rating={r.rating} />
+                      {r.comment && (
+                        <p className="font-body text-[14px] text-ink/70 leading-[1.6]">{r.comment}</p>
+                      )}
                     </div>
-                    {r.comment && (
-                      <p className="font-body text-[14px] text-ink/70 leading-[1.6]">{r.comment}</p>
-                    )}
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="bg-paper-2 border border-ink/8 px-5 py-8 text-center">
+                  <p className="font-body text-[14px] text-ink/40">
+                    Todavía no hay reseñas para este producto. ¡Sé el primero!
+                  </p>
+                </div>
+              )}
             </div>
           )
         })}
-
-        {reviews.length === 0 && (
-          <div className="bg-paper-2 border border-ink/8 p-10 text-center mb-12">
-            <p className="font-body text-[15px] text-ink/40">Sé el primero en dejar tu reseña.</p>
-          </div>
-        )}
 
         {/* Review form */}
         <div className="border-t border-ink/10 pt-12">

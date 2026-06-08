@@ -346,6 +346,75 @@ const ALERT_TIPO_LABELS: Record<string, string> = {
   custom:     'Nota',
 }
 
+// ─── Review request email (post-entrega) ─────────────────────────────────────
+
+export interface ReviewRequestData {
+  to:          string
+  clientName:  string
+  orderNumber: string
+  items: { productName: string; productId: string }[]
+}
+
+export async function sendReviewRequest(data: ReviewRequestData): Promise<void> {
+  if (!process.env.RESEND_API_KEY || process.env.RESEND_API_KEY.startsWith('re_REPLACE')) {
+    console.warn('[email] RESEND_API_KEY no configurado — saltando email de reseña')
+    return
+  }
+
+  const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://hardy.ar'
+  const reviewUrl = `${SITE_URL}/tienda/resenas`
+
+  const productList = data.items
+    .map((i) => `<li style="font-family:Helvetica,Arial,sans-serif;font-size:14px;color:#1a1a1a;padding:4px 0;">${i.productName}</li>`)
+    .join('')
+
+  const html = `<!DOCTYPE html>
+<html lang="es">
+<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/></head>
+<body style="margin:0;padding:0;background:#f1efe9;font-family:'Helvetica Neue',Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f1efe9;padding:40px 20px;">
+  <tr><td align="center">
+    <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
+      <tr><td style="background:#1a1a1a;padding:28px 36px;">
+        <span style="font-family:'Courier New',monospace;font-size:22px;font-weight:900;letter-spacing:0.08em;color:#fafaf8;text-transform:uppercase;">HARDY</span>
+        <br/><span style="font-family:'Courier New',monospace;font-size:10px;letter-spacing:0.25em;color:#C0171E;text-transform:uppercase;">── ¿Qué te pareció?</span>
+      </td></tr>
+      <tr><td style="background:#fafaf8;padding:36px;">
+        <p style="font-family:'Courier New',monospace;font-size:11px;letter-spacing:0.2em;color:#C0171E;text-transform:uppercase;margin:0 0 8px 0;">── Tu opinión importa</p>
+        <h1 style="font-family:Georgia,serif;font-size:26px;font-weight:600;color:#1a1a1a;margin:0 0 16px 0;">Hola, ${data.clientName}.</h1>
+        <p style="font-family:Helvetica,Arial,sans-serif;font-size:15px;color:#555;line-height:1.7;margin:0 0 20px 0;">
+          Tu pedido <strong>#${data.orderNumber}</strong> ya llegó. ¿Cómo estuvo la experiencia?
+          Tu opinión nos ayuda a seguir mejorando y a que otros clientes puedan elegir con más información.
+        </p>
+        <p style="font-family:'Courier New',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:#999;margin:0 0 8px 0;">Productos comprados:</p>
+        <ul style="margin:0 0 28px 0;padding-left:18px;">${productList}</ul>
+        <div style="text-align:center;margin-bottom:28px;">
+          <a href="${reviewUrl}" style="display:inline-block;background:#C0171E;color:#fafaf8;font-family:'Courier New',monospace;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;padding:14px 32px;text-decoration:none;">
+            Dejar mi reseña →
+          </a>
+        </div>
+        <div style="background:#f1efe9;border-left:3px solid #e8e6e2;padding:14px 18px;">
+          <p style="font-family:Helvetica,Arial,sans-serif;font-size:13px;color:#555;margin:0;line-height:1.6;">
+            Solo te lleva 1 minuto. Podés calificar con estrellas y escribir una línea sobre tu experiencia.
+          </p>
+        </div>
+      </td></tr>
+      <tr><td style="padding:20px 36px;background:#f1efe9;border-top:1px solid #e0ddd8;">
+        <p style="font-family:'Courier New',monospace;font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:#aaa;margin:0;">HARDY · Alimentá tu instinto · hardy.ar</p>
+      </td></tr>
+    </table>
+  </td></tr>
+</table>
+</body></html>`
+
+  await resend.emails.send({
+    from:    FROM_ADDRESS,
+    to:      data.to,
+    subject: `Hardy — ¿Qué te pareció tu pedido #${data.orderNumber}?`,
+    html,
+  })
+}
+
 // ─── B2C store order confirmation ─────────────────────────────────────────────
 
 export interface StoreOrderConfirmationData {
