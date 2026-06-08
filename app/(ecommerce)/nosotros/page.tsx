@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import type { Metadata } from 'next'
+import WhatsAppLink from '@/components/analytics/WhatsAppLink'
 
 export const metadata: Metadata = {
   title: 'Nuestra historia · Hardy',
@@ -200,14 +201,12 @@ export default function NosotrosPage() {
             Somos una marca en crecimiento. Abiertos a nuevos distribuidores,
             gastronómicos y colaboraciones.
           </p>
-          <Link
+          <WhatsAppLink
             href="https://wa.me/5491135736956"
-            target="_blank"
-            rel="noopener noreferrer"
             className="inline-block bg-paper text-ink font-mono text-[12px] tracking-[0.15em] uppercase px-8 py-[18px] hover:bg-ink hover:text-paper transition-colors duration-200"
           >
             Escribinos por WhatsApp →
-          </Link>
+          </WhatsAppLink>
         </div>
       </section>
     </main>

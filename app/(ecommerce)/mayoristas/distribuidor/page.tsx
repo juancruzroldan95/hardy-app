@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { WA_NUMBER } from '@/consts/products'
+import WhatsAppLink from '@/components/analytics/WhatsAppLink'
 
 export const metadata: Metadata = {
   title: 'Distribuidores — Hardy',
@@ -31,14 +32,12 @@ export default function DistribuidorPage() {
             Crema de maní y miel Hardy para tu portfolio de distribución. Dos productos premium,
             una sola marca, precio competitivo por volumen.
           </p>
-          <a
+          <WhatsAppLink
             href={`${WA_NUMBER}?text=Hola%20Hardy,%20soy%20distribuidor%20y%20quiero%20información`}
-            target="_blank"
-            rel="noopener noreferrer"
             className="inline-block bg-red text-paper font-mono text-[12px] tracking-[0.2em] uppercase px-8 py-4"
           >
             Consultar por WhatsApp →
-          </a>
+          </WhatsAppLink>
         </div>
       </section>
 
@@ -94,14 +93,12 @@ export default function DistribuidorPage() {
             Cada zona es distinta. Contactanos y armamos una propuesta personalizada
             para crema de maní y miel.
           </p>
-          <a
+          <WhatsAppLink
             href={`${WA_NUMBER}?text=Hola%20Hardy,%20quiero%20ser%20distribuidor%20de%20crema%20de%20maní%20y%20miel`}
-            target="_blank"
-            rel="noopener noreferrer"
             className="inline-block bg-red text-paper font-mono text-[12px] tracking-[0.2em] uppercase px-10 py-4"
           >
             Escribir por WhatsApp →
-          </a>
+          </WhatsAppLink>
         </div>
       </section>
 
