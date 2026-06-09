@@ -5,7 +5,6 @@ import { getProfileByUserId } from '@/repository/queries/profile'
 import { formatARS } from '@/consts/products'
 import { ROLE_LABELS } from '@/consts/roles'
 import OrderStatusBadge from '@/components/portal/OrderStatusBadge'
-import PaymentStatusBadge from '@/components/portal/PaymentStatusBadge'
 import { imputarPago } from '@/repository/mutations/admin'
 import type { UserRole } from '@/db/schema'
 import { db } from '@/db'
@@ -125,13 +124,12 @@ export default async function AdminPedidosPage({ searchParams }: Props) {
           <div className="min-w-[760px]">
           <div
             className="px-5 py-3 border-b border-ink/8 bg-paper-2 grid gap-4"
-            style={{ gridTemplateColumns: '1fr 110px 130px 100px 110px 100px 80px' }}
+            style={{ gridTemplateColumns: '1fr 110px 130px 100px 100px 80px' }}
           >
             <span className="font-mono text-[9px] tracking-[0.15em] uppercase text-ink/40">Cliente</span>
             <span className="font-mono text-[9px] tracking-[0.15em] uppercase text-ink/40">Segmento</span>
             <span className="font-mono text-[9px] tracking-[0.15em] uppercase text-ink/40">Fecha</span>
             <span className="font-mono text-[9px] tracking-[0.15em] uppercase text-ink/40">Estado</span>
-            <span className="font-mono text-[9px] tracking-[0.15em] uppercase text-ink/40">Pago</span>
             <span className="font-mono text-[9px] tracking-[0.15em] uppercase text-ink/40 text-right">Total</span>
             <span />
           </div>
@@ -145,7 +143,7 @@ export default async function AdminPedidosPage({ searchParams }: Props) {
                 <div
                   key={order.id}
                   className="px-5 py-4 grid gap-4 items-center"
-                  style={{ gridTemplateColumns: '1fr 110px 130px 100px 110px 100px 80px' }}
+                  style={{ gridTemplateColumns: '1fr 110px 130px 100px 100px 80px' }}
                 >
                   <div>
                     <div className="font-body font-semibold text-[13px] text-ink truncate">
@@ -164,7 +162,6 @@ export default async function AdminPedidosPage({ searchParams }: Props) {
                     })}
                   </span>
                   <OrderStatusBadge status={order.status} />
-                  <PaymentStatusBadge status={order.paymentStatus} />
                   <span className="font-mono text-[13px] text-ink text-right">
                     {formatARS(Number(order.totalArs))}
                   </span>
