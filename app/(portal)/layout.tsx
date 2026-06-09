@@ -1,6 +1,6 @@
 import { createClient } from '@/services/supabase/server'
 import { db } from '@/db'
-import { profiles, orders } from '@/db/schema'
+import { profiles, orders, solicitudes } from '@/db/schema'
 import { and, eq, gt } from 'drizzle-orm'
 import PortalSidebar from '@/components/portal/PortalSidebar'
 import type { UserRole } from '@/db/schema'
@@ -40,6 +40,16 @@ export default async function PortalLayout({ children }: { children: React.React
   })
   const notifCount = recentlyUpdated.filter(o => o.status !== 'pending').length
 
+  // Solicitudes pendientes — solo relevante para admin
+  let pendingSolicitudesCount = 0
+  if (role === 'admin') {
+    const pending = await db.query.solicitudes.findMany({
+      where: and(eq(solicitudes.estado, 'pendiente'), eq(solicitudes.isDeleted, false)),
+      columns: { id: true },
+    })
+    pendingSolicitudesCount = pending.length
+  }
+
   return (
     <div className="min-h-screen bg-paper-2 flex max-md:flex-col">
       <PortalSidebar
@@ -49,6 +59,7 @@ export default async function PortalLayout({ children }: { children: React.React
         vendedorNombre={vendedorNombre}
         vendedorWhatsapp={vendedorWhatsapp}
         notifCount={notifCount}
+        pendingSolicitudesCount={pendingSolicitudesCount}
       />
       <main className="flex-1 min-w-0 p-8 max-md:p-5">
         {children}

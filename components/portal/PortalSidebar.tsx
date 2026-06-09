@@ -15,6 +15,7 @@ interface Props {
   vendedorNombre?: string
   vendedorWhatsapp?: string
   notifCount?: number
+  pendingSolicitudesCount?: number
 }
 
 const CLIENT_LINKS = [
@@ -46,6 +47,7 @@ export default function PortalSidebar({
   vendedorNombre,
   vendedorWhatsapp,
   notifCount,
+  pendingSolicitudesCount,
 }: Props) {
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
@@ -144,22 +146,33 @@ export default function PortalSidebar({
               Admin
             </p>
             <ul className="flex flex-col gap-1">
-              {ADMIN_LINKS.map(({ href, label }) => (
-                <li key={href}>
-                  <Link
-                    href={href}
-                    onClick={() => setOpen(false)}
-                    className={[
-                      'block px-3 py-2 font-mono text-[11px] tracking-[0.12em] uppercase transition-colors',
-                      isActive(href)
-                        ? 'text-paper bg-[#2a2a2a]'
-                        : 'text-paper/60 hover:text-paper',
-                    ].join(' ')}
-                  >
-                    {isActive(href) ? '── ' : ''}{label}
-                  </Link>
-                </li>
-              ))}
+              {ADMIN_LINKS.map(({ href, label }) => {
+                const isSolicitudes = href === '/portal/admin/solicitudes'
+                const badge = isSolicitudes && pendingSolicitudesCount && pendingSolicitudesCount > 0
+                  ? pendingSolicitudesCount
+                  : null
+                return (
+                  <li key={href}>
+                    <Link
+                      href={href}
+                      onClick={() => setOpen(false)}
+                      className={[
+                        'flex items-center justify-between px-3 py-2 font-mono text-[11px] tracking-[0.12em] uppercase transition-colors',
+                        isActive(href)
+                          ? 'text-paper bg-[#2a2a2a]'
+                          : 'text-paper/60 hover:text-paper',
+                      ].join(' ')}
+                    >
+                      <span>{isActive(href) ? '── ' : ''}{label}</span>
+                      {badge && (
+                        <span className="bg-red text-paper font-mono text-[8px] w-4 h-4 rounded-full flex items-center justify-center shrink-0">
+                          {badge > 9 ? '9+' : badge}
+                        </span>
+                      )}
+                    </Link>
+                  </li>
+                )
+              })}
             </ul>
           </div>
         )}
