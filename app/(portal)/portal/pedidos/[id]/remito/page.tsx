@@ -9,7 +9,6 @@ import { createClient } from '@/services/supabase/server'
 import { getProfileByUserId } from '@/repository/queries/profile'
 import { getOrderById } from '@/repository/queries/orders'
 import { HARDY_BANK } from '@/consts/hardy'
-import { formatARS } from '@/consts/products'
 import PrintButton from '@/components/portal/PrintButton'
 
 const SHIPPING_LABELS: Record<string, string> = {
@@ -168,8 +167,6 @@ export default async function RemitoPage({ params }: Props) {
               <tr style={{ borderBottom: '2px solid #000' }}>
                 <th className="font-mono text-[9px] tracking-[0.15em] uppercase text-left pb-2 text-gray-500">Producto</th>
                 <th className="font-mono text-[9px] tracking-[0.15em] uppercase text-center pb-2 text-gray-500">Cant.</th>
-                <th className="font-mono text-[9px] tracking-[0.15em] uppercase text-right pb-2 text-gray-500">Precio unit.</th>
-                <th className="font-mono text-[9px] tracking-[0.15em] uppercase text-right pb-2 text-gray-500">Subtotal</th>
               </tr>
             </thead>
             <tbody>
@@ -180,21 +177,9 @@ export default async function RemitoPage({ params }: Props) {
                     <div className="font-mono text-[10px] text-gray-400 mt-[1px]">{item.variant} · {item.size}</div>
                   </td>
                   <td className="py-3 text-center font-mono text-[13px]">{item.qty}</td>
-                  <td className="py-3 text-right font-mono text-[13px] text-gray-600">{formatARS(Number(item.unitPriceArs))}</td>
-                  <td className="py-3 text-right font-mono text-[14px] font-semibold">{formatARS(Number(item.subtotalArs))}</td>
                 </tr>
               ))}
             </tbody>
-            <tfoot>
-              <tr style={{ borderTop: '2px solid #000' }}>
-                <td colSpan={3} className="pt-4 font-mono text-[10px] tracking-[0.1em] uppercase text-gray-500 text-right pr-6">
-                  Total (sin IVA)
-                </td>
-                <td className="pt-4 font-mono text-[20px] font-bold text-right">
-                  {formatARS(Number(order.totalArs))}
-                </td>
-              </tr>
-            </tfoot>
           </table>
 
           {/* PO Number + Requested date */}
