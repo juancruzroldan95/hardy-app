@@ -69,8 +69,8 @@ export default async function TiendaPage() {
           {/* Imagen colección */}
           <div className="relative aspect-[16/10] max-md:order-1 overflow-hidden">
             <Image
-              src="/lifestyle/tienda-hero-coleccion.png"
-              alt="Colección de productos Hardy — crema de maní y miel"
+              src="/lifestyle/tienda-hero-natural-miel.png"
+              alt="HARDY — Crema de maní Natural y Miel Líquida"
               fill
               priority
               className="object-cover"
@@ -185,8 +185,8 @@ export default async function TiendaPage() {
           <div className="grid grid-cols-3 gap-[2px] max-md:grid-cols-1">
             <div className="relative aspect-square overflow-hidden">
               <Image
-                src="/lifestyle/tex-natural-cuchara.png"
-                alt="Crema de maní natural cremosa"
+                src="/lifestyle/tienda-textura-natural.png"
+                alt="Crema de maní HARDY Natural — frasco abierto con cuchara"
                 fill
                 className="object-cover"
                 sizes="(max-width: 900px) 100vw, 33vw"
@@ -194,8 +194,8 @@ export default async function TiendaPage() {
             </div>
             <div className="relative aspect-square overflow-hidden">
               <Image
-                src="/lifestyle/tex-crunchy-tostada.png"
-                alt="Crema de maní crunchy en tostada"
+                src="/lifestyle/tienda-textura-crunchy.png"
+                alt="Crema de maní HARDY Crunchy — untada en tostada de pan integral"
                 fill
                 className="object-cover"
                 sizes="(max-width: 900px) 100vw, 33vw"
@@ -203,8 +203,8 @@ export default async function TiendaPage() {
             </div>
             <div className="relative aspect-square overflow-hidden">
               <Image
-                src="/lifestyle/tex-miel-hilo.png"
-                alt="Miel líquida natural"
+                src="/lifestyle/tienda-textura-miel.png"
+                alt="Miel líquida HARDY — chorreado de miel desde cucharón de madera"
                 fill
                 className="object-cover"
                 sizes="(max-width: 900px) 100vw, 33vw"
