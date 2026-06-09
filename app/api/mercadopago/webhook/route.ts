@@ -1,5 +1,8 @@
 import { updateOrderPaymentStatus } from '@/repository/mutations/storeOrders'
 import { getStoreOrderById } from '@/repository/queries/storeOrders'
+import { db } from '@/db'
+import { orders } from '@/db/schema'
+import { eq } from 'drizzle-orm'
 
 /**
  * Webhook de Mercado Pago.
@@ -93,26 +96,38 @@ export async function POST(request: Request): Promise<Response> {
       return Response.json({ ok: true })
     }
 
-    // Verificar que la orden existe en DB y pertenece al canal B2C
-    const order = await getStoreOrderById(externalRef)
-    if (!order || order.channel !== 'b2c') {
+    // Try B2C store order first
+    const storeOrder = await getStoreOrderById(externalRef)
+    if (storeOrder && storeOrder.channel === 'b2c') {
+      if (status === 'approved') {
+        await updateOrderPaymentStatus(externalRef, 'paid', paymentId)
+        fetch(`${SITE_URL}/api/andreani/orden`, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ orderId: externalRef }),
+        }).catch((err) => {
+          console.error('[webhook/mp] Error disparando orden Andreani:', err)
+        })
+      } else if (status === 'rejected' || status === 'cancelled') {
+        await updateOrderPaymentStatus(externalRef, 'failed', paymentId)
+      }
       return Response.json({ ok: true })
     }
 
-    if (status === 'approved') {
-      await updateOrderPaymentStatus(externalRef, 'paid', paymentId)
-
-      // Crear el envío en Andreani de forma asíncrona
-      // (llamada interna al route handler dedicado)
-      fetch(`${SITE_URL}/api/andreani/orden`, {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ orderId: externalRef }),
-      }).catch((err) => {
-        console.error('[webhook/mp] Error disparando orden Andreani:', err)
-      })
-    } else if (status === 'rejected' || status === 'cancelled') {
-      await updateOrderPaymentStatus(externalRef, 'failed', paymentId)
+    // Try B2B portal order
+    const portalOrder = await db.query.orders.findFirst({
+      where: eq(orders.id, externalRef),
+    })
+    if (portalOrder) {
+      if (status === 'approved') {
+        await db.update(orders)
+          .set({ paymentStatus: 'paid', status: 'confirmed' })
+          .where(eq(orders.id, externalRef))
+      } else if (status === 'rejected' || status === 'cancelled') {
+        await db.update(orders)
+          .set({ paymentStatus: 'failed' })
+          .where(eq(orders.id, externalRef))
+      }
     }
 
     return Response.json({ ok: true })

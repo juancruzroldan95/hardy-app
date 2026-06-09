@@ -71,6 +71,13 @@
       "when": 1780878061189,
       "tag": "0009_tearful_karen_page",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1780971984320,
+      "tag": "0010_romantic_reavers",
+      "breakpoints": true
     }
   ]
 }

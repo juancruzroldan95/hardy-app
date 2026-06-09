@@ -35,11 +35,14 @@ const SHIPPING_LABELS: Record<string, string> = {
 }
 
 const PAYMENT_LABELS: Record<string, string> = {
-  transferencia: 'Transferencia bancaria',
-  efectivo:      'Efectivo al recibir',
-  credito30:     'Crédito a 30 días',
-  credito60:     'Crédito a 60 días',
-  cheque:        'Cheque',
+  mercadopago:      'Tarjeta / Mercado Pago',
+  transferencia:    'Transferencia bancaria',
+  deposito_bancario: 'Depósito bancario',
+  echeq_30:         'E-CHEQ 30 días',
+  efectivo:         'Efectivo al recibir',
+  credito30:        'Crédito a 30 días',
+  credito60:        'Crédito a 60 días',
+  cheque:           'Cheque',
 }
 
 interface Props {

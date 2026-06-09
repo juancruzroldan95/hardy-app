@@ -14,6 +14,7 @@ import { getAdminUser } from './admin'
 
 export type CreateOrderState =
   | { error: string }
+  | { initPoint: string }
   | undefined
 
 export interface OrderLineInput {
@@ -247,6 +248,45 @@ async function _createOrderForUser({
     }
   } catch (e) {
     console.error('[email] Failed to send order confirmation:', e)
+  }
+
+  // Mercado Pago: create preference and return init_point for client redirect
+  if (paymentMethod === 'mercadopago') {
+    const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://hardy.ar'
+    const mpItems = itemsToInsert.map((i) => ({
+      title:       `${i.productName} · ${i.variant} · ${i.size}`,
+      quantity:    i.qty,
+      unit_price:  Number(i.unitPriceArs),
+      currency_id: 'ARS',
+    }))
+
+    const mpRes = await fetch('https://api.mercadopago.com/checkout/preferences', {
+      method: 'POST',
+      headers: {
+        Authorization:  `Bearer ${process.env.MERCADOPAGO_ACCESS_TOKEN}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        items:              mpItems,
+        back_urls: {
+          success: `${BASE_URL}/portal/pedidos/${newOrder.id}?payment=success`,
+          failure: `${BASE_URL}/portal/pedidos/${newOrder.id}?payment=failure`,
+          pending: `${BASE_URL}/portal/pedidos/${newOrder.id}?payment=pending`,
+        },
+        auto_return:        'approved',
+        external_reference: newOrder.id,
+        notification_url:   `${BASE_URL}/api/mercadopago/webhook`,
+      }),
+    })
+
+    if (!mpRes.ok) {
+      const detail = await mpRes.json()
+      console.error('[mp] Error creating preference:', detail)
+      redirect(`/portal/pedidos/${newOrder.id}`)
+    }
+
+    const mpData = await mpRes.json()
+    return { initPoint: mpData.init_point as string }
   }
 
   redirect(`/portal/pedidos/${newOrder.id}`)
