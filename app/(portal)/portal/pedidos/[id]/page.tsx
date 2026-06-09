@@ -31,6 +31,7 @@ const SHIPPING_LABELS: Record<string, string> = {
 }
 
 const PAYMENT_LABELS: Record<string, string> = {
+  mercadopago:      'Tarjeta / Mercado Pago',
   transferencia:    'Transferencia bancaria',
   deposito_bancario: 'Depósito bancario',
   echeq_30:         'E-CHEQ 30 días',

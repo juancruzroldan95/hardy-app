@@ -37,14 +37,6 @@ export default function ProductCard({ product, rating }: { product: Product; rat
 
   const images = product.images ?? [product.image]
 
-  // ── URL param: auto-open on mount if ?producto=id matches ────────────────────
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    if (params.get('producto') === product.id) {
-      openModal()
-    }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
-
   // ── Open: mount → next frame → show (two-frame trick for CSS transitions) ────
   const openModal = useCallback(() => {
     setModalImgIdx(0)
@@ -62,6 +54,16 @@ export default function ProductCard({ product, rating }: { product: Product; rat
     window.history.replaceState({}, '', window.location.pathname)
     setTimeout(() => setModalMounted(false), 280)
   }, [])
+
+  // ── URL param: auto-open on mount if ?producto=id matches ────────────────────
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('producto') === product.id) {
+      // Diferido para no actualizar estado de forma síncrona dentro del efecto
+      const t = setTimeout(() => openModal(), 0)
+      return () => clearTimeout(t)
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Close on Escape key
   useEffect(() => {
@@ -128,7 +130,7 @@ export default function ProductCard({ product, rating }: { product: Product; rat
             {product.desc}
           </div>
           <div className="flex-1" />
-          <div className="pt-[14px] border-t border-ink/15 group-hover:border-white/15 flex justify-between items-center transition-colors duration-[220ms]">
+          <div className="pt-[14px] border-t border-ink/15 group-hover:border-white/15 flex justify-between items-center gap-2 transition-colors duration-[220ms] max-md:flex-col max-md:items-stretch max-md:gap-3">
             {product.price ? (
               <>
                 <div className="font-heading text-[22px] font-medium whitespace-nowrap group-hover:text-paper transition-colors duration-[220ms]">
@@ -136,7 +138,7 @@ export default function ProductCard({ product, rating }: { product: Product; rat
                 </div>
                 <button
                   onClick={(e) => { e.stopPropagation(); addItem(product.id) }}
-                  className="bg-red text-paper font-mono text-[10px] tracking-[0.08em] uppercase px-[14px] py-[10px] whitespace-nowrap flex-shrink-0 cursor-pointer border-none"
+                  className="bg-red text-paper font-mono text-[10px] tracking-[0.08em] uppercase px-[14px] py-[10px] whitespace-nowrap flex-shrink-0 cursor-pointer border-none max-md:w-full"
                 >
                   + Agregar
                 </button>
@@ -151,7 +153,7 @@ export default function ProductCard({ product, rating }: { product: Product; rat
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={(e) => e.stopPropagation()}
-                  className="bg-red text-paper font-mono text-[10px] tracking-[0.08em] uppercase px-[14px] py-[10px] whitespace-nowrap flex-shrink-0 no-underline"
+                  className="bg-red text-paper font-mono text-[10px] tracking-[0.08em] uppercase px-[14px] py-[10px] whitespace-nowrap flex-shrink-0 no-underline text-center max-md:w-full"
                 >
                   Consultar →
                 </a>
@@ -165,7 +167,7 @@ export default function ProductCard({ product, rating }: { product: Product; rat
       {modalMounted && (
         <div
           className={[
-            'fixed inset-0 z-[300] flex items-center justify-center p-5 overflow-y-auto',
+            'fixed inset-0 z-[300] flex items-center justify-center p-5 overflow-y-auto max-md:items-start',
             'transition-opacity duration-[260ms]',
             modalVisible ? 'opacity-100' : 'opacity-0',
           ].join(' ')}
@@ -174,11 +176,10 @@ export default function ProductCard({ product, rating }: { product: Product; rat
         >
           <div
             className={[
-              'bg-ink max-w-[920px] w-full grid grid-cols-2 max-md:grid-cols-1 rounded-[2px] overflow-hidden relative',
+              'bg-ink max-w-[920px] w-full grid grid-cols-2 max-md:grid-cols-1 rounded-[2px] overflow-hidden relative md:max-h-[92vh] max-md:overflow-visible',
               'transition-all duration-[260ms]',
               modalVisible ? 'scale-100 translate-y-0' : 'scale-[0.96] translate-y-4',
             ].join(' ')}
-            style={{ maxHeight: '92vh' }}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Image panel */}

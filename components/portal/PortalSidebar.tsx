@@ -66,7 +66,7 @@ export default function PortalSidebar({
   const isAdmin = role === 'admin'
 
   return (
-    <aside className="w-[240px] max-md:w-full shrink-0 bg-ink flex flex-col min-h-screen max-md:min-h-0 max-md:sticky max-md:top-0 max-md:z-40">
+    <aside className="w-[240px] max-md:w-full shrink-0 bg-ink flex flex-col min-h-screen max-md:min-h-0 max-md:sticky max-md:top-0 max-md:z-40 max-md:max-h-screen">
       {/* Logo + hamburger (mobile) */}
       <div className="px-7 pt-8 pb-6 border-b border-[#2a2a2a] max-md:py-4 max-md:flex max-md:items-center max-md:justify-between">
         <div>
@@ -97,8 +97,8 @@ export default function PortalSidebar({
         </button>
       </div>
 
-      {/* Contenido colapsable en mobile */}
-      <div className={`flex flex-col flex-1 ${open ? '' : 'max-md:hidden'}`}>
+      {/* Contenido colapsable en mobile — scroll interno para que el logout siempre sea alcanzable */}
+      <div className={`flex flex-col flex-1 max-md:overflow-y-auto max-md:max-h-[calc(100vh-64px)] ${open ? '' : 'max-md:hidden'}`}>
 
       {/* Volver al sitio — dentro del menú en mobile */}
       <Link
@@ -110,7 +110,9 @@ export default function PortalSidebar({
       </Link>
 
       {/* Nav */}
-      <nav className="flex-1 px-4 py-6 overflow-y-auto">
+      {/* En desktop: flex-1 + overflow-y-auto para scrollear dentro del sidebar fijo.
+          En mobile: el div padre maneja todo el scroll, el nav crece sin límite. */}
+      <nav className="flex-1 px-4 py-6 overflow-y-auto max-md:overflow-visible max-md:flex-none">
         <ul className="flex flex-col gap-1">
           {CLIENT_LINKS.map(({ href, label }) => (
             <li key={href}>

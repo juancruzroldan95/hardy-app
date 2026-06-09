@@ -162,6 +162,7 @@ const SHIPPING_OPTIONS = [
 ] as const
 
 const PAYMENT_OPTIONS = [
+  { value: 'mercadopago',     label: 'Tarjeta / Mercado Pago', sub: 'Pagá ahora con tarjeta de crédito, débito o saldo MP', showBank: false },
   { value: 'transferencia',   label: 'Transferencia bancaria', sub: '50% anticipado + 50% contra entrega',   showBank: true  },
   { value: 'deposito_bancario', label: 'Depósito bancario',   sub: '50% anticipado + 50% contra entrega',   showBank: true  },
   { value: 'echeq_30',        label: 'E-CHEQ 30 días',        sub: 'Liberamos mercadería al recibir el E-CHEQ', showBank: true },
@@ -232,6 +233,13 @@ export default function NuevoPedidoForm({
     overrideAction ?? createPortalOrder,
     undefined,
   )
+
+  // Redirect to MP checkout when the action returns an initPoint
+  useEffect(() => {
+    if (state && 'initPoint' in state) {
+      window.location.href = state.initPoint
+    }
+  }, [state])
 
   const draftKey = userId ? `hardy-order-draft-${userId}` : null
 
