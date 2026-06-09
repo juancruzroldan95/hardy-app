@@ -369,14 +369,17 @@ export async function createPortalAccessFromSolicitud(
   const cuit        = (formData.get('cuit')        as string)?.trim() || null
   const city        = (formData.get('city')        as string)?.trim() || null
   const province    = (formData.get('province')    as string)?.trim() || null
+  const password    = (formData.get('password')    as string)?.trim()
 
   if (!email || !displayName || !role) {
     return { error: 'Email, nombre y rol son obligatorios.' }
   }
+  if (!password || password.length < 6) {
+    return { error: 'La contraseña debe tener al menos 6 caracteres.' }
+  }
 
   // 1. Buscar si ya existe en auth.users
   let authUserId: string | null = null
-  let tempPassword = ''
 
   try {
     const result = await db.execute(
@@ -387,16 +390,13 @@ export async function createPortalAccessFromSolicitud(
     console.error('Error al consultar auth.users:', e)
   }
 
-  // 2. Si no existe, crear en Supabase Auth
+  // 2. Si no existe, crear en Supabase Auth con la contraseña elegida
   if (!authUserId) {
-    const randomStr = Math.random().toString(36).substring(2, 8).toUpperCase()
-    tempPassword = `Hardy2026$${randomStr}`
-
     try {
       const adminClient = createAdminClient()
       const { data: authData, error: authError } = await adminClient.auth.admin.createUser({
         email,
-        password: tempPassword,
+        password,
         email_confirm: true,
       })
       if (authError) return { error: `Error en Supabase Auth: ${authError.message}` }
@@ -434,7 +434,7 @@ export async function createPortalAccessFromSolicitud(
   revalidatePath('/portal/admin/solicitudes')
   revalidatePath('/portal/admin/clientes')
 
-  return { success: true, email, tempPassword, displayName }
+  return { success: true, email, tempPassword: password, displayName }
 }
 
 // ─── Edit Client Profile (Admin) ──────────────────────────────────────────────
