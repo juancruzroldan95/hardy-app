@@ -9,9 +9,8 @@ const resend = new Resend(process.env.RESEND_API_KEY)
 // Hardy warehouse email that receives copies of all orders
 const WAREHOUSE_EMAIL = process.env.HARDY_WAREHOUSE_EMAIL ?? 'guido.giambruni@gmail.com'
 
-// From address — requires a verified domain in Resend.
-// Use onboarding@resend.dev for testing until you verify hardyfoods.com.ar
-const FROM_ADDRESS = 'Hardy <onboarding@resend.dev>'
+// From address — requires hardy.ar verified in Resend (resend.com/domains)
+const FROM_ADDRESS = 'Hardy <ventas@hardy.ar>'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
