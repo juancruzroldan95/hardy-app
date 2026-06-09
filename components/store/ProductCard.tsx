@@ -37,14 +37,6 @@ export default function ProductCard({ product, rating }: { product: Product; rat
 
   const images = product.images ?? [product.image]
 
-  // ── URL param: auto-open on mount if ?producto=id matches ────────────────────
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    if (params.get('producto') === product.id) {
-      openModal()
-    }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
-
   // ── Open: mount → next frame → show (two-frame trick for CSS transitions) ────
   const openModal = useCallback(() => {
     setModalImgIdx(0)
@@ -62,6 +54,16 @@ export default function ProductCard({ product, rating }: { product: Product; rat
     window.history.replaceState({}, '', window.location.pathname)
     setTimeout(() => setModalMounted(false), 280)
   }, [])
+
+  // ── URL param: auto-open on mount if ?producto=id matches ────────────────────
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('producto') === product.id) {
+      // Diferido para no actualizar estado de forma síncrona dentro del efecto
+      const t = setTimeout(() => openModal(), 0)
+      return () => clearTimeout(t)
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Close on Escape key
   useEffect(() => {
