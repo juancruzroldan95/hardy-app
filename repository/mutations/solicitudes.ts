@@ -3,8 +3,6 @@
 import { db } from '@/db'
 import { solicitudes } from '@/db/schema'
 import type { TipoNegocio } from '@/db/schema'
-import { sendCatalogEmail } from '@/services/resend'
-import type { CatalogSegmento } from '@/services/resend'
 
 export type SolicitudState =
   | { success: true }
@@ -16,12 +14,6 @@ const TIPOS_NEGOCIO_VALIDOS: TipoNegocio[] = [
   'restaurante', 'gimnasio', 'almacen', 'otro',
 ]
 
-// Mapeo tipo de negocio → segmento de catálogo
-function resolveSegmento(tipo: TipoNegocio): CatalogSegmento {
-  if (tipo === 'distribuidor') return 'distribuidor'
-  if (tipo === 'cafeteria' || tipo === 'restaurante') return 'gastronomico'
-  return 'mayorista'
-}
 
 export async function submitSolicitud(
   _prev: SolicitudState,
@@ -70,12 +62,6 @@ export async function submitSolicitud(
       mensaje,
     })
 
-    const segmento = resolveSegmento(tipoNegocio)
-
-    // Email al prospecto con catálogo adjunto (fire-and-forget)
-    sendCatalogEmail({ to: email, nombre, empresa, segmento })
-      .catch((e) => console.error('[solicitud] Error al enviar catálogo:', e))
-
     // Notificación interna al equipo Hardy
     const RESEND_API_KEY = process.env.RESEND_API_KEY
     const ADMIN_EMAIL    = process.env.ADMIN_EMAIL
@@ -89,10 +75,10 @@ export async function submitSolicitud(
         body: JSON.stringify({
           from:    'Hardy Portal <noreply@hardy.com.ar>',
           to:      ADMIN_EMAIL,
-          subject: `Nueva solicitud — ${empresa} [${segmento.toUpperCase()}]`,
+          subject: `Nueva solicitud de acceso — ${empresa}`,
           html: `
             <h2>Nueva solicitud de acceso al portal</h2>
-            <p><strong>Segmento detectado:</strong> ${segmento.toUpperCase()} — se envió el catálogo correspondiente.</p>
+            <p>Revisá los datos y, si corresponde, aprobá el acceso desde el panel de solicitudes.</p>
             <table>
               <tr><td><strong>Nombre:</strong></td><td>${nombre}</td></tr>
               <tr><td><strong>Empresa:</strong></td><td>${empresa}</td></tr>
