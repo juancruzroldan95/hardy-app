@@ -347,6 +347,96 @@ export async function createClientProfile(
   redirect(`/portal/admin/clientes/nuevo?${params.toString()}`)
 }
 
+// ─── Crear acceso desde solicitud ──────────────────────────────────────────────
+
+export type CreateAccessState =
+  | { success: true; email: string; tempPassword: string; displayName: string }
+  | { error: string }
+  | undefined
+
+export async function createPortalAccessFromSolicitud(
+  solicitudId: string,
+  _prev: CreateAccessState,
+  formData: FormData,
+): Promise<CreateAccessState> {
+  await getAdminUser()
+
+  const email       = (formData.get('email')       as string)?.trim().toLowerCase()
+  const displayName = (formData.get('displayName') as string)?.trim()
+  const company     = (formData.get('company')     as string)?.trim() || null
+  const role        = (formData.get('role')        as string)?.trim() as UserRole
+  const phone       = (formData.get('phone')       as string)?.trim() || null
+  const cuit        = (formData.get('cuit')        as string)?.trim() || null
+  const city        = (formData.get('city')        as string)?.trim() || null
+  const province    = (formData.get('province')    as string)?.trim() || null
+
+  if (!email || !displayName || !role) {
+    return { error: 'Email, nombre y rol son obligatorios.' }
+  }
+
+  // 1. Buscar si ya existe en auth.users
+  let authUserId: string | null = null
+  let tempPassword = ''
+
+  try {
+    const result = await db.execute(
+      drizzleSql`SELECT id FROM auth.users WHERE email = ${email} LIMIT 1`
+    )
+    authUserId = (result as unknown as Array<{ id: string }>)[0]?.id ?? null
+  } catch (e) {
+    console.error('Error al consultar auth.users:', e)
+  }
+
+  // 2. Si no existe, crear en Supabase Auth
+  if (!authUserId) {
+    const randomStr = Math.random().toString(36).substring(2, 8).toUpperCase()
+    tempPassword = `Hardy2026$${randomStr}`
+
+    try {
+      const adminClient = createAdminClient()
+      const { data: authData, error: authError } = await adminClient.auth.admin.createUser({
+        email,
+        password: tempPassword,
+        email_confirm: true,
+      })
+      if (authError) return { error: `Error en Supabase Auth: ${authError.message}` }
+      authUserId = authData.user?.id ?? null
+    } catch (e) {
+      console.error('Error Supabase Admin:', e)
+      return { error: 'Error de comunicación con Supabase Auth.' }
+    }
+  }
+
+  if (!authUserId) return { error: 'No se pudo obtener el ID de usuario.' }
+
+  // 3. Verificar que no tenga perfil ya creado
+  const existing = await db.query.profiles.findFirst({
+    where: eq(profiles.userId, authUserId),
+  })
+  if (existing) return { error: 'Este email ya tiene un perfil activo en el portal.' }
+
+  // 4. Crear el perfil
+  try {
+    await db.insert(profiles).values({
+      userId: authUserId, role, displayName, company, phone, cuit, city, province,
+    })
+  } catch (e) {
+    console.error('Error al insertar perfil:', e)
+    return { error: 'Error al guardar el perfil.' }
+  }
+
+  // 5. Marcar la solicitud como aprobada
+  await db.update(solicitudes)
+    .set({ estado: 'aprobada', updatedAt: new Date() })
+    .where(eq(solicitudes.id, solicitudId))
+
+  revalidatePath(`/portal/admin/solicitudes/${solicitudId}`)
+  revalidatePath('/portal/admin/solicitudes')
+  revalidatePath('/portal/admin/clientes')
+
+  return { success: true, email, tempPassword, displayName }
+}
+
 // ─── Edit Client Profile (Admin) ──────────────────────────────────────────────
 
 export type EditClientState = { error: string } | { success: true } | undefined

@@ -102,10 +102,8 @@ export default function SolicitudForm() {
           en las próximas <em className="not-italic text-red">24-48hs.</em>
         </h3>
         <p className="font-body text-[14px] leading-[1.7]" style={{ color: 'rgba(250,250,248,0.65)' }}>
-          Revisamos tu solicitud y te contactamos por WhatsApp y email con
-          tu usuario y contraseña para acceder al portal.
-          <br className="mb-2" />
-          <strong style={{ color: 'rgba(250,250,248,0.9)' }}>Revisá tu casilla — te enviamos el catálogo ahora mismo.</strong>
+          Revisamos tu información y te contactamos por WhatsApp y email
+          para coordinar el acceso al portal.
         </p>
       </div>
     )

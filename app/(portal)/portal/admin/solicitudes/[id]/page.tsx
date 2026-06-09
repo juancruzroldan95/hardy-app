@@ -4,6 +4,7 @@ import { createClient } from '@/services/supabase/server'
 import { getProfileByUserId } from '@/repository/queries/profile'
 import { getSolicitudById } from '@/repository/queries/solicitudes'
 import { updateSolicitudEstado } from '@/repository/mutations/admin'
+import SolicitudAccessForm from '@/components/portal/SolicitudAccessForm'
 import type { EstadoSolicitud } from '@/db/schema'
 
 const TIPO_LABELS: Record<string, string> = {
@@ -17,6 +18,18 @@ const TIPO_LABELS: Record<string, string> = {
   otro:         'Otro',
 }
 
+// Mapeo tipo de negocio → rol por defecto para el acceso
+const TIPO_TO_ROLE: Record<string, string> = {
+  dietetica:    'mayorista',
+  suplementos:  'mayorista',
+  distribuidor: 'distribuidor',
+  cafeteria:    'gastronomico',
+  restaurante:  'gastronomico',
+  gimnasio:     'mayorista',
+  almacen:      'mayorista',
+  otro:         'mayorista',
+}
+
 const ESTADO_OPTIONS: { value: EstadoSolicitud; label: string }[] = [
   { value: 'pendiente',  label: 'Pendiente'  },
   { value: 'contactado', label: 'Contactado' },
@@ -26,9 +39,10 @@ const ESTADO_OPTIONS: { value: EstadoSolicitud; label: string }[] = [
 
 interface Props {
   params: Promise<{ id: string }>
+  searchParams: Promise<{ saved?: string }>
 }
 
-export default async function AdminSolicitudDetailPage({ params }: Props) {
+export default async function AdminSolicitudDetailPage({ params, searchParams }: Props) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
@@ -37,6 +51,7 @@ export default async function AdminSolicitudDetailPage({ params }: Props) {
   if (profile?.role !== 'admin') redirect('/portal')
 
   const { id } = await params
+  const { saved } = await searchParams
 
   const solicitud = await getSolicitudById(id)
   if (!solicitud) notFound()
@@ -47,7 +62,10 @@ export default async function AdminSolicitudDetailPage({ params }: Props) {
     const notasAdmin = (formData.get('notasAdmin') as string)?.trim() || undefined
     if (!estado) return
     await updateSolicitudEstado(id, estado, notasAdmin)
+    redirect(`/portal/admin/solicitudes/${id}?saved=1`)
   }
+
+  const defaultRole = TIPO_TO_ROLE[solicitud.tipoNegocio] ?? 'mayorista'
 
   return (
     <div className="max-w-[720px]">
@@ -73,12 +91,12 @@ export default async function AdminSolicitudDetailPage({ params }: Props) {
           </p>
           <dl className="grid grid-cols-2 gap-4 max-md:grid-cols-1">
             {[
-              { label: 'Nombre',      value: solicitud.nombre },
-              { label: 'Empresa',     value: solicitud.empresa },
-              { label: 'Tipo',        value: TIPO_LABELS[solicitud.tipoNegocio] ?? solicitud.tipoNegocio },
-              { label: 'Email',       value: solicitud.email },
-              { label: 'WhatsApp',    value: solicitud.whatsapp },
-              { label: 'Ciudad',      value: `${solicitud.ciudad}, ${solicitud.provincia}` },
+              { label: 'Nombre',   value: solicitud.nombre },
+              { label: 'Empresa',  value: solicitud.empresa },
+              { label: 'Tipo',     value: TIPO_LABELS[solicitud.tipoNegocio] ?? solicitud.tipoNegocio },
+              { label: 'Email',    value: solicitud.email },
+              { label: 'WhatsApp', value: solicitud.whatsapp },
+              { label: 'Ciudad',   value: `${solicitud.ciudad}, ${solicitud.provincia}` },
               ...(solicitud.cuit ? [{ label: 'CUIT', value: solicitud.cuit }] : []),
               {
                 label: 'Fecha',
@@ -103,11 +121,18 @@ export default async function AdminSolicitudDetailPage({ params }: Props) {
         )}
       </div>
 
-      {/* Actions */}
-      <div className="bg-paper border border-ink/8 p-6">
+      {/* Estado */}
+      <div className="bg-paper border border-ink/8 p-6 mb-6">
         <p className="font-mono text-[9px] tracking-[0.15em] uppercase text-ink/40 mb-5">
           Actualizar estado
         </p>
+
+        {saved && (
+          <div className="bg-[#f0f7f0] border border-[#c6dfc7] px-4 py-3 mb-4">
+            <p className="font-mono text-[10px] tracking-[0.12em] text-[#2d6a35]">✓ Estado guardado correctamente.</p>
+          </div>
+        )}
+
         <form action={handleUpdate} className="flex flex-col gap-4">
           <div>
             <label className="font-mono text-[10px] tracking-[0.12em] uppercase text-ink/60 block mb-2">
@@ -146,8 +171,31 @@ export default async function AdminSolicitudDetailPage({ params }: Props) {
         </form>
       </div>
 
+      {/* Crear acceso al portal — solo cuando está aprobada */}
+      {solicitud.estado === 'aprobada' && (
+        <div className="bg-paper border border-[#c6dfc7] p-6 mb-6">
+          <p className="font-mono text-[9px] tracking-[0.15em] uppercase text-[#2d6a35] mb-1">
+            ── Crear acceso al portal
+          </p>
+          <p className="font-body text-[13px] text-ink/50 mb-5">
+            Revisá los datos pre-cargados, ajustá el rol y creá las credenciales para que el cliente pueda ingresar.
+          </p>
+          <SolicitudAccessForm
+            solicitudId={solicitud.id}
+            defaultEmail={solicitud.email}
+            defaultNombre={solicitud.nombre}
+            defaultEmpresa={solicitud.empresa}
+            defaultPhone={solicitud.whatsapp}
+            defaultCuit={solicitud.cuit}
+            defaultCity={solicitud.ciudad}
+            defaultProvince={solicitud.provincia}
+            defaultRole={defaultRole}
+          />
+        </div>
+      )}
+
       {/* Quick contact */}
-      <div className="mt-6 flex gap-3 flex-wrap">
+      <div className="flex gap-3 flex-wrap">
         <a
           href={`https://wa.me/${solicitud.whatsapp.replace(/\D/g, '')}`}
           target="_blank"
