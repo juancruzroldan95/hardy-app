@@ -53,12 +53,10 @@ export default function SolicitudAccessForm({
         </p>
         <div className="bg-white border border-[#c6dfc7] px-4 py-3 font-mono text-[13px] space-y-1">
           <div><span className="text-ink/40">Email:</span> <strong>{state.email}</strong></div>
-          {state.tempPassword && (
-            <div><span className="text-ink/40">Contraseña temporal:</span> <strong>{state.tempPassword}</strong></div>
-          )}
+          <div><span className="text-ink/40">Contraseña:</span> <strong>{state.tempPassword}</strong></div>
         </div>
         <p className="font-mono text-[10px] text-ink/40 mt-3">
-          Compartí estas credenciales con el cliente por WhatsApp o email. Podrá cambiar la contraseña desde su perfil.
+          Compartí estas credenciales con el cliente por WhatsApp o email.
         </p>
       </div>
     )
@@ -169,6 +167,24 @@ export default function SolicitudAccessForm({
             className="w-full bg-paper border border-ink/15 font-body text-[14px] px-4 py-3 outline-none focus:border-ink transition-colors"
           />
         </div>
+      </div>
+
+      {/* Contraseña */}
+      <div>
+        <label className="font-mono text-[10px] tracking-[0.12em] uppercase text-ink/50 block mb-2">
+          Contraseña *
+        </label>
+        <input
+          type="text"
+          name="password"
+          required
+          minLength={6}
+          placeholder="Ej: Hardy2026 o el nombre del negocio"
+          className="w-full bg-paper border border-ink/15 font-body text-[14px] px-4 py-3 outline-none focus:border-ink transition-colors"
+        />
+        <p className="font-mono text-[9px] tracking-[0.08em] text-ink/30 mt-1">
+          Mínimo 6 caracteres. Elegí algo fácil de recordar para el cliente.
+        </p>
       </div>
 
       {state && 'error' in state && (

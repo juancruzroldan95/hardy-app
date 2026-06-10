@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { createClient } from '@/services/supabase/server'
 import { getProfileByUserId } from '@/repository/queries/profile'
 import { getActivePriceOverrides } from '@/repository/queries/stock'
-import { getProducts, formatARS } from '@/consts/products'
+import { getProducts } from '@/consts/products'
 import { ROLE_LABELS } from '@/consts/roles'
 
 export default async function CatalogoPage() {
@@ -60,7 +60,7 @@ export default async function CatalogoPage() {
             ── Catálogo B2B
           </p>
           <h1 className="font-heading text-[clamp(26px,3vw,38px)] font-medium leading-[1.1] tracking-[-0.02em]">
-            Lista de precios
+            Catálogo de productos
           </h1>
         </div>
         <div className="flex items-center gap-3 flex-wrap">
@@ -82,10 +82,7 @@ export default async function CatalogoPage() {
         </div>
       </div>
       <p className="font-mono text-[10px] tracking-[0.12em] text-ink/40 uppercase mb-10">
-        Segmento: {ROLE_LABELS[role]} — Precios en ARS, sin IVA
-        {!overrideMap.size && (
-          <span className="ml-2 text-ink/30">· Precios estándar (sin configuración por rol)</span>
-        )}
+        Segmento: {ROLE_LABELS[role]} — Los precios se aplican al armar el pedido
       </p>
 
       {/* Frascos */}
@@ -118,18 +115,8 @@ export default async function CatalogoPage() {
                   </div>
                 )}
               </div>
-              <div className="text-right shrink-0">
-                <div className="font-mono text-[14px] font-medium text-ink">
-                  {p.hasOverride
-                    ? formatARS(p.b2bPrice)
-                    : <span className="text-ink/30 text-[11px]">Consultar</span>
-                  }
-                </div>
-                {p.hasOverride && p.unitsPerBox && p.line === 'frasco' && (
-                  <div className="font-mono text-[9px] text-ink/40 mt-[2px]">
-                    caja × {p.unitsPerBox} = {formatARS(p.b2bPrice * p.unitsPerBox)}
-                  </div>
-                )}
+              <div className="font-mono text-[10px] tracking-[0.1em] text-ink/30 group-hover:text-ink/50 transition-colors shrink-0">
+                Ver →
               </div>
             </Link>
           ))}
@@ -167,13 +154,8 @@ export default async function CatalogoPage() {
                     </div>
                   )}
                 </div>
-                <div className="text-right shrink-0">
-                  <div className="font-mono text-[14px] font-medium text-ink">
-                    {p.hasOverride
-                      ? formatARS(p.b2bPrice)
-                      : <span className="text-ink/30 text-[11px]">Consultar</span>
-                    }
-                  </div>
+                <div className="font-mono text-[10px] tracking-[0.1em] text-ink/30 group-hover:text-ink/50 transition-colors shrink-0">
+                  Ver →
                 </div>
               </Link>
             ))}

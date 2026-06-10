@@ -162,10 +162,10 @@ const SHIPPING_OPTIONS = [
 ] as const
 
 const PAYMENT_OPTIONS = [
-  { value: 'mercadopago',     label: 'Tarjeta / Mercado Pago', sub: 'Pagá ahora con tarjeta de crédito, débito o saldo MP', showBank: false },
-  { value: 'transferencia',   label: 'Transferencia bancaria', sub: '50% anticipado + 50% contra entrega',   showBank: true  },
-  { value: 'deposito_bancario', label: 'Depósito bancario',   sub: '50% anticipado + 50% contra entrega',   showBank: true  },
-  { value: 'echeq_30',        label: 'E-CHEQ 30 días',        sub: 'Liberamos mercadería al recibir el E-CHEQ', showBank: true },
+  { value: 'mercadopago',      label: 'Tarjeta / Mercado Pago', sub: 'Pagá ahora con tarjeta de crédito, débito o saldo MP', showBank: false },
+  { value: 'transferencia',    label: 'Transferencia bancaria', sub: '50% anticipado + 50% contra entrega',      showBank: true },
+  { value: 'deposito_bancario', label: 'Depósito bancario',    sub: '50% anticipado + 50% contra entrega',      showBank: true },
+  { value: 'echeq_30',         label: 'E-CHEQ 30 días',       sub: 'Liberamos mercadería al recibir el E-CHEQ', showBank: true },
 ] as const
 
 const BANK_PAYMENT_VALUES = new Set(['transferencia', 'deposito_bancario', 'echeq_30'])
