@@ -19,7 +19,7 @@ export const RECETAS: Receta[] = [
     porciones: '20 unidades',
     dificultad: 'Medio',
     categoria: 'Entreno',
-    imagen: '/lifestyle/recetas/receta-13.png',
+    imagen: '/lifestyle/recetas/receta-alfajores-mani.png',
     productos: ['Crema de Maní Natural 380g', 'Miel Líquida 500g'],
     ingredientes: [
       '200 g de Crema de Maní Natural HARDY',
