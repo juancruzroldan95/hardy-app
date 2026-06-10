@@ -95,30 +95,36 @@ export default function HomePage() {
 
       {/* ── 1. HERO (B2B primario) ─────────────────────────────────── */}
       {/* §4.2 — nuevo eyebrow/copy/CTAs, sin "+500" aquí */}
-      <section
-        className="relative min-h-screen w-full flex items-center overflow-hidden text-paper [background-image:url('/lifestyle/hero-coleccion-dark.jpg')] [background-size:cover] [background-position:right_center] max-md:[background-position:55%_center]"
-      >
-        {/* En mobile, overlay cubre más para garantizar legibilidad con fondo centrado */}
-        <div
-          className="absolute inset-0 z-[1]"
-          style={{
-            background:
-              'linear-gradient(to right, rgba(10,10,10,0.85) 0%, rgba(10,10,10,0.65) 40%, rgba(10,10,10,0.30) 70%, rgba(10,10,10,0.10) 100%)',
-          }}
-        />
-        <div className="relative z-[2] px-16 max-w-[720px] max-md:px-6 max-md:py-24">
+      <section className="hero-section relative min-h-screen w-full flex items-center overflow-hidden text-paper">
+        <style>{`
+          .hero-section {
+            background-image: url('/lifestyle/hero-coleccion-dark.jpg');
+            background-size: cover;
+            background-position: right center;
+          }
+          @media (max-width: 767px) {
+            .hero-section {
+              background-image: url('/lifestyle/tienda-hero-natural-miel-mobile.png');
+              background-position: center bottom;
+            }
+          }
+        `}</style>
+        {/* Overlay: izquierda→derecha en desktop, arriba→abajo en mobile con fondo claro */}
+        <div className="absolute inset-0 z-[1] max-md:hidden" style={{ background: 'linear-gradient(to right, rgba(10,10,10,0.85) 0%, rgba(10,10,10,0.65) 40%, rgba(10,10,10,0.30) 70%, rgba(10,10,10,0.10) 100%)' }} />
+        <div className="absolute inset-0 z-[1] hidden max-md:block" style={{ background: 'linear-gradient(to bottom, rgba(240,230,215,0.92) 0%, rgba(240,230,215,0.80) 40%, rgba(240,230,215,0.20) 70%, rgba(240,230,215,0.0) 100%)' }} />
+        <div className="relative z-[2] px-16 max-w-[720px] max-md:px-6 max-md:pt-16 max-md:pb-8 max-md:self-start max-md:w-full">
           <p className="font-mono text-[11px] tracking-[0.25em] text-red uppercase mb-7 max-md:text-[10px] max-md:tracking-[0.15em] max-md:mb-5">
             ── MANÍ Y MIEL PURA · HECHO EN ARGENTINA
           </p>
           <h1
-            className="font-heading font-medium tracking-[-0.02em] m-0 text-paper"
+            className="font-heading font-medium tracking-[-0.02em] m-0 text-paper max-md:text-ink"
             style={{ fontSize: 'clamp(48px, 8vw, 112px)', lineHeight: 0.92 }}
           >
             Alimentá tu
             <br />
             <em className="not-italic text-red">instinto.</em>
           </h1>
-          <p className="mt-8 text-[17px] leading-[1.6] max-w-[480px] text-[#d0d0d0] font-light max-md:mt-5 max-md:text-[15px]">
+          <p className="mt-8 text-[17px] leading-[1.6] max-w-[480px] text-[#d0d0d0] font-light max-md:mt-5 max-md:text-[15px] max-md:text-ink/70">
             Crema de maní y miel 100% naturales. Un solo ingrediente, sin aditivos. Hecha en Argentina.
           </p>
           <div className="mt-9 flex gap-3 max-md:flex-col max-md:mt-7">
@@ -130,7 +136,7 @@ export default function HomePage() {
             </Link>
             <Link
               href="/tienda"
-              className="text-paper font-mono text-[12px] tracking-[0.15em] uppercase px-8 py-[18px] border border-white/30 text-center max-md:w-full"
+              className="text-paper font-mono text-[12px] tracking-[0.15em] uppercase px-8 py-[18px] border border-white/30 text-center max-md:w-full max-md:text-ink max-md:border-ink/30"
               style={{ background: 'rgba(255,255,255,0.08)' }}
             >
               VER PRODUCTOS →
