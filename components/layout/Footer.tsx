@@ -1,4 +1,7 @@
+'use client'
+
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { MessageCircle } from 'lucide-react'
 import { WA_NUMBER } from '@/consts/products'
 import NewsletterForm from '@/components/layout/NewsletterForm'
@@ -40,6 +43,15 @@ const columns: { title: string; links: FooterLink[] }[] = [
 ]
 
 export default function Footer() {
+  const pathname = usePathname()
+
+  function handleInternalLink(e: React.MouseEvent<HTMLAnchorElement>, href: string) {
+    if (pathname === href) {
+      e.preventDefault()
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+  }
+
   return (
     <>
       <footer className="bg-[#111] text-paper pt-20 pb-[30px] px-10 max-md:px-5 max-md:pt-12 max-md:pb-6">
@@ -80,6 +92,7 @@ export default function Footer() {
                     <Link
                       key={l.label}
                       href={l.href}
+                      onClick={(e) => handleInternalLink(e, l.href)}
                       className="block text-[#bbb] text-[14px] mb-[10px] hover:text-paper transition-colors no-underline"
                     >
                       {l.label}
