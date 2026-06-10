@@ -147,11 +147,11 @@ export default async function TiendaPage() {
 
       {/* Banda editorial — Crunchy */}
       <section className="bg-ink">
-        <div className="max-w-[1240px] mx-auto grid grid-cols-2 items-stretch max-md:grid-cols-1">
+        <div className="max-w-[1240px] mx-auto grid grid-cols-2 items-stretch max-md:grid-cols-1 md:[&>*:first-child]:order-2 md:[&>*:last-child]:order-1">
           <div className="relative aspect-[3/2] max-md:aspect-[16/10] overflow-hidden">
             <Image
-              src="/lifestyle/producto-crunchy-textura.png"
-              alt="Crema de maní Crunchy con trozos de maní real"
+              src="/lifestyle/tienda-crunchy-block.png"
+              alt="Crema de maní HARDY Crunchy untada en tostada — textura con trozos visibles de maní"
               fill
               className="object-cover"
               sizes="(max-width: 900px) 100vw, 50vw"
