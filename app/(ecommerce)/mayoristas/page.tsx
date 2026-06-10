@@ -4,6 +4,7 @@ import { MessageCircle } from 'lucide-react'
 import { WA_NUMBER, ESCALAS } from '@/consts/products'
 import SolicitudForm from '@/components/mayoristas/SolicitudForm'
 import WhatsAppLink from '@/components/analytics/WhatsAppLink'
+import RevealSection from '@/components/ui/RevealSection'
 
 export const metadata: Metadata = {
   title: 'Mayoristas — Hardy',
@@ -72,18 +73,19 @@ export default function MayoristasPage() {
       {/* QUÉ VENDÉS */}
       <section className="py-16 px-10 bg-paper-2 max-md:px-6">
         <div className="max-w-[1100px] mx-auto">
-          <p className="font-mono text-[11px] tracking-[0.25em] text-red uppercase mb-6">── Qué vendés</p>
+          <RevealSection>
+            <p className="font-mono text-[11px] tracking-[0.25em] text-red uppercase mb-6">── Qué vendés</p>
+          </RevealSection>
           <div className="grid grid-cols-2 gap-[2px] max-md:grid-cols-1">
             {PRODUCTOS.map((p, i) => (
-              <div
-                key={i}
-                className="group bg-paper-2 hover:bg-ink transition-colors border-t-[3px] border-transparent hover:border-red p-8 cursor-default"
-              >
-                <p className="font-mono text-[10px] text-red tracking-[0.2em] uppercase mb-[10px]">{p.tag}</p>
-                <h3 className="font-heading text-[26px] font-medium m-0 mb-3 group-hover:text-paper transition-colors">{p.title}</h3>
-                <p className="text-[13px] text-[#555] group-hover:text-[#bbb] leading-[1.6] m-0 mb-4 transition-colors">{p.desc}</p>
-                <p className="font-mono text-[10px] text-[#999] group-hover:text-[#888] tracking-[0.15em] uppercase transition-colors">{p.sub}</p>
-              </div>
+              <RevealSection key={i} delay={i * 100}>
+                <div className="group bg-paper-2 hover:bg-ink transition-colors border-t-[3px] border-transparent hover:border-red p-8 cursor-default">
+                  <p className="font-mono text-[10px] text-red tracking-[0.2em] uppercase mb-[10px]">{p.tag}</p>
+                  <h3 className="font-heading text-[26px] font-medium m-0 mb-3 group-hover:text-paper transition-colors">{p.title}</h3>
+                  <p className="text-[13px] text-[#555] group-hover:text-[#bbb] leading-[1.6] m-0 mb-4 transition-colors">{p.desc}</p>
+                  <p className="font-mono text-[10px] text-[#999] group-hover:text-[#888] tracking-[0.15em] uppercase transition-colors">{p.sub}</p>
+                </div>
+              </RevealSection>
             ))}
           </div>
         </div>
@@ -92,42 +94,43 @@ export default function MayoristasPage() {
       {/* ESCALAS */}
       <section className="py-16 px-10 bg-paper max-md:px-6">
         <div className="max-w-[1100px] mx-auto">
-          <div className="flex justify-between items-baseline mb-8 flex-wrap gap-3">
-            <div>
-              <p className="font-mono text-[11px] tracking-[0.25em] uppercase text-red mb-2">── Escalas</p>
-              <h2
-                className="font-heading font-medium m-0"
-                style={{ fontSize: 'clamp(24px,4vw,36px)' }}
-              >
-                Precios por volumen
-              </h2>
+          <RevealSection>
+            <div className="flex justify-between items-baseline mb-8 flex-wrap gap-3">
+              <div>
+                <p className="font-mono text-[11px] tracking-[0.25em] uppercase text-red mb-2">── Escalas</p>
+                <h2
+                  className="font-heading font-medium m-0"
+                  style={{ fontSize: 'clamp(24px,4vw,36px)' }}
+                >
+                  Precios por volumen
+                </h2>
+              </div>
+              <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#999]">1 caja = 15 unidades</span>
             </div>
-            <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#999]">1 caja = 15 unidades</span>
-          </div>
+          </RevealSection>
           <div className="grid grid-cols-4 gap-[2px] max-md:grid-cols-2">
             {ESCALAS.map((s, i) => (
-              <div
-                key={i}
-                className="group bg-paper-2 hover:bg-ink transition-colors border-t-[3px] border-transparent hover:border-red px-5 py-7 text-center cursor-default"
-              >
-                <p className="font-mono text-[9px] tracking-[0.2em] uppercase text-[#999] group-hover:text-red mb-[10px] transition-colors">Desde</p>
-                <p className="font-heading text-[32px] font-medium leading-none mb-1 group-hover:text-paper transition-colors">{s.big}</p>
-                <p className="font-mono text-[10px] text-[#888] mb-4 group-hover:text-[#bbb] transition-colors">{s.sub}</p>
-                <div className="w-6 h-[2px] bg-ink/30 group-hover:bg-red mx-auto mb-[14px] transition-colors" />
-                <p className="font-heading text-[15px] font-medium group-hover:text-paper transition-colors">{s.name}</p>
-                <p className="text-[11px] text-[#777] mt-1 leading-[1.4] group-hover:text-[#bbb] transition-colors">{s.target}</p>
-              </div>
+              <RevealSection key={i} delay={i * 80}>
+                <div className="group bg-paper-2 hover:bg-ink transition-colors border-t-[3px] border-transparent hover:border-red px-5 py-7 text-center cursor-default">
+                  <p className="font-mono text-[9px] tracking-[0.2em] uppercase text-[#999] group-hover:text-red mb-[10px] transition-colors">Desde</p>
+                  <p className="font-heading text-[32px] font-medium leading-none mb-1 group-hover:text-paper transition-colors">{s.big}</p>
+                  <p className="font-mono text-[10px] text-[#888] mb-4 group-hover:text-[#bbb] transition-colors">{s.sub}</p>
+                  <div className="w-6 h-[2px] bg-ink/30 group-hover:bg-red mx-auto mb-[14px] transition-colors" />
+                  <p className="font-heading text-[15px] font-medium group-hover:text-paper transition-colors">{s.name}</p>
+                  <p className="text-[11px] text-[#777] mt-1 leading-[1.4] group-hover:text-[#bbb] transition-colors">{s.target}</p>
+                </div>
+              </RevealSection>
             ))}
           </div>
-          <div className="mt-1 px-5 py-4 bg-paper-2 text-[13px] text-[#555] text-center leading-[1.5]">
+          <RevealSection delay={120} className="mt-1 px-5 py-4 bg-paper-2 text-[13px] text-[#555] text-center leading-[1.5]">
             <em>Más volumen = mejor precio por unidad. ¿Movés mucho? <strong className="text-ink">Hablemos.</strong></em>
-          </div>
+          </RevealSection>
         </div>
       </section>
 
       {/* PRECIO CONGELADO */}
       <section className="py-16 px-10 bg-ink text-paper max-md:px-6">
-        <div className="max-w-[1100px] mx-auto">
+        <RevealSection className="max-w-[1100px] mx-auto">
           <p className="font-mono text-[11px] tracking-[0.25em] text-red uppercase mb-4">── Previsibilidad</p>
           <h2
             className="font-heading font-medium m-0 mb-4 leading-[1.1]"
@@ -139,7 +142,7 @@ export default function MayoristasPage() {
             Arrancás con un precio fijo durante tres meses. Al cierre del período, ajustamos según tu
             volumen con un descuento atado a inflación. Sin sorpresas. Sin renegociar cada semana.
           </p>
-        </div>
+        </RevealSection>
       </section>
 
       {/* DISTRIBUIDORES */}

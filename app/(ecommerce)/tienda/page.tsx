@@ -9,6 +9,7 @@ import { db } from '@/db'
 import { productReviews } from '@/db/schema'
 import ProductCard from '@/components/store/ProductCard'
 import type { ProductRating } from '@/components/store/ProductCard'
+import RevealSection from '@/components/ui/RevealSection'
 
 export const metadata: Metadata = {
   title: 'Tienda',
@@ -85,19 +86,21 @@ export default async function TiendaPage() {
         <div className="max-w-[1100px] mx-auto">
 
           {/* Frascos */}
-          <div className="mb-5">
+          <RevealSection className="mb-5">
             <div className="font-mono text-[10px] tracking-[0.2em] uppercase text-red mb-1">── Frascos</div>
             <p className="text-[13px] text-[#888] m-0">Crema de maní y miel · 380g–500g · Por unidad</p>
-          </div>
+          </RevealSection>
           <div className="grid grid-cols-4 gap-[2px] mb-[2px] max-md:grid-cols-2">
-            {frascos.map((p) => (
-              <ProductCard key={p.id} product={p} rating={ratingByProduct.get(p.id)} />
+            {frascos.map((p, i) => (
+              <RevealSection key={p.id} delay={i * 80}>
+                <ProductCard product={p} rating={ratingByProduct.get(p.id)} />
+              </RevealSection>
             ))}
           </div>
 
           {/* Baldes a granel — viven en /a-granel con "Consultar precio".
               Ver correcciones web HARDY P1.2: la tienda pública queda solo con frascos. */}
-          <div className="mt-10 border border-ink/10 bg-paper-2 px-6 py-7 flex items-center justify-between gap-6 max-md:flex-col max-md:items-start">
+          <RevealSection delay={120} className="mt-10 border border-ink/10 bg-paper-2 px-6 py-7 flex items-center justify-between gap-6 max-md:flex-col max-md:items-start">
             <div>
               <div className="font-mono text-[10px] tracking-[0.2em] uppercase text-red mb-1">── A Granel · Baldes</div>
               <p className="text-[14px] text-ink m-0 max-w-[520px] leading-[1.6]">
@@ -110,7 +113,7 @@ export default async function TiendaPage() {
             >
               Ver a granel →
             </Link>
-          </div>
+          </RevealSection>
 
         </div>
       </section>
@@ -175,41 +178,31 @@ export default async function TiendaPage() {
       {/* Texturas reales */}
       <section className="bg-paper-2 py-[60px] px-10 max-md:px-5 max-md:py-12">
         <div className="max-w-[1100px] mx-auto">
-          <p className="font-mono text-[11px] tracking-[0.25em] text-red uppercase mb-4">── Textura real</p>
-          <h2
-            className="font-heading font-medium tracking-[-0.02em] m-0 mb-8 leading-[1.1]"
-            style={{ fontSize: 'clamp(28px,4vw,44px)' }}
-          >
-            Se nota lo que <em className="not-italic text-red">no</em> tiene.
-          </h2>
+          <RevealSection>
+            <p className="font-mono text-[11px] tracking-[0.25em] text-red uppercase mb-4">── Textura real</p>
+            <h2
+              className="font-heading font-medium tracking-[-0.02em] m-0 mb-8 leading-[1.1]"
+              style={{ fontSize: 'clamp(28px,4vw,44px)' }}
+            >
+              Se nota lo que <em className="not-italic text-red">no</em> tiene.
+            </h2>
+          </RevealSection>
           <div className="grid grid-cols-3 gap-[2px] max-md:grid-cols-1">
-            <div className="relative aspect-square overflow-hidden">
-              <Image
-                src="/lifestyle/tienda-textura-natural.png"
-                alt="Crema de maní HARDY Natural — frasco abierto con cuchara"
-                fill
-                className="object-cover"
-                sizes="(max-width: 900px) 100vw, 33vw"
-              />
-            </div>
-            <div className="relative aspect-square overflow-hidden">
-              <Image
-                src="/lifestyle/tienda-textura-crunchy.png"
-                alt="Crema de maní HARDY Crunchy — untada en tostada de pan integral"
-                fill
-                className="object-cover"
-                sizes="(max-width: 900px) 100vw, 33vw"
-              />
-            </div>
-            <div className="relative aspect-square overflow-hidden">
-              <Image
-                src="/lifestyle/tienda-textura-miel.png"
-                alt="Miel líquida HARDY — chorreado de miel desde cucharón de madera"
-                fill
-                className="object-cover"
-                sizes="(max-width: 900px) 100vw, 33vw"
-              />
-            </div>
+            {[
+              { src: '/lifestyle/tienda-textura-natural.png', alt: 'Crema de maní HARDY Natural — frasco abierto con cuchara' },
+              { src: '/lifestyle/tienda-textura-crunchy.png', alt: 'Crema de maní HARDY Crunchy — untada en tostada de pan integral' },
+              { src: '/lifestyle/tienda-textura-miel.png', alt: 'Miel líquida HARDY — chorreado de miel desde cucharón de madera' },
+            ].map((img, i) => (
+              <RevealSection key={img.src} delay={i * 100} className="relative aspect-square overflow-hidden">
+                <Image
+                  src={img.src}
+                  alt={img.alt}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 900px) 100vw, 33vw"
+                />
+              </RevealSection>
+            ))}
           </div>
         </div>
       </section>
