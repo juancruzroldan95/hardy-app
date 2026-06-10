@@ -2,6 +2,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import type { Metadata } from 'next'
 import WhatsAppLink from '@/components/analytics/WhatsAppLink'
+import RevealSection from '@/components/ui/RevealSection'
 
 export const metadata: Metadata = {
   title: 'Nuestra historia · Hardy',
@@ -93,7 +94,7 @@ export default function NosotrosPage() {
       {/* §1.5 — Producto en contexto */}
       <section className="bg-paper-2">
         <div className="max-w-[1100px] mx-auto grid grid-cols-2 max-md:grid-cols-1">
-          <div className="relative aspect-square overflow-hidden bg-[#e8e4de]">
+          <RevealSection className="relative aspect-square overflow-hidden bg-[#e8e4de]">
             <Image
               src="/lifestyle/nosotros-fundador.png"
               alt="Fundador de Hardy en su taller"
@@ -101,8 +102,8 @@ export default function NosotrosPage() {
               className="object-cover"
               sizes="(max-width: 900px) 100vw, 50vw"
             />
-          </div>
-          <div className="bg-ink text-paper flex flex-col justify-center px-12 py-16 max-md:px-8 max-md:py-10">
+          </RevealSection>
+          <RevealSection delay={120} className="bg-ink text-paper flex flex-col justify-center px-12 py-16 max-md:px-8 max-md:py-10">
             <p className="font-mono text-[11px] tracking-[0.25em] text-red uppercase mb-4">── La idea</p>
             <p className="font-heading text-[clamp(22px,3vw,34px)] font-medium leading-[1.2] tracking-[-0.02em] text-paper mb-4">
               Un frasco con un solo ingrediente puede cambiar lo que desayunás.
@@ -110,26 +111,27 @@ export default function NosotrosPage() {
             <p className="font-body text-[14px] text-paper/60 leading-[1.7]">
               Eso fue todo lo que necesitamos para arrancar en 2015. La misma idea sigue siendo la misma hoy.
             </p>
-          </div>
+          </RevealSection>
         </div>
       </section>
 
       {/* §2 — TIMELINE */}
       <section className="bg-paper px-6 py-20 md:py-28">
         <div className="max-w-3xl mx-auto">
-          <p className="font-mono text-[11px] tracking-[0.25em] text-red uppercase mb-12">
-            ── Desde el principio
-          </p>
+          <RevealSection>
+            <p className="font-mono text-[11px] tracking-[0.25em] text-red uppercase mb-12">
+              ── Desde el principio
+            </p>
+          </RevealSection>
           <div className="relative pl-8 border-l-2 border-red flex flex-col gap-10">
-            {TIMELINE.map(({ year, desc }) => (
-              <div key={year} className="relative">
-                {/* dot */}
+            {TIMELINE.map(({ year, desc }, i) => (
+              <RevealSection key={year} delay={i * 80} className="relative">
                 <span className="absolute -left-[41px] top-[3px] w-3 h-3 rounded-full bg-red" />
                 <p className="font-mono text-[11px] tracking-[0.2em] text-red uppercase mb-2">
                   {year}
                 </p>
                 <p className="font-body text-ink text-base leading-relaxed">{desc}</p>
-              </div>
+              </RevealSection>
             ))}
           </div>
         </div>
@@ -138,20 +140,22 @@ export default function NosotrosPage() {
       {/* §3 — VALORES */}
       <section className="bg-paper-2 px-6 py-20 md:py-28">
         <div className="max-w-5xl mx-auto">
-          <p className="font-mono text-[11px] tracking-[0.25em] text-red uppercase mb-4">
-            ── Lo que nos define
-          </p>
-          <h2 className="font-heading text-[clamp(28px,4vw,44px)] font-medium leading-[1.1] tracking-[-0.02em] text-ink mb-14">
-            Principios que no negociamos.
-          </h2>
+          <RevealSection>
+            <p className="font-mono text-[11px] tracking-[0.25em] text-red uppercase mb-4">
+              ── Lo que nos define
+            </p>
+            <h2 className="font-heading text-[clamp(28px,4vw,44px)] font-medium leading-[1.1] tracking-[-0.02em] text-ink mb-14">
+              Principios que no negociamos.
+            </h2>
+          </RevealSection>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {VALORES.map(({ title, desc }) => (
-              <div key={title} className="border-t-2 border-ink pt-6">
+            {VALORES.map(({ title, desc }, i) => (
+              <RevealSection key={title} delay={i * 100} className="border-t-2 border-ink pt-6">
                 <h3 className="font-heading text-[22px] font-medium text-ink mb-3">
                   {title}
                 </h3>
                 <p className="font-body text-ink/70 text-base leading-relaxed">{desc}</p>
-              </div>
+              </RevealSection>
             ))}
           </div>
         </div>
@@ -161,23 +165,23 @@ export default function NosotrosPage() {
       <section className="bg-ink text-paper px-6 py-20 md:py-28">
         <div className="max-w-5xl mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-4">
-            {STATS.map(({ num, label }) => (
-              <div key={label} className="flex flex-col gap-2">
+            {STATS.map(({ num, label }, i) => (
+              <RevealSection key={label} delay={i * 80} className="flex flex-col gap-2">
                 <span className="font-display text-[clamp(36px,5vw,60px)] leading-none text-red">
                   {num}
                 </span>
                 <span className="font-mono text-[11px] tracking-[0.2em] text-paper/60 uppercase">
                   {label}
                 </span>
-              </div>
+              </RevealSection>
             ))}
           </div>
           <div className="mt-16 grid grid-cols-2 gap-[2px] max-md:grid-cols-1">
             {[
               { src: '/lifestyle/proceso-molino.png', alt: 'Proceso de elaboración Hardy' },
               { src: '/lifestyle/mani-crudo.png', alt: 'Maní seleccionado de Córdoba' },
-            ].map((img) => (
-              <div key={img.src} className="relative aspect-[16/10] bg-[#1a1a1a] overflow-hidden">
+            ].map((img, i) => (
+              <RevealSection key={img.src} delay={i * 100} className="relative aspect-[16/10] bg-[#1a1a1a] overflow-hidden">
                 <Image
                   src={img.src}
                   alt={img.alt}
@@ -185,7 +189,7 @@ export default function NosotrosPage() {
                   className="object-cover"
                   sizes="(max-width: 900px) 100vw, 50vw"
                 />
-              </div>
+              </RevealSection>
             ))}
           </div>
         </div>
@@ -193,7 +197,7 @@ export default function NosotrosPage() {
 
       {/* §5 — CTA */}
       <section className="bg-red text-paper px-6 py-20 md:py-28">
-        <div className="max-w-3xl mx-auto">
+        <RevealSection className="max-w-3xl mx-auto">
           <h2 className="font-heading text-[clamp(28px,4vw,48px)] font-medium leading-[1.1] tracking-[-0.02em] mb-4">
             ¿Querés trabajar con nosotros?
           </h2>
@@ -207,7 +211,7 @@ export default function NosotrosPage() {
           >
             Escribinos por WhatsApp →
           </WhatsAppLink>
-        </div>
+        </RevealSection>
       </section>
     </main>
   )
