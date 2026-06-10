@@ -69,49 +69,26 @@ export default function DondeComprarPage() {
           {CARDS.map((c) => (
             <div
               key={c.title}
-              className={`group transition-colors border-t-[3px] flex flex-col px-7 py-8 ${
-                c.primary
-                  ? 'bg-ink text-paper border-red'
-                  : 'bg-paper-2 hover:bg-ink border-transparent hover:border-red'
-              }`}
+              className="group transition-colors border-t-[3px] flex flex-col px-7 py-8 bg-paper-2 hover:bg-ink border-transparent hover:border-red"
             >
-              <c.Icon
-                size={24}
-                className={`mb-5 ${c.primary ? 'text-red' : 'text-red'}`}
-              />
-              <h2
-                className={`font-heading text-[22px] font-medium leading-[1.15] m-0 mb-3 transition-colors ${
-                  c.primary ? 'text-paper' : 'group-hover:text-paper'
-                }`}
-              >
+              <c.Icon size={24} className="mb-5 text-red" />
+              <h2 className="font-heading text-[22px] font-medium leading-[1.15] m-0 mb-3 transition-colors group-hover:text-paper">
                 {c.title}
               </h2>
-              <p
-                className={`font-body text-[14px] leading-[1.6] m-0 mb-7 flex-1 transition-colors ${
-                  c.primary ? 'text-paper/60' : 'text-[#666] group-hover:text-[#aaa]'
-                }`}
-              >
+              <p className="font-body text-[14px] leading-[1.6] m-0 mb-7 flex-1 transition-colors text-[#666] group-hover:text-[#aaa]">
                 {c.desc}
               </p>
               {c.external ? (
                 <WhatsAppLink
                   href={c.href}
-                  className={`inline-block self-start font-mono text-[11px] tracking-[0.15em] uppercase px-5 py-[11px] transition-colors ${
-                    c.primary
-                      ? 'bg-red text-paper hover:opacity-90'
-                      : 'border border-red text-red group-hover:bg-red group-hover:text-paper'
-                  }`}
+                  className="inline-block self-start font-mono text-[11px] tracking-[0.15em] uppercase px-5 py-[11px] transition-colors border border-red text-red group-hover:bg-red group-hover:text-paper"
                 >
                   {c.cta}
                 </WhatsAppLink>
               ) : (
                 <Link
                   href={c.href}
-                  className={`inline-block self-start font-mono text-[11px] tracking-[0.15em] uppercase px-5 py-[11px] transition-colors ${
-                    c.primary
-                      ? 'bg-red text-paper hover:opacity-90'
-                      : 'border border-red text-red group-hover:bg-red group-hover:text-paper'
-                  }`}
+                  className="inline-block self-start font-mono text-[11px] tracking-[0.15em] uppercase px-5 py-[11px] transition-colors border border-red text-red group-hover:bg-red group-hover:text-paper"
                 >
                   {c.cta}
                 </Link>
