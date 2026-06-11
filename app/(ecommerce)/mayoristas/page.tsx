@@ -5,6 +5,7 @@ import { WA_NUMBER, ESCALAS } from '@/consts/products'
 import SolicitudForm from '@/components/mayoristas/SolicitudForm'
 import WhatsAppLink from '@/components/analytics/WhatsAppLink'
 import RevealSection from '@/components/ui/RevealSection'
+import ContactForm from '@/components/store/ContactForm'
 
 export const metadata: Metadata = {
   title: 'Mayoristas — Hardy',
@@ -128,21 +129,25 @@ export default function MayoristasPage() {
         </div>
       </section>
 
-      {/* PRECIO CONGELADO */}
-      <section className="py-16 px-10 bg-ink text-paper max-md:px-6">
-        <RevealSection className="max-w-[1100px] mx-auto">
-          <p className="font-mono text-[11px] tracking-[0.25em] text-red uppercase mb-4">── Previsibilidad</p>
-          <h2
-            className="font-heading font-medium m-0 mb-4 leading-[1.1]"
-            style={{ fontSize: 'clamp(26px,4vw,40px)' }}
-          >
-            Precio congelado <em className="not-italic text-red">90 días.</em>
-          </h2>
-          <p className="text-[15px] text-[#bbb] max-w-[620px] leading-[1.7]">
-            Arrancás con un precio fijo durante tres meses. Al cierre del período, ajustamos según tu
-            volumen con un descuento atado a inflación. Sin sorpresas. Sin renegociar cada semana.
-          </p>
-        </RevealSection>
+      {/* RESEÑAS Y CONSULTAS */}
+      <section className="py-20 px-10 bg-paper max-md:px-6">
+        <div className="max-w-[1100px] mx-auto grid grid-cols-2 gap-16 items-start max-md:grid-cols-1 max-md:gap-8">
+          <RevealSection>
+            <p className="font-mono text-[11px] tracking-[0.25em] text-red uppercase mb-4">── Tu opinión importa</p>
+            <h2
+              className="font-heading font-medium m-0 mb-4 leading-[1.1] tracking-[-0.02em]"
+              style={{ fontSize: 'clamp(26px,4vw,40px)' }}
+            >
+              Dejanos tu reseña <em className="not-italic text-red">o consulta.</em>
+            </h2>
+            <p className="font-body text-[15px] text-ink/55 leading-[1.7] max-w-[420px]">
+              ¿Tenés una pregunta sobre nuestros productos o querés contarnos tu experiencia? Nos llega directo y te respondemos.
+            </p>
+          </RevealSection>
+          <RevealSection delay={80}>
+            <ContactForm />
+          </RevealSection>
+        </div>
       </section>
       {/* DISTRIBUIDORES */}
       <section className="py-16 px-10 bg-paper-2 max-md:px-6">

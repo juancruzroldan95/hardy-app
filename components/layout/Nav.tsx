@@ -72,7 +72,8 @@ export default function Nav({ cartCount = 0, onCartOpen }: NavProps) {
                     <ChevronDown size={10} className={`transition-transform duration-200 ${tiendaOpen ? 'rotate-180' : ''}`} />
                   </Link>
                   {tiendaOpen && (
-                    <div className="absolute top-[calc(100%+12px)] left-1/2 -translate-x-1/2 bg-ink border border-[#333] py-2 min-w-[180px] z-50 shadow-[0_8px_24px_rgba(0,0,0,0.4)]">
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 pt-3 z-50">
+                    <div className="bg-ink border border-[#333] py-2 min-w-[180px] shadow-[0_8px_24px_rgba(0,0,0,0.4)]">
                       {tiendaDropdown.map((d) => (
                         <Link
                           key={d.href}
@@ -84,6 +85,7 @@ export default function Nav({ cartCount = 0, onCartOpen }: NavProps) {
                           {d.label}
                         </Link>
                       ))}
+                    </div>
                     </div>
                   )}
                 </div>

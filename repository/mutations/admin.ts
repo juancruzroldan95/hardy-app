@@ -562,6 +562,54 @@ export async function deleteClient(profileId: string) {
   revalidatePath('/portal/admin/clientes')
 }
 
+// ─── Update Client Notes (FormData-based, avoids closure serialization) ──────
+
+export async function updateClientNotesAction(formData: FormData) {
+  await getAdminUser()
+  const profileId = (formData.get('profileId') as string)?.trim()
+  const notes     = (formData.get('notes')     as string) ?? ''
+  if (!profileId) return
+  await db.update(profiles)
+    .set({ notes: notes.trim() || null, updatedAt: new Date() })
+    .where(eq(profiles.id, profileId))
+  revalidatePath('/portal/admin/clientes')
+}
+
+// ─── Update Client Email (Admin) ──────────────────────────────────────────────
+
+export type AdminAuthState = { success: true } | { error: string } | undefined
+
+export async function updateClientEmailAdmin(_prev: AdminAuthState, formData: FormData): Promise<AdminAuthState> {
+  await getAdminUser()
+  const userId = (formData.get('userId') as string)?.trim()
+  const email  = (formData.get('email')  as string)?.trim().toLowerCase()
+  if (!userId) return { error: 'Falta el ID de usuario.' }
+  if (!email)  return { error: 'El email es requerido.' }
+
+  const adminClient = createAdminClient()
+  const { error } = await adminClient.auth.admin.updateUserById(userId, { email })
+  if (error) return { error: `Error al actualizar email: ${error.message}` }
+
+  revalidatePath('/portal/admin/clientes')
+  return { success: true }
+}
+
+// ─── Update Client Password (Admin) ──────────────────────────────────────────
+
+export async function updateClientPasswordAdmin(_prev: AdminAuthState, formData: FormData): Promise<AdminAuthState> {
+  await getAdminUser()
+  const userId   = (formData.get('userId')   as string)?.trim()
+  const password = (formData.get('password') as string)?.trim()
+  if (!userId) return { error: 'Falta el ID de usuario.' }
+  if (!password || password.length < 6) return { error: 'La contraseña debe tener al menos 6 caracteres.' }
+
+  const adminClient = createAdminClient()
+  const { error } = await adminClient.auth.admin.updateUserById(userId, { password })
+  if (error) return { error: `Error al actualizar contraseña: ${error.message}` }
+
+  return { success: true }
+}
+
 // ─── Update Alert Scheduled Date ─────────────────────────────────────────────
 
 export async function updateAlertScheduledDate(alertId: string, scheduledFor: string | null) {

@@ -9,10 +9,11 @@ import {
   createClientAlert,
   resolveClientAlert,
   deleteClientAlert,
-  updateClientNotes,
+  updateClientNotesAction,
   updateClientRole,
   deleteClient,
 } from '@/repository/mutations/admin'
+import DeleteButton from '@/components/portal/DeleteButton'
 
 const ALERT_TIPO_LABELS = {
   reorder:    'Recompra',
@@ -385,14 +386,13 @@ export default async function AdminClientesPage({ searchParams }: Props) {
                                 ✓ Resolver
                               </button>
                             </form>
-                            <form action={async () => { 'use server'; await deleteClientAlert(alert.id) }}>
-                              <button
-                                type="submit"
-                                className="font-mono text-[9px] tracking-[0.1em] uppercase text-ink/30 hover:text-red transition-colors"
-                              >
-                                × Borrar
-                              </button>
-                            </form>
+                            <DeleteButton
+                              action={async () => { 'use server'; await deleteClientAlert(alert.id) }}
+                              confirm="¿Estás seguro que deseás eliminar esta alerta?"
+                              className="font-mono text-[9px] tracking-[0.1em] uppercase text-ink/30 hover:text-red transition-colors"
+                            >
+                              × Borrar
+                            </DeleteButton>
                           </div>
                         </div>
                       ))}
@@ -491,14 +491,8 @@ export default async function AdminClientesPage({ searchParams }: Props) {
                 {/* ── Notes ─────────────────────────────────────────── */}
                 <div className="px-6 py-4 border-b border-ink/8">
                   <p className="font-mono text-[9px] tracking-[0.15em] uppercase text-ink/40 mb-3">Notas internas</p>
-                  <form
-                    action={async (formData: FormData) => {
-                      'use server'
-                      const notes = (formData.get('notes') as string) ?? ''
-                      await updateClientNotes(client.id, notes)
-                    }}
-                    className="flex items-end gap-3 flex-wrap"
-                  >
+                  <form action={updateClientNotesAction} className="flex items-end gap-3 flex-wrap">
+                    <input type="hidden" name="profileId" value={client.id} />
                     <textarea
                       name="notes"
                       rows={2}
@@ -598,22 +592,19 @@ export default async function AdminClientesPage({ searchParams }: Props) {
 
                 {/* ── Eliminar cliente ──────────────────────────────── */}
                 <div className="px-6 py-4 border-t border-red/10 bg-red/[0.02]">
-                  <form
+                  <DeleteButton
                     action={async () => {
                       'use server'
                       await deleteClient(client.id)
                     }}
+                    confirm={`¿Estás seguro que deseás eliminar a ${client.company ?? client.displayName}? Esta acción no se puede deshacer.`}
+                    className="font-mono text-[10px] tracking-[0.12em] uppercase text-red/50 hover:text-red hover:bg-red/8 border border-red/15 hover:border-red/30 px-4 py-[8px] transition-colors flex items-center gap-2"
                   >
-                    <button
-                      type="submit"
-                      className="font-mono text-[10px] tracking-[0.12em] uppercase text-red/50 hover:text-red hover:bg-red/8 border border-red/15 hover:border-red/30 px-4 py-[8px] transition-colors flex items-center gap-2"
-                    >
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
-                      </svg>
-                      Eliminar cliente
-                    </button>
-                  </form>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                    </svg>
+                    Eliminar cliente
+                  </DeleteButton>
                 </div>
 
               </div>

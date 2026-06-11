@@ -5,6 +5,7 @@ import { getProfileByUserId, getProfileById } from '@/repository/queries/profile
 import { db } from '@/db'
 import { sql } from 'drizzle-orm'
 import EditClientForm from '@/components/portal/EditClientForm'
+import ClientAuthForm from '@/components/portal/ClientAuthForm'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -54,10 +55,11 @@ export default async function EditarClientePage({ params }: PageProps) {
         Editar cliente
       </h1>
       <p className="font-body text-[14px] text-ink/40 mb-8">
-        Modificá los datos del perfil de este cliente. El correo electrónico no es editable.
+        Modificá los datos del perfil, el email y la contraseña de acceso de este cliente.
       </p>
 
       <EditClientForm client={client} email={clientEmail} />
+      <ClientAuthForm userId={client.userId} currentEmail={clientEmail} />
     </div>
   )
 }

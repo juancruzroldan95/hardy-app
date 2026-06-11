@@ -4,6 +4,7 @@ import { createClient } from '@/services/supabase/server'
 import { getProfileByUserId } from '@/repository/queries/profile'
 import { getAllNovedadesAdmin } from '@/repository/queries/novedades'
 import { softDeleteNovedad } from '@/repository/mutations/admin'
+import DeleteButton from '@/components/portal/DeleteButton'
 
 export default async function AdminNovedadesPage() {
   const supabase = await createClient()
@@ -73,19 +74,16 @@ export default async function AdminNovedadesPage() {
                 >
                   Editar
                 </Link>
-                <form
+                <DeleteButton
                   action={async () => {
                     'use server'
                     await softDeleteNovedad(item.id)
                   }}
+                  confirm={`¿Estás seguro que deseás eliminar la novedad "${item.titulo}"?`}
+                  className="font-mono text-[10px] tracking-[0.12em] uppercase text-red/60 hover:text-red border border-red/20 px-3 py-[7px] transition-colors"
                 >
-                  <button
-                    type="submit"
-                    className="font-mono text-[10px] tracking-[0.12em] uppercase text-red/60 hover:text-red border border-red/20 px-3 py-[7px] transition-colors"
-                  >
-                    Eliminar
-                  </button>
-                </form>
+                  Eliminar
+                </DeleteButton>
               </div>
             </div>
           ))}

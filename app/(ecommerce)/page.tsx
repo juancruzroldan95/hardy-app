@@ -156,7 +156,7 @@ export default function HomePage() {
                 className="font-heading font-medium tracking-[-0.02em] m-0"
                 style={{ fontSize: 'clamp(36px, 5vw, 56px)', lineHeight: 1.1 }}
               >
-                Elegí tu <em className="not-italic text-red">formato Hardy.</em>
+                Elegí tu <em className="not-italic text-red">formato <span className="font-display tracking-[0.04em]">HARDY.</span></em>
               </h2>
               <p className="mt-4 text-[15px] text-[#555] max-w-[560px] leading-[1.6]">
                 Desde el frasco para tu casa hasta la caja mayorista o el balde para producción.
@@ -242,16 +242,18 @@ export default function HomePage() {
           {/* Comparación de etiquetas */}
           <RevealSection className="grid grid-cols-2 gap-[2px] max-md:grid-cols-1">
             {/* HARDY */}
-            <div className="bg-paper px-9 py-10 border-t-[3px] border-red flex flex-col max-md:px-6">
-              <div className="font-display text-[28px] tracking-[0.04em] leading-none mb-6">HARDY</div>
-              <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#888] mb-2">Ingredientes</p>
-              <p className="font-heading text-[26px] font-medium m-0 leading-[1.2]">maní.</p>
+            <div className="bg-ink px-10 py-12 flex flex-col max-md:px-6">
+              <p className="font-mono text-[10px] tracking-[0.22em] uppercase text-red m-0 mb-5">Nuestra etiqueta</p>
+              <div className="font-display text-[32px] tracking-[0.04em] leading-none text-paper mb-7">HARDY</div>
+              <p className="font-mono text-[9px] tracking-[0.22em] uppercase text-paper/45 m-0 mb-2">Ingredientes</p>
+              <p className="font-heading text-[22px] font-medium m-0 leading-[1.2] text-paper">maní.</p>
             </div>
             {/* La mayoría */}
-            <div className="bg-[#e8e6e2] px-9 py-10 border-t-[3px] border-[#bbb] flex flex-col max-md:px-6">
-              <div className="font-body text-[18px] font-bold text-[#777] leading-none mb-6">La mayoría</div>
-              <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#999] mb-2">Ingredientes</p>
-              <p className="font-body text-[17px] m-0 leading-[1.5] text-[#777]">
+            <div className="bg-paper-2 px-10 py-12 flex flex-col max-md:px-6">
+              <p className="font-mono text-[10px] tracking-[0.22em] uppercase text-[#aaa] m-0 mb-5">La mayoría</p>
+              <div className="font-display text-[24px] tracking-[0.04em] leading-none text-[#bbbab4] mb-7">???</div>
+              <p className="font-mono text-[9px] tracking-[0.22em] uppercase text-[#aaa] m-0 mb-2">Ingredientes</p>
+              <p className="font-body text-[15px] m-0 leading-[1.6] text-[#777]">
                 maní, azúcar, aceite de palma, sal, estabilizante (E471).
               </p>
             </div>

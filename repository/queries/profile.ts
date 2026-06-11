@@ -1,6 +1,6 @@
 import { db } from '@/db'
 import { profiles, deliveryAddresses, orders, orderItems, clientAlerts } from '@/db/schema'
-import { and, eq, ne, desc } from 'drizzle-orm'
+import { and, eq, ne, desc, asc } from 'drizzle-orm'
 
 export async function getProfileByUserId(userId: string) {
   return db.query.profiles.findFirst({
@@ -39,6 +39,25 @@ export async function getAllProfiles() {
   return db.query.profiles.findMany({
     where: eq(profiles.isDeleted, false),
   })
+}
+
+export async function getAllPendingAlerts() {
+  return db.query.clientAlerts.findMany({
+    where: and(
+      eq(clientAlerts.isDeleted, false),
+      eq(clientAlerts.isResolved, false),
+    ),
+    orderBy: [asc(clientAlerts.scheduledFor), desc(clientAlerts.createdAt)],
+    with: { profile: true },
+  })
+}
+
+export async function getPendingAlertsCount() {
+  const rows = await db.query.clientAlerts.findMany({
+    where: and(eq(clientAlerts.isDeleted, false), eq(clientAlerts.isResolved, false)),
+    columns: { id: true },
+  })
+  return rows.length
 }
 
 export async function getAllClientsWithOrdersAndAlerts() {
