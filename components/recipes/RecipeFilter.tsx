@@ -15,8 +15,8 @@ export default function RecipeFilter({ recetas }: { recetas: Receta[] }) {
 
   return (
     <>
-      {/* Filter bar — sticky just below the nav */}
-      <section className="sticky top-[99px] z-40 bg-paper border-b border-ink/10">
+      {/* Filter bar */}
+      <section className="bg-paper border-b border-ink/10">
         <div className="max-w-[1100px] mx-auto px-10 max-md:px-5 flex gap-[2px]">
           {CATEGORIAS.map((cat) => (
             <button

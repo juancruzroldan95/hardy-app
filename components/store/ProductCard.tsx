@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useCallback, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import Image from 'next/image'
 import { useCart } from '@/components/contexts/cart-context'
 import { formatARS, WA_NUMBER } from '@/consts/products'
@@ -34,6 +35,9 @@ export default function ProductCard({ product, rating }: { product: Product; rat
   const [modalMounted,  setModalMounted]  = useState(false)  // controls DOM presence
   const [modalVisible,  setModalVisible]  = useState(false)  // controls CSS opacity/scale
   const [modalImgIdx,   setModalImgIdx]   = useState(0)
+
+  const [bodyEl, setBodyEl] = useState<HTMLElement | null>(null)
+  useEffect(() => { setBodyEl(document.body) }, [])
 
   const images = product.images ?? [product.image]
 
@@ -118,14 +122,16 @@ export default function ProductCard({ product, rating }: { product: Product; rat
           <div className="font-heading text-[18px] font-medium mb-[6px] leading-[1.2] group-hover:text-paper transition-colors duration-[220ms]">
             {product.name}
           </div>
-          {rating && rating.count > 0 && (
-            <div className="flex items-center gap-1.5 mb-2">
-              <Stars avg={rating.avg} />
-              <span className="font-mono text-[10px] text-ink/50 group-hover:text-[#aaa] transition-colors duration-[220ms]">
-                {rating.avg.toFixed(1)} · {rating.count}
-              </span>
-            </div>
-          )}
+          <div className="h-[22px] flex items-center mb-2">
+            {rating && rating.count > 0 && (
+              <>
+                <Stars avg={rating.avg} />
+                <span className="font-mono text-[10px] text-ink/50 group-hover:text-[#aaa] transition-colors duration-[220ms] ml-1.5">
+                  {rating.avg.toFixed(1)} · {rating.count}
+                </span>
+              </>
+            )}
+          </div>
           <div className="text-[13px] leading-[1.5] mb-4 text-[#666] group-hover:text-[#aaa] transition-colors duration-[220ms]">
             {product.desc}
           </div>
@@ -163,8 +169,8 @@ export default function ProductCard({ product, rating }: { product: Product; rat
         </div>
       </article>
 
-      {/* Product modal — mount/unmount controlled separately from visibility */}
-      {modalMounted && (
+      {/* Product modal — rendered via portal to escape RevealSection's will-change:transform stacking context */}
+      {modalMounted && bodyEl && createPortal(
         <div
           className={[
             'fixed inset-0 z-[300] flex items-center justify-center p-5 overflow-y-auto max-md:items-start',
@@ -184,13 +190,13 @@ export default function ProductCard({ product, rating }: { product: Product; rat
           >
             {/* Image panel */}
             <div className="flex flex-col bg-[#111]">
-              <div className="flex-1 overflow-hidden relative" style={{ minHeight: '320px' }}>
+              <div className="flex-1 relative" style={{ minHeight: '320px' }}>
                 <Image
                   src={images[modalImgIdx]}
                   alt={product.name}
-                  width={460}
-                  height={460}
-                  className="w-full h-full object-contain block p-6 transition-opacity duration-200"
+                  fill
+                  className="object-contain p-6 transition-opacity duration-200"
+                  sizes="460px"
                 />
               </div>
               <div className="flex gap-2 p-3 px-4 justify-center" style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
@@ -322,7 +328,8 @@ export default function ProductCard({ product, rating }: { product: Product; rat
               </div>
             </div>
           </div>
-        </div>
+        </div>,
+        bodyEl
       )}
     </>
   )

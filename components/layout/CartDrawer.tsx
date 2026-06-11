@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 import { useState, useRef } from 'react'
-import { X, Plus, Minus, Loader2, ArrowLeft, Package, MapPin, CreditCard } from 'lucide-react'
+import { X, Plus, Minus, Loader2, ArrowLeft, Package, MapPin, CreditCard, Trash2 } from 'lucide-react'
 import { useCart } from '@/components/contexts/cart-context'
 import { trackInitiateCheckout } from '@/consts/meta-pixel'
 import type { ShippingData } from '@/types'
@@ -313,6 +313,7 @@ export default function CartDrawer() {
     openCheckout,
     closeCheckout,
     updateQty,
+    removeItem,
     formatARS,
     clearCart,
   } = useCart()
@@ -399,6 +400,13 @@ export default function CartDrawer() {
                       <span className="font-mono text-[12px] min-w-[18px] text-center">{item.qty}</span>
                       <button onClick={() => updateQty(item.id, 1)} className="w-[22px] h-[22px] bg-paper-2 flex items-center justify-center">
                         <Plus size={11} />
+                      </button>
+                      <button
+                        onClick={() => removeItem(item.id)}
+                        className="w-[22px] h-[22px] ml-1 text-ink/30 hover:text-red transition-colors flex items-center justify-center"
+                        title="Eliminar"
+                      >
+                        <Trash2 size={12} />
                       </button>
                     </div>
                   </div>

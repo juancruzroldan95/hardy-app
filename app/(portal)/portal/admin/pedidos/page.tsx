@@ -10,6 +10,7 @@ import type { UserRole } from '@/db/schema'
 import { db } from '@/db'
 import { desc, eq } from 'drizzle-orm'
 import { orderItems, orders, profiles } from '@/db/schema'
+import { deleteOrder } from '@/repository/mutations/admin'
 
 const ROLE_OPTIONS: { value: string; label: string }[] = [
   { value: '',             label: 'Todos'          },
@@ -156,7 +157,7 @@ export default async function AdminPedidosPage({ searchParams }: Props) {
           <div className="min-w-[820px]">
             <div
               className="px-5 py-3 border-b border-ink/8 bg-paper-2 grid gap-4"
-              style={{ gridTemplateColumns: '1fr 110px 130px 100px 110px 100px 60px' }}
+              style={{ gridTemplateColumns: '1fr 110px 130px 100px 110px 100px 60px 36px' }}
             >
               <span className="font-mono text-[9px] tracking-[0.15em] uppercase text-ink/40">Cliente</span>
               <span className="font-mono text-[9px] tracking-[0.15em] uppercase text-ink/40">Segmento</span>
@@ -164,6 +165,7 @@ export default async function AdminPedidosPage({ searchParams }: Props) {
               <span className="font-mono text-[9px] tracking-[0.15em] uppercase text-ink/40">Estado</span>
               <span className="font-mono text-[9px] tracking-[0.15em] uppercase text-ink/40">Pago</span>
               <span className="font-mono text-[9px] tracking-[0.15em] uppercase text-ink/40 text-right">Total</span>
+              <span />
               <span />
             </div>
 
@@ -175,7 +177,7 @@ export default async function AdminPedidosPage({ searchParams }: Props) {
                   <div
                     key={order.id}
                     className="px-5 py-4 grid gap-4 items-center"
-                    style={{ gridTemplateColumns: '1fr 110px 130px 100px 110px 100px 60px' }}
+                    style={{ gridTemplateColumns: '1fr 110px 130px 100px 110px 100px 60px 36px' }}
                   >
                     <div>
                       <div className="font-body font-semibold text-[13px] text-ink truncate">
@@ -205,6 +207,25 @@ export default async function AdminPedidosPage({ searchParams }: Props) {
                       >
                         →
                       </Link>
+                    </div>
+                    <div className="flex items-center justify-end">
+                      <form
+                        action={async () => {
+                          'use server'
+                          await deleteOrder(order.id)
+                        }}
+                      >
+                        <button
+                          type="submit"
+                          title="Eliminar pedido"
+                          className="w-7 h-7 flex items-center justify-center text-ink/20 hover:text-red hover:bg-red/8 transition-colors rounded"
+                          onClick={() => { /* confirmación manejada por browser native */ }}
+                        >
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                          </svg>
+                        </button>
+                      </form>
                     </div>
                   </div>
                 )
