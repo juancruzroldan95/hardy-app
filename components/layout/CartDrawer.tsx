@@ -402,7 +402,7 @@ export default function CartDrawer() {
                         <Plus size={11} />
                       </button>
                       <button
-                        onClick={() => removeItem(item.id)}
+                        onClick={() => { if (window.confirm(`¿Estás seguro que deseás eliminar "${item.name}" del carrito?`)) removeItem(item.id) }}
                         className="w-[22px] h-[22px] ml-1 text-ink/30 hover:text-red transition-colors flex items-center justify-center"
                         title="Eliminar"
                       >

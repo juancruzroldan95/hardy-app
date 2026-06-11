@@ -11,6 +11,7 @@ import { db } from '@/db'
 import { desc, eq } from 'drizzle-orm'
 import { orderItems, orders, profiles } from '@/db/schema'
 import { deleteOrder } from '@/repository/mutations/admin'
+import DeleteButton from '@/components/portal/DeleteButton'
 
 const ROLE_OPTIONS: { value: string; label: string }[] = [
   { value: '',             label: 'Todos'          },
@@ -209,22 +210,19 @@ export default async function AdminPedidosPage({ searchParams }: Props) {
                       </Link>
                     </div>
                     <div className="flex items-center justify-end">
-                      <form
+                      <DeleteButton
                         action={async () => {
                           'use server'
                           await deleteOrder(order.id)
                         }}
+                        confirm={`¿Estás seguro que deseás eliminar el pedido de ${order.userId ? (profileMap.get(order.userId)?.company ?? profileMap.get(order.userId)?.displayName ?? 'este cliente') : 'este cliente'}?`}
+                        title="Eliminar pedido"
+                        className="w-7 h-7 flex items-center justify-center text-ink/20 hover:text-red hover:bg-red/8 transition-colors rounded"
                       >
-                        <button
-                          type="submit"
-                          title="Eliminar pedido"
-                          className="w-7 h-7 flex items-center justify-center text-ink/20 hover:text-red hover:bg-red/8 transition-colors rounded"
-                        >
-                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
-                          </svg>
-                        </button>
-                      </form>
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                        </svg>
+                      </DeleteButton>
                     </div>
                   </div>
                 )
