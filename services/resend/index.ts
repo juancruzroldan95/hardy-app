@@ -702,3 +702,44 @@ export async function sendAlertReminder(alerts: AlertReminderData[]): Promise<vo
     html,
   })
 }
+
+// ─── Contact / Review form ────────────────────────────────────────────────────
+
+export interface ContactMessageData {
+  nombre:  string
+  email:   string
+  tipo:    'consulta' | 'resena'
+  mensaje: string
+}
+
+export async function sendContactMessage(data: ContactMessageData): Promise<void> {
+  const tipoLabel = data.tipo === 'resena' ? 'Reseña' : 'Consulta'
+  const html = `<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><title>${tipoLabel} de ${data.nombre}</title></head>
+<body style="margin:0;padding:0;background:#f1efe9;">
+<table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:32px 16px;">
+  <table width="580" cellpadding="0" cellspacing="0" style="background:#fafaf8;border:1px solid #e0ddd8;">
+    <tr><td style="padding:28px 36px 20px;border-bottom:2px solid #1a1a1a;">
+      <p style="font-family:'Courier New',monospace;font-size:9px;letter-spacing:0.25em;text-transform:uppercase;color:#c0171e;margin:0 0 6px;">── Hardy · ${tipoLabel}</p>
+      <h1 style="font-family:Georgia,serif;font-size:22px;font-weight:600;color:#1a1a1a;margin:0;">${data.nombre}</h1>
+      <p style="font-family:'Courier New',monospace;font-size:11px;color:#888;margin:4px 0 0;">${data.email}</p>
+    </td></tr>
+    <tr><td style="padding:24px 36px;">
+      <p style="font-family:Helvetica,Arial,sans-serif;font-size:15px;color:#1a1a1a;line-height:1.7;margin:0;white-space:pre-wrap;">${data.mensaje.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>
+    </td></tr>
+    <tr><td style="padding:16px 36px 24px;background:#f1efe9;border-top:1px solid #e0ddd8;">
+      <p style="font-family:'Courier New',monospace;font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:#aaa;margin:0;">HARDY · Formulario web</p>
+    </td></tr>
+  </table>
+</td></tr></table>
+</body></html>`
+
+  await resend.emails.send({
+    from:     FROM_ADDRESS,
+    to:       WAREHOUSE_EMAIL,
+    replyTo:  data.email,
+    subject:  `Hardy — ${tipoLabel} de ${data.nombre}`,
+    html,
+  })
+}
+
