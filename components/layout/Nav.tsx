@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
-import { ShoppingBag, Menu, X, MessageCircle, ChevronDown } from 'lucide-react'
+import { ShoppingBag, Menu, X, MessageCircle } from 'lucide-react'
 import { WA_NUMBER } from '@/consts/products'
 
 interface NavProps {
@@ -11,15 +11,8 @@ interface NavProps {
   onCartOpen?: () => void
 }
 
-const tiendaDropdown = [
-  { href: '/tienda',                   label: 'Para tu casa'  },
-  { href: '/mayoristas/gastronomico',  label: 'Gastronómico'  },
-  { href: '/mayoristas/distribuidor',  label: 'Distribuidores' },
-  { href: '/mayoristas/productor',     label: 'Productores'   },
-]
-
 const links = [
-  { href: '/tienda',          label: 'Tienda',        dropdown: true  },
+  { href: '/tienda',          label: 'Tienda'  },
   { href: '/mayoristas',      label: 'Mayoristas'                     },
   { href: '/a-granel',        label: 'A granel'                       },
   { href: '/recetas',         label: 'Recetas'                        },
@@ -28,11 +21,8 @@ const links = [
 ]
 
 export default function Nav({ cartCount = 0, onCartOpen }: NavProps) {
-  const [menuOpen,    setMenuOpen]    = useState(false)
-  const [tiendaOpen,  setTiendaOpen]  = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
   const pathname = usePathname()
-
-  const isTiendaActive = pathname === '/tienda' || pathname.startsWith('/mayoristas')
 
   return (
     <>
@@ -51,47 +41,7 @@ export default function Nav({ cartCount = 0, onCartOpen }: NavProps) {
 
         {/* Desktop links */}
         <div className="flex gap-8 font-mono text-[12px] tracking-[0.12em] uppercase max-md:hidden items-center">
-          {links.map((l) => {
-            if (l.dropdown) {
-              return (
-                <div
-                  key={l.href}
-                  className="relative"
-                  onMouseEnter={() => setTiendaOpen(true)}
-                  onMouseLeave={() => setTiendaOpen(false)}
-                >
-                  <Link
-                    href={l.href}
-                    className={`text-paper no-underline transition-opacity duration-200 pb-[2px] border-b flex items-center gap-1 ${
-                      isTiendaActive
-                        ? 'opacity-100 border-red'
-                        : 'opacity-75 hover:opacity-100 border-transparent'
-                    }`}
-                  >
-                    {l.label}
-                    <ChevronDown size={10} className={`transition-transform duration-200 ${tiendaOpen ? 'rotate-180' : ''}`} />
-                  </Link>
-                  {tiendaOpen && (
-                    <div className="absolute top-full left-1/2 -translate-x-1/2 pt-3 z-50">
-                    <div className="bg-ink border border-[#333] py-2 min-w-[180px] shadow-[0_8px_24px_rgba(0,0,0,0.4)]">
-                      {tiendaDropdown.map((d) => (
-                        <Link
-                          key={d.href}
-                          href={d.href}
-                          className={`block px-5 py-[10px] text-[11px] tracking-[0.12em] no-underline transition-colors duration-150 ${
-                            pathname === d.href ? 'text-red' : 'text-paper/75 hover:text-paper hover:bg-white/5'
-                          }`}
-                        >
-                          {d.label}
-                        </Link>
-                      ))}
-                    </div>
-                    </div>
-                  )}
-                </div>
-              )
-            }
-            return (
+          {links.map((l) => (
               <Link
                 key={l.href}
                 href={l.href}
@@ -103,8 +53,7 @@ export default function Nav({ cartCount = 0, onCartOpen }: NavProps) {
               >
                 {l.label}
               </Link>
-            )
-          })}
+          ))}
         </div>
 
         {/* Actions */}
@@ -151,20 +100,9 @@ export default function Nav({ cartCount = 0, onCartOpen }: NavProps) {
         <div className="bg-ink border-b border-[#2a2a2a] px-6 py-6 flex flex-col gap-5 font-mono text-[13px] tracking-[0.12em] uppercase">
           <Link href="/" className="text-paper" onClick={() => setMenuOpen(false)}>Inicio</Link>
           {links.map((l) => (
-            l.dropdown ? (
-              <div key={l.href} className="flex flex-col gap-3">
-                <span className="text-paper/40 text-[10px]">Tienda</span>
-                {tiendaDropdown.map((d) => (
-                  <Link key={d.href} href={d.href} className="text-paper pl-2" onClick={() => setMenuOpen(false)}>
-                    {d.label}
-                  </Link>
-                ))}
-              </div>
-            ) : (
-              <Link key={l.href} href={l.href} className="text-paper" onClick={() => setMenuOpen(false)}>
-                {l.label}
-              </Link>
-            )
+            <Link key={l.href} href={l.href} className="text-paper" onClick={() => setMenuOpen(false)}>
+              {l.label}
+            </Link>
           ))}
           <Link href="/portal" className="text-red border-t border-paper/10 pt-4 mt-1" onClick={() => setMenuOpen(false)}>
             Portal Cliente →
