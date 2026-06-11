@@ -36,6 +36,9 @@ export default function ProductCard({ product, rating }: { product: Product; rat
   const [modalVisible,  setModalVisible]  = useState(false)  // controls CSS opacity/scale
   const [modalImgIdx,   setModalImgIdx]   = useState(0)
 
+  const [bodyEl, setBodyEl] = useState<HTMLElement | null>(null)
+  useEffect(() => { setBodyEl(document.body) }, [])
+
   const images = product.images ?? [product.image]
 
   // ── Open: mount → next frame → show (two-frame trick for CSS transitions) ────
@@ -167,7 +170,7 @@ export default function ProductCard({ product, rating }: { product: Product; rat
       </article>
 
       {/* Product modal — rendered via portal to escape RevealSection's will-change:transform stacking context */}
-      {modalMounted && createPortal(
+      {modalMounted && bodyEl && createPortal(
         <div
           className={[
             'fixed inset-0 z-[300] flex items-center justify-center p-5 overflow-y-auto max-md:items-start',
@@ -326,7 +329,7 @@ export default function ProductCard({ product, rating }: { product: Product; rat
             </div>
           </div>
         </div>,
-        document.body
+        bodyEl
       )}
     </>
   )

@@ -6,6 +6,7 @@ import { getOrdersByUserId } from '@/repository/queries/orders'
 import OrderStatusBadge from '@/components/portal/OrderStatusBadge'
 import { formatARS } from '@/consts/products'
 import type { OrderStatus } from '@/db/schema'
+import { deleteOwnOrder } from '@/repository/mutations/orders'
 
 const STATUS_FILTERS: { value: OrderStatus | 'all'; label: string }[] = [
   { value: 'all',       label: 'Todos'          },
@@ -128,18 +129,19 @@ export default async function PedidosPage({ searchParams }: Props) {
       ) : (
         <div className="bg-paper border border-ink/8 divide-y divide-ink/8">
           {/* Header */}
-          <div className="hidden md:grid grid-cols-[1fr_auto_auto_auto_auto] gap-6 px-5 py-3 bg-paper-2">
+          <div className="hidden md:grid grid-cols-[1fr_auto_auto_auto_auto_auto] gap-6 px-5 py-3 bg-paper-2">
             <span className="font-mono text-[9px] tracking-[0.15em] uppercase text-ink/40">Fecha</span>
             <span className="font-mono text-[9px] tracking-[0.15em] uppercase text-ink/40">Estado</span>
             <span className="font-mono text-[9px] tracking-[0.15em] uppercase text-ink/40">Total</span>
             <span className="font-mono text-[9px] tracking-[0.15em] uppercase text-ink/40 sr-only">Repetir</span>
             <span className="font-mono text-[9px] tracking-[0.15em] uppercase text-ink/40 sr-only">Ver</span>
+            <span className="font-mono text-[9px] tracking-[0.15em] uppercase text-ink/40 sr-only">Eliminar</span>
           </div>
 
           {userOrders.map((order) => (
             <div
               key={order.id}
-              className="flex md:grid md:grid-cols-[1fr_auto_auto_auto_auto] items-center gap-4 md:gap-6 px-5 py-4 hover:bg-paper-2 transition-colors group"
+              className="flex md:grid md:grid-cols-[1fr_auto_auto_auto_auto_auto] items-center gap-4 md:gap-6 px-5 py-4 hover:bg-paper-2 transition-colors group"
             >
               <Link
                 href={`/portal/pedidos/${order.id}`}
@@ -173,6 +175,22 @@ export default async function PedidosPage({ searchParams }: Props) {
               >
                 →
               </Link>
+              <form
+                action={async () => {
+                  'use server'
+                  await deleteOwnOrder(order.id)
+                }}
+              >
+                <button
+                  type="submit"
+                  title="Eliminar pedido"
+                  className="w-7 h-7 flex items-center justify-center text-ink/20 hover:text-red hover:bg-red/8 transition-colors rounded"
+                >
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                  </svg>
+                </button>
+              </form>
             </div>
           ))}
         </div>

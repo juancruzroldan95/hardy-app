@@ -542,6 +542,26 @@ export async function deleteOrderMessage(messageId: string) {
   revalidatePath('/portal/admin/pedidos')
 }
 
+// ─── Delete Order (soft) ─────────────────────────────────────────────────────
+
+export async function deleteOrder(orderId: string) {
+  await getAdminUser()
+  await db.update(orders)
+    .set({ isDeleted: true, updatedAt: new Date() })
+    .where(eq(orders.id, orderId))
+  revalidatePath('/portal/admin/pedidos')
+}
+
+// ─── Delete Client (soft) ────────────────────────────────────────────────────
+
+export async function deleteClient(profileId: string) {
+  await getAdminUser()
+  await db.update(profiles)
+    .set({ isDeleted: true, isActive: false, updatedAt: new Date() })
+    .where(eq(profiles.id, profileId))
+  revalidatePath('/portal/admin/clientes')
+}
+
 // ─── Update Alert Scheduled Date ─────────────────────────────────────────────
 
 export async function updateAlertScheduledDate(alertId: string, scheduledFor: string | null) {

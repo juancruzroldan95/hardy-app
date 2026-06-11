@@ -291,3 +291,23 @@ async function _createOrderForUser({
 
   redirect(`/portal/pedidos/${newOrder.id}`)
 }
+
+export async function deleteOwnOrder(orderId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/portal/login')
+
+  const order = await db.query.orders.findFirst({
+    where: and(eq(orders.id, orderId), eq(orders.isDeleted, false)),
+    columns: { userId: true },
+  })
+
+  if (!order || order.userId !== user.id) redirect('/portal/pedidos')
+
+  await db.update(orders)
+    .set({ isDeleted: true, updatedAt: new Date() })
+    .where(eq(orders.id, orderId))
+
+  revalidatePath('/portal/pedidos')
+  redirect('/portal/pedidos')
+}
