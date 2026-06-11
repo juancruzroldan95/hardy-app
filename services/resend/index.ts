@@ -736,7 +736,7 @@ export async function sendContactMessage(data: ContactMessageData): Promise<void
 
   await resend.emails.send({
     from:     FROM_ADDRESS,
-    to:       WAREHOUSE_EMAIL,
+    to:       'ventas@hardy.ar',
     replyTo:  data.email,
     subject:  `Hardy — ${tipoLabel} de ${data.nombre}`,
     html,
