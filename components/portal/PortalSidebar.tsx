@@ -16,6 +16,7 @@ interface Props {
   vendedorWhatsapp?: string
   notifCount?: number
   pendingSolicitudesCount?: number
+  pendingTasksCount?: number
 }
 
 const CLIENT_LINKS = [
@@ -33,6 +34,7 @@ const ADMIN_LINKS = [
   { href: '/portal/admin/solicitudes',  label: 'Solicitudes' },
   { href: '/portal/admin/pedidos',      label: 'Pedidos'     },
   { href: '/portal/admin/clientes',     label: 'Clientes'    },
+  { href: '/portal/admin/tareas',       label: 'Tareas'      },
   { href: '/portal/admin/suscriptores', label: 'Suscriptores' },
   { href: '/portal/admin/stock',        label: 'Stock'       },
   { href: '/portal/admin/finanzas',     label: 'Finanzas'    },
@@ -48,6 +50,7 @@ export default function PortalSidebar({
   vendedorWhatsapp,
   notifCount,
   pendingSolicitudesCount,
+  pendingTasksCount,
 }: Props) {
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
@@ -148,9 +151,12 @@ export default function PortalSidebar({
             <ul className="flex flex-col gap-1">
               {ADMIN_LINKS.map(({ href, label }) => {
                 const isSolicitudes = href === '/portal/admin/solicitudes'
-                const badge = isSolicitudes && pendingSolicitudesCount && pendingSolicitudesCount > 0
+                const isTareas      = href === '/portal/admin/tareas'
+                const badge = (isSolicitudes && pendingSolicitudesCount && pendingSolicitudesCount > 0)
                   ? pendingSolicitudesCount
-                  : null
+                  : (isTareas && pendingTasksCount && pendingTasksCount > 0)
+                    ? pendingTasksCount
+                    : null
                 return (
                   <li key={href}>
                     <Link

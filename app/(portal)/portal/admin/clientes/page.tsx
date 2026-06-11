@@ -9,7 +9,7 @@ import {
   createClientAlert,
   resolveClientAlert,
   deleteClientAlert,
-  updateClientNotes,
+  updateClientNotesAction,
   updateClientRole,
   deleteClient,
 } from '@/repository/mutations/admin'
@@ -491,14 +491,8 @@ export default async function AdminClientesPage({ searchParams }: Props) {
                 {/* ── Notes ─────────────────────────────────────────── */}
                 <div className="px-6 py-4 border-b border-ink/8">
                   <p className="font-mono text-[9px] tracking-[0.15em] uppercase text-ink/40 mb-3">Notas internas</p>
-                  <form
-                    action={async (formData: FormData) => {
-                      'use server'
-                      const notes = (formData.get('notes') as string) ?? ''
-                      await updateClientNotes(client.id, notes)
-                    }}
-                    className="flex items-end gap-3 flex-wrap"
-                  >
+                  <form action={updateClientNotesAction} className="flex items-end gap-3 flex-wrap">
+                    <input type="hidden" name="profileId" value={client.id} />
                     <textarea
                       name="notes"
                       rows={2}
