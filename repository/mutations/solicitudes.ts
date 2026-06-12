@@ -28,7 +28,9 @@ export async function submitSolicitud(
   const provincia = (formData.get('provincia')   as string)?.trim()
   const direccion = (formData.get('direccion')   as string)?.trim() || null
   const cuit      = (formData.get('cuit')        as string)?.trim() || null
-  const mensaje   = (formData.get('mensaje')     as string)?.trim() || null
+  const consulta  = (formData.get('consulta')    as string)?.trim() || null
+  const mensajeRaw = (formData.get('mensaje')    as string)?.trim() || null
+  const mensaje   = [consulta, mensajeRaw].filter(Boolean).join('\n\n') || null
 
   // Validaciones base
   if (!nombre || !empresa || !tipoRaw || !email || !whatsapp || !ciudad || !provincia) {

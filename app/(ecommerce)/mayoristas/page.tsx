@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
 import Image from 'next/image'
 import { MessageCircle } from 'lucide-react'
 import { WA_NUMBER, ESCALAS } from '@/consts/products'
@@ -59,14 +58,8 @@ export default function MayoristasPage() {
               href="#solicitar"
               className="inline-block bg-red text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-7 py-[14px]"
             >
-              Solicitar acceso a Portal Cliente →
+              Solicitar acceso →
             </a>
-            <Link
-              href="/portal"
-              className="inline-block bg-paper/10 border border-white/20 text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-7 py-[14px]"
-            >
-              Acceder a Portal Cliente →
-            </Link>
           </div>
         </div>
       </section>
@@ -124,7 +117,7 @@ export default function MayoristasPage() {
             ))}
           </div>
           <RevealSection delay={120} className="mt-1 px-5 py-4 bg-paper-2 text-[13px] text-[#555] text-center leading-[1.5]">
-            <em>Más volumen = mejor precio por unidad. ¿Movés mucho? <strong className="text-ink">Hablemos.</strong></em>
+            <em>Más volumen = mejor precio por unidad. ¿Movés mucho? <a href="#solicitar" className="text-ink font-semibold hover:text-red transition-colors">Hablemos.</a></em>
           </RevealSection>
         </div>
       </section>
@@ -186,23 +179,14 @@ export default function MayoristasPage() {
           <div className="bg-ink text-paper px-10 py-10 text-center">
             <p className="font-heading text-[24px] font-medium mb-3">¿Listo para vender Hardy?</p>
             <p className="text-[13px] text-[#bbb] mb-6 leading-[1.6]">
-              Solicitá tu acceso al portal de clientes y realizá tu compra o contactanos por WhatsApp.
+              Completá el formulario y te contactamos con las condiciones para tu segmento.
             </p>
-            <div className="flex gap-3 flex-wrap justify-center">
-              <Link
-                href="/portal"
-                className="inline-block bg-red text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-6 py-[14px]"
-              >
-                Portal Cliente →
-              </Link>
-              <WhatsAppLink
-                href={`${WA_NUMBER}?text=Hola%20Hardy,%20quiero%20información%20mayorista`}
-                className="bg-paper/10 border border-white/20 text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-6 py-[14px] flex items-center gap-2"
-                aria-label="WhatsApp"
-              >
-                Contactanos <MessageCircle size={14} />
-              </WhatsAppLink>
-            </div>
+            <a
+              href="#solicitar"
+              className="inline-block bg-red text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-6 py-[14px]"
+            >
+              Solicitar acceso →
+            </a>
           </div>
         </div>
       </section>

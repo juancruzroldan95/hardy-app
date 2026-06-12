@@ -178,6 +178,17 @@ export default function SolicitudForm() {
         )}
       </div>
 
+      {/* ── Consulta opcional (paso 1) ──────────────────────── */}
+      <Field label="¿Algo que quieras contarnos?" name="consulta" required={false}>
+        <textarea
+          id="consulta"
+          name="consulta"
+          rows={3}
+          placeholder="Preguntás, comentás, lo que sea. Opcional."
+          className="w-full bg-paper border border-ink/15 text-ink font-body text-[15px] px-4 py-3 outline-none focus:border-ink transition-colors resize-none"
+        />
+      </Field>
+
       {/* ── Botón "Continuar" del paso 1 ────────────────────── */}
       {!expandido && (
         <div className="pt-1">
