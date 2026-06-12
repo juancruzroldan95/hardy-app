@@ -1,8 +1,10 @@
 import type { Metadata } from 'next'
 import Image from 'next/image'
-import Link from 'next/link'
-import { MessageCircle, Coffee, ChefHat, Dumbbell, Factory } from 'lucide-react'
+import { MessageCircle } from 'lucide-react'
 import { WA_NUMBER } from '@/consts/products'
+import { GRANEL_PRODUCTOS } from '@/consts/granel'
+import ProductCard from '@/components/granel/ProductCard'
+import BulkCalculator from '@/components/granel/BulkCalculator'
 import WhatsAppLink from '@/components/analytics/WhatsAppLink'
 
 export const metadata: Metadata = {
@@ -11,151 +13,76 @@ export const metadata: Metadata = {
     'Crema de maní y miel en volumen para gastronomía, repostería, cafeterías, producción e industria. Baldes de 4,5kg, 23kg, 6kg y 30kg.',
 }
 
-const BALDES_MANI = [
-  {
-    tag: 'Crema de Maní · 4,5 kg',
-    title: 'Balde 4,5 kg',
-    img: '/products/balde-45-open.png',
-    desc: 'Para cafeterías, cocinas, gimnasios y repostería. 100% maní seleccionado, sin azúcar, sin aceites, sin conservantes.',
-    waText: 'Hola Hardy, quiero info del balde de crema de maní de 4.5kg',
-  },
-  {
-    tag: 'Crema de Maní · 23 kg',
-    title: 'Balde 23 kg',
-    img: '/products/balde-23-open.png',
-    desc: 'Para producción continua, barras energéticas, helados y panificados. Mejor costo por kg de la línea.',
-    waText: 'Hola Hardy, quiero info del balde de crema de maní de 23kg',
-  },
-]
-
-const BALDES_MIEL = [
-  {
-    tag: 'Miel Líquida · 6 kg',
-    title: 'Balde 6 kg',
-    img: '/products/miel-balde-6-front.png',
-    desc: 'Para cafeterías, restaurantes y pastelerías. Miel multifloral sin pasteurizar, sin procesar.',
-    waText: 'Hola Hardy, quiero info de miel a granel 6kg',
-  },
-  {
-    tag: 'Miel Líquida · 30 kg',
-    title: 'Balde 30 kg',
-    img: '/products/miel-balde-30-front.png',
-    desc: 'Para producción a escala. Panificados, barras energéticas, bebidas. La mejor relación costo por kg.',
-    waText: 'Hola Hardy, quiero info de miel a granel 30kg',
-  },
-]
-
-const USOS_MANI = ['Bowls', 'Toppings', 'Rellenos', 'Barras', 'Repostería', 'Heladería', 'Cocina profesional', 'Producción']
-const USOS_MIEL = ['Endulzante natural', 'Panificados', 'Repostería', 'Bebidas', 'Salsas', 'Toppings', 'Producción']
-
 const PARA_QUIEN = [
-  { Icon: Coffee,   t: 'Cafés y restaurants', d: 'Insumo para preparaciones, desayunos y carta.' },
-  { Icon: ChefHat,  t: 'Reposterías', d: 'Ingrediente para rellenos, coberturas y elaboraciones.' },
-  { Icon: Dumbbell, t: 'Emprendedores', d: 'Barras, snacks proteicos y productos naturales.' },
-  { Icon: Factory,  t: 'Industria', d: 'Volúmenes altos para elaboración continua.' },
+  'Cafés y restaurants',
+  'Reposterías',
+  'Emprendedores',
+  'Gimnasios y salud',
+  'Industria alimentaria',
 ]
-
-function BaldeCard({
-  tag, title, img, desc, waText,
-}: {
-  tag: string
-  title: string
-  img: string
-  desc: string
-  waText: string
-}) {
-  return (
-    <div className="group bg-paper-2 hover:bg-ink flex flex-col transition-colors border-t-[3px] border-transparent hover:border-red cursor-default">
-      <div className="aspect-square overflow-hidden bg-[#e8e6e2] group-hover:bg-[#111] transition-colors">
-        <Image
-          src={img}
-          alt={title}
-          width={400}
-          height={400}
-          className="w-full h-full object-contain p-6"
-        />
-      </div>
-      <div className="p-6">
-        <p className="font-mono text-[9px] tracking-[0.2em] text-red uppercase mb-2">{tag}</p>
-        <h3 className="font-heading text-[20px] font-medium m-0 mb-[10px] group-hover:text-paper transition-colors">{title}</h3>
-        <p className="text-[13px] text-[#666] group-hover:text-[#aaa] leading-[1.55] m-0 mb-5 transition-colors">{desc}</p>
-        <a
-          href={`${WA_NUMBER}?text=${encodeURIComponent(waText)}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-block border border-red text-red group-hover:bg-red group-hover:text-paper font-mono text-[10px] tracking-[0.15em] uppercase px-[18px] py-[9px] transition-colors"
-        >
-          Consultar precio →
-        </a>
-      </div>
-    </div>
-  )
-}
 
 export default function AGranelPage() {
   return (
     <div className="bg-paper text-ink">
 
       {/* HERO */}
-      <section className="bg-ink text-paper py-20 px-10 max-md:px-6">
+      <section className="bg-ink text-paper py-16 px-10 max-md:px-6">
         <div className="max-w-[1100px] mx-auto">
           <p className="font-mono text-[11px] tracking-[0.25em] text-red uppercase mb-5">── A granel</p>
           <h1
-            className="font-heading font-medium tracking-[-0.02em] leading-[1.05] m-0 mb-5"
-            style={{ fontSize: 'clamp(38px,6vw,68px)' }}
+            className="font-heading font-medium tracking-[-0.02em] leading-[1.05] m-0"
+            style={{ fontSize: 'clamp(36px,6vw,64px)' }}
           >
             Formatos a granel para<br /><em className="not-italic text-red">uso profesional.</em>
           </h1>
-          <p className="text-[16px] text-[#bbb] max-w-[560px] leading-[1.7] mb-9">
-            Crema de maní y miel en volumen para gastronomía, repostería, cafeterías, producción e industria.
-          </p>
-          <div className="flex gap-3 flex-wrap items-center">
-            <WhatsAppLink
-              href={`${WA_NUMBER}?text=Hola%20Hardy,%20quiero%20información%20de%20productos%20a%20granel`}
-              className="inline-flex items-center gap-2 bg-red text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-7 py-[13px]"
-              aria-label="Consultar por WhatsApp"
-            >
-              Contactanos por WhatsApp <MessageCircle size={14} />
-            </WhatsAppLink>
-            <Link
-              href="/mayoristas#solicitar"
-              className="bg-paper/10 border border-white/20 text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-7 py-[13px] inline-block"
-            >
-              Solicitar acceso mayorista →
-            </Link>
-          </div>
         </div>
       </section>
 
-      {/* PARA QUIÉN */}
-      <section className="py-14 px-10 bg-paper-2 max-md:px-6">
+      {/* TARJETAS DE PRODUCTO CON PRECIO */}
+      <section className="py-14 px-10 max-md:px-6">
         <div className="max-w-[1100px] mx-auto">
-          <p className="font-mono text-[11px] tracking-[0.25em] text-red uppercase mb-6">── ¿Para quién es?</p>
-          <div className="grid grid-cols-4 gap-[2px] max-md:grid-cols-2">
-            {PARA_QUIEN.map((c, i) => (
-              <div
-                key={i}
-                className="group bg-paper hover:bg-ink transition-colors border-t-[3px] border-transparent hover:border-red px-5 py-6 cursor-default"
-              >
-                <c.Icon size={22} className="text-red mb-3" />
-                <h3 className="font-heading text-[16px] font-medium m-0 mb-[6px] group-hover:text-paper transition-colors">{c.t}</h3>
-                <p className="text-[12px] text-[#666] group-hover:text-[#aaa] leading-[1.5] m-0 transition-colors">{c.d}</p>
-              </div>
+          <p className="font-mono text-[11px] tracking-[0.25em] text-red uppercase mb-2">── Productos y precios</p>
+          <p className="font-body text-[14px] text-ink/50 mb-7">
+            Precios por unidad. Descuentos por volumen aplicados automáticamente al cambiar la cantidad.
+          </p>
+          <div className="grid grid-cols-2 gap-[2px] max-md:grid-cols-1">
+            {GRANEL_PRODUCTOS.map((p) => (
+              <ProductCard key={p.id} producto={p} />
             ))}
           </div>
         </div>
       </section>
 
-      {/* PRODUCTO EN ACCIÓN */}
+      {/* CALCULADORA */}
+      <section className="py-14 px-10 bg-paper-2 max-md:px-6">
+        <div className="max-w-[1100px] mx-auto">
+          <p className="font-mono text-[11px] tracking-[0.25em] text-red uppercase mb-2">── Calculadora de compra</p>
+          <p className="font-body text-[14px] text-ink/50 mb-7">
+            Ingresá los kg que necesitás y comparamos qué formato te sale más económico en total.
+          </p>
+          <BulkCalculator />
+        </div>
+      </section>
+
+      {/* PARA QUIÉN — chips */}
+      <section className="py-12 px-10 max-md:px-6">
+        <div className="max-w-[1100px] mx-auto flex flex-wrap gap-2 items-center">
+          <span className="font-mono text-[9px] tracking-[0.2em] text-red uppercase mr-3">Para:</span>
+          {PARA_QUIEN.map((label) => (
+            <span
+              key={label}
+              className="bg-paper-2 border border-ink/10 font-mono text-[10px] tracking-[0.12em] uppercase text-ink/60 px-4 py-[6px]"
+            >
+              {label}
+            </span>
+          ))}
+        </div>
+      </section>
+
+      {/* STORYTELLING — fotos de uso profesional */}
       <section className="bg-ink text-paper py-14 px-10 max-md:px-6">
         <div className="max-w-[1100px] mx-auto">
-          <p className="font-mono text-[11px] tracking-[0.25em] text-red uppercase mb-3">── En tu cocina</p>
-          <h2
-            className="font-heading font-medium tracking-[-0.02em] leading-[1.1] m-0 mb-8"
-            style={{ fontSize: 'clamp(28px,4vw,44px)' }}
-          >
-            Pensado para el <em className="not-italic text-red">uso profesional.</em>
-          </h2>
+          <p className="font-mono text-[11px] tracking-[0.25em] text-red uppercase mb-8">── En tu cocina</p>
           <div className="grid grid-cols-2 gap-[2px] max-md:grid-cols-1">
             <div className="relative aspect-[16/10] overflow-hidden">
               <Image
@@ -189,103 +116,24 @@ export default function AGranelPage() {
         </div>
       </section>
 
-      {/* CREMA DE MANÍ A GRANEL */}
-      <section className="py-14 px-10 bg-paper max-md:px-6">
-        <div className="max-w-[1100px] mx-auto">
-          <p className="font-mono text-[10px] tracking-[0.25em] text-red uppercase mb-[6px]">── Crema de maní a granel</p>
-          <p className="text-[13px] text-[#888] m-0 mb-7">Para cocinas, cafeterías, repostería, heladerías y producción a escala.</p>
-          <div className="grid grid-cols-2 gap-[2px] mb-[2px] max-md:grid-cols-1">
-            {BALDES_MANI.map((b, i) => (
-              <BaldeCard key={i} {...b} />
-            ))}
-          </div>
-          <div className="bg-paper-2 px-6 py-5 flex flex-wrap gap-2 items-center">
-            <span className="font-mono text-[9px] tracking-[0.2em] text-red uppercase mr-2">Usos:</span>
-            {USOS_MANI.map((u, i) => (
-              <span key={i} className="bg-paper px-3 py-1 font-mono text-[9px] tracking-[0.12em] uppercase text-[#666]">{u}</span>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* MIEL A GRANEL */}
-      <section className="py-14 px-10 bg-paper-2 max-md:px-6">
-        <div className="max-w-[1100px] mx-auto">
-          <p className="font-mono text-[10px] tracking-[0.25em] text-red uppercase mb-[6px]">── Miel a granel</p>
-          <p className="text-[13px] text-[#888] m-0 mb-7">Para gastronomía, cafeterías, pastelería, producción y uso profesional.</p>
-          <div className="grid grid-cols-2 gap-[2px] mb-[2px] max-md:grid-cols-1">
-            {BALDES_MIEL.map((b, i) => (
-              <BaldeCard key={i} {...b} />
-            ))}
-          </div>
-          <div className="bg-paper px-6 py-5 flex flex-wrap gap-2 items-center">
-            <span className="font-mono text-[9px] tracking-[0.2em] text-red uppercase mr-2">Usos:</span>
-            {USOS_MIEL.map((u, i) => (
-              <span key={i} className="bg-paper-2 px-3 py-1 font-mono text-[9px] tracking-[0.12em] uppercase text-[#666]">{u}</span>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ¿FRASCO O BALDE? — comparador conceptual */}
-      <section className="py-16 px-10 bg-paper max-md:px-6">
-        <div className="max-w-[1100px] mx-auto">
-          <p className="font-mono text-[11px] tracking-[0.25em] text-red uppercase mb-4">── ¿Frasco o balde?</p>
-          <div className="grid grid-cols-[1.4fr_1fr] gap-10 items-center max-md:grid-cols-1 max-md:gap-6">
-            <div>
-              <h2
-                className="font-heading font-medium tracking-[-0.02em] m-0 mb-4 leading-[1.15]"
-                style={{ fontSize: 'clamp(26px,4vw,40px)' }}
-              >
-                Si usás más de 2 frascos <em className="not-italic text-red">por semana,</em> el balde te conviene.
-              </h2>
-              <p className="text-[15px] text-[#555] leading-[1.7] max-w-[560px] mb-7">
-                El balde tiene mejor costo por kilo, dura más y ocupa menos espacio que la misma cantidad en
-                frascos. Para cocinas, cafeterías y producción, es el formato que tiene sentido.
-              </p>
-              <a
-                href={`${WA_NUMBER}?text=${encodeURIComponent('Hola Hardy, quiero saber si me conviene el balde o los frascos')}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block bg-red text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-7 py-[14px]"
-              >
-                Consultanos cuál te conviene →
-              </a>
-            </div>
-            {/* Ícono conceptual frasco vs balde */}
-            <div className="flex items-end justify-center gap-8 bg-paper-2 py-10 px-6 max-md:py-8">
-              <div className="flex flex-col items-center gap-3">
-                <div className="w-12 h-16 border-[3px] border-ink/30 rounded-b-md rounded-t-sm" />
-                <span className="font-mono text-[9px] tracking-[0.18em] uppercase text-[#888]">Frasco</span>
-              </div>
-              <div className="font-mono text-[12px] text-red">vs</div>
-              <div className="flex flex-col items-center gap-3">
-                <div className="w-20 h-24 border-[3px] border-red rounded-b-lg rounded-t-sm" />
-                <span className="font-mono text-[9px] tracking-[0.18em] uppercase text-red">Balde</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="py-16 px-10 bg-ink text-paper text-center max-md:px-6">
-        <div className="max-w-[480px] mx-auto">
+      {/* CTA GLOBAL — hablar con ventas */}
+      <section className="py-16 px-10 bg-paper text-center max-md:px-6">
+        <div className="max-w-[420px] mx-auto">
           <p
-            className="font-heading font-medium mb-[14px]"
-            style={{ fontSize: 'clamp(22px,4vw,32px)' }}
+            className="font-heading font-medium tracking-[-0.01em] mb-3"
+            style={{ fontSize: 'clamp(20px,3vw,28px)' }}
           >
-            ¿Querés consultar por volumen?
+            ¿Industria, volúmenes grandes o condiciones especiales?
           </p>
-          <p className="text-[#bbb] text-[14px] mb-7 leading-[1.6]">
-            Te asesoramos según el producto, el formato y la cantidad que necesitás.
+          <p className="text-[14px] text-ink/50 mb-7 leading-[1.6]">
+            Para cuentas de producción continua o acuerdos marco, hablá directamente con el equipo de ventas.
           </p>
           <WhatsAppLink
-            href={`${WA_NUMBER}?text=Hola%20Hardy,%20quiero%20consultar%20por%20volumen%20a%20granel`}
-            className="bg-red text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-8 py-[16px] inline-flex items-center gap-2 mx-auto"
-            aria-label="Consultar por WhatsApp"
+            href={`${WA_NUMBER}?text=${encodeURIComponent('Hola Hardy, quiero hablar con ventas sobre compras a granel en volumen')}`}
+            className="bg-ink text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-8 py-[16px] inline-flex items-center gap-2 mx-auto hover:opacity-80 transition-opacity"
+            aria-label="Hablar con ventas por WhatsApp"
           >
-            Contactanos <MessageCircle size={16} />
+            Hablar con ventas <MessageCircle size={14} />
           </WhatsAppLink>
         </div>
       </section>
