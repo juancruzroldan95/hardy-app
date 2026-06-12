@@ -31,7 +31,7 @@ export const GRANEL_PRODUCTOS: ProductoGranel[] = [
         id: 'mani_4_5kg',
         etiqueta: 'Balde 4,5 kg',
         kg: 4.5,
-        img: '/products/balde-45-open.png',
+        img: '/products/balde-45-front.png',
         tramos: [
           { min: 1,  max: 4,    precio_unidad: 17708 },
           { min: 5,  max: 9,    precio_unidad: 16823 },
@@ -42,7 +42,7 @@ export const GRANEL_PRODUCTOS: ProductoGranel[] = [
         id: 'mani_23kg',
         etiqueta: 'Balde 23 kg',
         kg: 23,
-        img: '/products/balde-23-open.png',
+        img: '/products/balde-23-front.png',
         tramos: [
           { min: 1,  max: 4,    precio_unidad: 84750 },
           { min: 5,  max: 9,    precio_unidad: 80513 },
