@@ -3,10 +3,12 @@
 import { useState, useTransition } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/services/supabase/client'
+import RequestAccessForm from '@/components/portal/RequestAccessForm'
 
 export default function LoginForm() {
   const [error, setError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
+  const [view, setView] = useState<'login' | 'solicitud'>('login')
   const router = useRouter()
   const searchParams = useSearchParams()
   const next = searchParams.get('next') ?? '/portal'
@@ -43,6 +45,17 @@ export default function LoginForm() {
         </div>
       </div>
 
+      {view === 'solicitud' ? (
+        <>
+          <div className="mb-6">
+            <h2 className="font-mono text-[11px] tracking-[0.2em] uppercase text-paper/60">
+              Solicitar acceso al portal
+            </h2>
+          </div>
+          <RequestAccessForm onBack={() => setView('login')} />
+        </>
+      ) : (
+        <>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div>
           <label
@@ -92,6 +105,21 @@ export default function LoginForm() {
           {isPending ? 'Ingresando...' : 'Ingresar →'}
         </button>
       </form>
+
+      <div className="mt-6 pt-5 border-t border-[#2a2a2a] text-center">
+        <p className="font-body text-[13px] text-paper/40">
+          ¿No tenés acceso al portal?{' '}
+          <button
+            type="button"
+            onClick={() => setView('solicitud')}
+            className="text-paper/70 underline underline-offset-2 hover:text-paper transition-colors"
+          >
+            Solicitarlo acá
+          </button>
+        </p>
+      </div>
+        </>
+      )}
     </div>
   )
 }
