@@ -4,9 +4,9 @@ import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/services/supabase/server'
 import { db } from '@/db'
-import { profiles, orders, solicitudes, novedades, clientAlerts, orderMessages } from '@/db/schema'
+import { profiles, orders, orderItems, solicitudes, novedades, clientAlerts, orderMessages } from '@/db/schema'
 import { and, eq, sql as drizzleSql } from 'drizzle-orm'
-import type { EstadoSolicitud, OrderStatus, PaymentStatus, AlertTipo, UserRole } from '@/db/schema'
+import type { EstadoSolicitud, OrderStatus, PaymentStatus, AlertTipo, UserRole, ShippingMethod, PaymentMethod } from '@/db/schema'
 import { sendOrderStatusUpdate, sendReviewRequest } from '@/services/resend'
 import { createAdminClient } from '@/services/supabase/admin'
 
@@ -606,6 +606,78 @@ export async function updateClientPasswordAdmin(_prev: AdminAuthState, formData:
   const adminClient = createAdminClient()
   const { error } = await adminClient.auth.admin.updateUserById(userId, { password })
   if (error) return { error: `Error al actualizar contraseña: ${error.message}` }
+
+  return { success: true }
+}
+
+// ─── Update Order Status (FormData-based) ────────────────────────────────────
+
+export type OrderUpdateState = { success?: true; error?: string } | undefined
+
+export async function updateOrderStatusAction(
+  _prev: OrderUpdateState,
+  formData: FormData,
+): Promise<OrderUpdateState> {
+  await getAdminUser()
+  const orderId       = (formData.get('orderId')       as string)?.trim()
+  const status        = (formData.get('status')        as OrderStatus)
+  const paymentStatus = (formData.get('paymentStatus') as PaymentStatus)
+  if (!orderId || !status) return { error: 'Datos inválidos.' }
+  await updateOrderStatus(orderId, status, paymentStatus || undefined)
+  return { success: true }
+}
+
+// ─── Update Order Details (items + logistics) ─────────────────────────────────
+
+export async function updateOrderDetails(
+  _prev: OrderUpdateState,
+  formData: FormData,
+): Promise<OrderUpdateState> {
+  await getAdminUser()
+
+  const orderId        = (formData.get('orderId')        as string)?.trim()
+  const shippingMethod = (formData.get('shippingMethod') as ShippingMethod) || null
+  const paymentMethod  = (formData.get('paymentMethod')  as PaymentMethod)  || null
+  const notes          = (formData.get('notes')          as string)?.trim()  || null
+
+  if (!orderId) return { error: 'ID de pedido requerido.' }
+
+  const currentItems = await db.query.orderItems.findMany({
+    where: and(eq(orderItems.orderId, orderId), eq(orderItems.isDeleted, false)),
+  })
+
+  let newTotal = 0
+
+  for (const item of currentItems) {
+    const raw = formData.get(`qty_${item.id}`)
+    const qty = Math.max(0, parseInt(raw as string) || 0)
+
+    if (qty === 0) {
+      await db.update(orderItems)
+        .set({ isDeleted: true })
+        .where(eq(orderItems.id, item.id))
+    } else {
+      const subtotal = qty * Number(item.unitPriceArs)
+      await db.update(orderItems)
+        .set({ qty, subtotalArs: subtotal.toFixed(2) })
+        .where(eq(orderItems.id, item.id))
+      newTotal += subtotal
+    }
+  }
+
+  await db.update(orders)
+    .set({
+      shippingMethod,
+      paymentMethod,
+      notes,
+      totalArs:  newTotal.toFixed(2),
+      updatedAt: new Date(),
+    })
+    .where(eq(orders.id, orderId))
+
+  revalidatePath('/portal/admin/pedidos')
+  revalidatePath(`/portal/admin/pedidos/${orderId}`)
+  revalidatePath(`/portal/pedidos/${orderId}`)
 
   return { success: true }
 }

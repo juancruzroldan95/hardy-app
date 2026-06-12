@@ -1,23 +1,28 @@
 import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
+import { Suspense } from 'react'
 import { createClient } from '@/services/supabase/server'
 import { db } from '@/db'
 import { orderItems, orders, profiles, orderMessages } from '@/db/schema'
 import { and, eq, asc } from 'drizzle-orm'
 import { formatARS } from '@/consts/products'
-import { updateOrderStatus, updateTrackingNumber } from '@/repository/mutations/admin'
+import {
+  updateOrderStatusAction,
+  updateTrackingNumber,
+} from '@/repository/mutations/admin'
 import OrderStatusBadge from '@/components/portal/OrderStatusBadge'
 import PaymentStatusBadge from '@/components/portal/PaymentStatusBadge'
 import MessageThread from '@/components/portal/MessageThread'
+import AdminOrderEditForm from '@/components/portal/AdminOrderEditForm'
 import type { OrderStatus, PaymentStatus } from '@/db/schema'
 
 const ORDER_STATUS_OPTIONS: { value: OrderStatus; label: string }[] = [
-  { value: 'pending',   label: 'Pendiente'       },
-  { value: 'confirmed', label: 'Confirmado'       },
-  { value: 'preparing', label: 'En preparación'  },
-  { value: 'shipped',   label: 'En camino'        },
-  { value: 'delivered', label: 'Entregado'        },
-  { value: 'cancelled', label: 'Cancelado'        },
+  { value: 'pending',   label: 'Pendiente'      },
+  { value: 'confirmed', label: 'Confirmado'      },
+  { value: 'preparing', label: 'En preparación' },
+  { value: 'shipped',   label: 'En camino'       },
+  { value: 'delivered', label: 'Entregado'       },
+  { value: 'cancelled', label: 'Cancelado'       },
 ]
 
 const PAYMENT_STATUS_OPTIONS: { value: PaymentStatus; label: string }[] = [
@@ -26,24 +31,6 @@ const PAYMENT_STATUS_OPTIONS: { value: PaymentStatus; label: string }[] = [
   { value: 'refunded', label: 'Reintegrado' },
   { value: 'failed',   label: 'Fallido'     },
 ]
-
-const SHIPPING_LABELS: Record<string, string> = {
-  coordinar_whatsapp: 'Coordinar por WhatsApp',
-  andreani:           'Andreani',
-  oca:                'OCA',
-  retiro_deposito:    'Retiro en depósito',
-}
-
-const PAYMENT_LABELS: Record<string, string> = {
-  mercadopago:      'Tarjeta / Mercado Pago',
-  transferencia:    'Transferencia bancaria',
-  deposito_bancario: 'Depósito bancario',
-  echeq_30:         'E-CHEQ 30 días',
-  efectivo:         'Efectivo al recibir',
-  credito30:        'Crédito a 30 días',
-  credito60:        'Crédito a 60 días',
-  cheque:           'Cheque',
-}
 
 interface Props {
   params: Promise<{ id: string }>
@@ -79,18 +66,16 @@ export default async function AdminPedidoDetailPage({ params }: Props) {
       })
     : null
 
-  async function handleStatusUpdate(formData: FormData) {
-    'use server'
-    const status        = formData.get('status')        as OrderStatus
-    const paymentStatus = formData.get('paymentStatus') as PaymentStatus
-    if (!status) return
-    await updateOrderStatus(id, status, paymentStatus || undefined)
-  }
-
   async function handleTrackingUpdate(formData: FormData) {
     'use server'
     const tracking = formData.get('trackingNumber') as string
     await updateTrackingNumber(id, tracking ?? '')
+  }
+
+  // Wrapper para updateOrderStatusAction — pasa orderId via hidden input
+  async function handleStatusUpdate(formData: FormData) {
+    'use server'
+    await updateOrderStatusAction(undefined, formData)
   }
 
   return (
@@ -122,7 +107,7 @@ export default async function AdminPedidoDetailPage({ params }: Props) {
         </div>
       </div>
 
-      {/* Order items */}
+      {/* Resumen de productos (solo lectura) */}
       <div className="bg-paper border border-ink/8 mb-6">
         <div className="px-5 py-3 border-b border-ink/8 bg-paper-2">
           <p className="font-mono text-[9px] tracking-[0.2em] uppercase text-ink/40">Productos</p>
@@ -174,42 +159,31 @@ export default async function AdminPedidoDetailPage({ params }: Props) {
         </div>
       )}
 
-      {/* Delivery + payment method */}
-      {(order.shippingMethod || order.paymentMethod || order.notes) && (
-        <div className="bg-paper border border-ink/8 p-5 mb-6">
-          <div className="grid grid-cols-2 gap-4 max-md:grid-cols-1">
-            {order.shippingMethod && (
-              <div>
-                <p className="font-mono text-[9px] tracking-[0.12em] uppercase text-ink/40 mb-1">Envío</p>
-                <p className="font-body text-[14px] text-ink">
-                  {SHIPPING_LABELS[order.shippingMethod] ?? order.shippingMethod}
-                </p>
-              </div>
-            )}
-            {order.paymentMethod && (
-              <div>
-                <p className="font-mono text-[9px] tracking-[0.12em] uppercase text-ink/40 mb-1">Forma de pago</p>
-                <p className="font-body text-[14px] text-ink">
-                  {PAYMENT_LABELS[order.paymentMethod] ?? order.paymentMethod}
-                </p>
-              </div>
-            )}
-          </div>
-          {order.notes && (
-            <div className="mt-4 pt-4 border-t border-ink/8">
-              <p className="font-mono text-[9px] tracking-[0.12em] uppercase text-ink/40 mb-1">Notas del cliente</p>
-              <p className="font-body text-[14px] text-ink/70">{order.notes}</p>
-            </div>
-          )}
-        </div>
-      )}
+      {/* Editar pedido: items + logística */}
+      <Suspense>
+        <AdminOrderEditForm
+          orderId={id}
+          items={order.items.map((i) => ({
+            id:           i.id,
+            productName:  i.productName,
+            variant:      i.variant,
+            size:         i.size,
+            unitPriceArs: Number(i.unitPriceArs),
+            qty:          i.qty,
+          }))}
+          shippingMethod={order.shippingMethod ?? null}
+          paymentMethod={order.paymentMethod ?? null}
+          notes={order.notes ?? null}
+        />
+      </Suspense>
 
-      {/* Status update */}
+      {/* Actualizar estado */}
       <div className="bg-paper border border-ink/8 p-6 mb-6">
         <p className="font-mono text-[9px] tracking-[0.15em] uppercase text-ink/40 mb-5">
           Actualizar estado
         </p>
         <form action={handleStatusUpdate} className="grid grid-cols-2 gap-4 max-md:grid-cols-1">
+          <input type="hidden" name="orderId" value={id} />
           <div>
             <label className="font-mono text-[10px] tracking-[0.12em] uppercase text-ink/60 block mb-2">Estado del pedido</label>
             <select name="status" defaultValue={order.status}
@@ -231,13 +205,13 @@ export default async function AdminPedidoDetailPage({ params }: Props) {
           <div className="col-span-2 max-md:col-span-1">
             <button type="submit"
               className="bg-ink text-paper font-mono text-[11px] tracking-[0.15em] uppercase px-6 py-[13px] hover:bg-ink/80 transition-colors">
-              Guardar cambios →
+              Guardar estado →
             </button>
           </div>
         </form>
       </div>
 
-      {/* Tracking number */}
+      {/* Número de seguimiento */}
       <div className="bg-paper border border-ink/8 p-6 mb-6">
         <p className="font-mono text-[9px] tracking-[0.15em] uppercase text-ink/40 mb-4">Número de seguimiento</p>
         <form action={handleTrackingUpdate} className="flex items-center gap-3">
@@ -254,7 +228,7 @@ export default async function AdminPedidoDetailPage({ params }: Props) {
           </button>
         </form>
         <p className="font-mono text-[9px] text-ink/30 mt-2">
-          Al guardar el número de seguimiento aparecerá en el detalle del pedido del cliente.
+          Al guardar, el número de seguimiento aparecerá en el detalle del pedido del cliente.
         </p>
       </div>
 
