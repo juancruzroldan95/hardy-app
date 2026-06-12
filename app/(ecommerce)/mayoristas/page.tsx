@@ -1,11 +1,11 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import Image from 'next/image'
 import { MessageCircle } from 'lucide-react'
 import { WA_NUMBER, ESCALAS } from '@/consts/products'
 import SolicitudForm from '@/components/mayoristas/SolicitudForm'
 import WhatsAppLink from '@/components/analytics/WhatsAppLink'
 import RevealSection from '@/components/ui/RevealSection'
-import ContactForm from '@/components/store/ContactForm'
 
 export const metadata: Metadata = {
   title: 'Mayoristas — Hardy',
@@ -129,24 +129,35 @@ export default function MayoristasPage() {
         </div>
       </section>
 
-      {/* RESEÑAS Y CONSULTAS */}
-      <section className="py-20 px-10 bg-ink text-paper max-md:px-6">
-        <div className="max-w-[1100px] mx-auto grid grid-cols-2 gap-16 items-start max-md:grid-cols-1 max-md:gap-8">
+      {/* TEXTURAS REALES */}
+      <section className="py-[60px] px-10 bg-ink max-md:px-5 max-md:py-12">
+        <div className="max-w-[1100px] mx-auto">
           <RevealSection>
-            <p className="font-mono text-[11px] tracking-[0.25em] text-red uppercase mb-4">── Tu opinión importa</p>
+            <p className="font-mono text-[11px] tracking-[0.25em] text-red uppercase mb-4">── Textura real</p>
             <h2
-              className="font-heading font-medium m-0 mb-4 leading-[1.1] tracking-[-0.02em] text-paper"
-              style={{ fontSize: 'clamp(26px,4vw,40px)' }}
+              className="font-heading font-medium tracking-[-0.02em] text-paper m-0 mb-8 leading-[1.1]"
+              style={{ fontSize: 'clamp(28px,4vw,44px)' }}
             >
-              Dejanos tu reseña <em className="not-italic text-red">o consulta.</em>
+              Se nota lo que <em className="not-italic text-red">no</em> tiene.
             </h2>
-            <p className="font-body text-[15px] text-paper/55 leading-[1.7] max-w-[420px]">
-              ¿Tenés una pregunta sobre nuestros productos o querés contarnos tu experiencia? Nos llega directo y te respondemos.
-            </p>
           </RevealSection>
-          <RevealSection delay={80}>
-            <ContactForm />
-          </RevealSection>
+          <div className="grid grid-cols-3 gap-[2px] max-md:grid-cols-1">
+            {[
+              { src: '/lifestyle/tienda-textura-natural.png', alt: 'Crema de maní HARDY Natural — frasco abierto con cuchara' },
+              { src: '/lifestyle/tienda-textura-crunchy.png', alt: 'Crema de maní HARDY Crunchy — untada en tostada de pan integral' },
+              { src: '/lifestyle/tienda-textura-miel.png', alt: 'Miel líquida HARDY — chorreado de miel desde cucharón de madera' },
+            ].map((img, i) => (
+              <RevealSection key={img.src} delay={i * 100} className="relative aspect-square overflow-hidden">
+                <Image
+                  src={img.src}
+                  alt={img.alt}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 900px) 100vw, 33vw"
+                />
+              </RevealSection>
+            ))}
+          </div>
         </div>
       </section>
 
