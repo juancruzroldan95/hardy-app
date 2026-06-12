@@ -24,7 +24,7 @@ const PRODUCTOS = [
     tag: 'Miel',
     title: 'Líquida y Sólida',
     desc: 'Frascos 500g de miel pura multifloral. Sin azúcar agregada, sin aditivos.',
-    sub: '2 variedades · 500g · 15u/caja',
+    sub: '2 variedades · 500g · 12u/caja',
   },
 ]
 
