@@ -208,6 +208,8 @@ export default function SolicitudForm() {
             <Field label="Provincia" name="provincia" placeholder="Provincia" />
           </div>
 
+          <Field label="Dirección" name="direccion" placeholder="Calle, número, piso/dpto." required={false} />
+
           {/* CUIT: obligatorio para distribuidores */}
           <Field
             label="CUIT / CUIL"

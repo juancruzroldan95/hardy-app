@@ -197,6 +197,7 @@ export const solicitudes = pgTable('solicitudes', {
   whatsapp:    text('whatsapp').notNull(),
   ciudad:      text('ciudad').notNull(),
   provincia:   text('provincia').notNull(),
+  direccion:   text('direccion'),
   cuit:        text('cuit'),
   mensaje:     text('mensaje'),
   notasAdmin:  text('notas_admin'),

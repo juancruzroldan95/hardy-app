@@ -26,6 +26,7 @@ export async function submitSolicitud(
   const whatsapp  = (formData.get('whatsapp')    as string)?.trim()
   const ciudad    = (formData.get('ciudad')      as string)?.trim()
   const provincia = (formData.get('provincia')   as string)?.trim()
+  const direccion = (formData.get('direccion')   as string)?.trim() || null
   const cuit      = (formData.get('cuit')        as string)?.trim() || null
   const mensaje   = (formData.get('mensaje')     as string)?.trim() || null
 
@@ -58,6 +59,7 @@ export async function submitSolicitud(
       whatsapp,
       ciudad,
       provincia,
+      direccion,
       cuit,
       mensaje,
     })
@@ -86,6 +88,7 @@ export async function submitSolicitud(
               <tr><td><strong>Email:</strong></td><td>${email}</td></tr>
               <tr><td><strong>WhatsApp:</strong></td><td>${whatsapp}</td></tr>
               <tr><td><strong>Ciudad:</strong></td><td>${ciudad}, ${provincia}</td></tr>
+              ${direccion ? `<tr><td><strong>Dirección:</strong></td><td>${direccion}</td></tr>` : ''}
               ${cuit    ? `<tr><td><strong>CUIT:</strong></td><td>${cuit}</td></tr>` : ''}
               ${mensaje ? `<tr><td><strong>Mensaje:</strong></td><td>${mensaje}</td></tr>` : ''}
             </table>
