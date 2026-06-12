@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { GRANEL_PRODUCTOS, getTramo } from '@/consts/granel'
+import { GRANEL_PRODUCTOS, DIFERENCIA_MINIMA_PCT, getTramo } from '@/consts/granel'
 import type { Formato } from '@/consts/granel'
 import { WA_NUMBER } from '@/consts/products'
 
@@ -26,7 +26,12 @@ export default function BulkCalculator() {
 
   const producto   = GRANEL_PRODUCTOS[productoIdx]
   const resultados = producto.formatos.map((f) => ({ formato: f, calc: calcFormato(f, kg) }))
-  const minTotal   = Math.min(...resultados.map((r) => r.calc?.total ?? Infinity))
+  const totales    = resultados.map((r) => r.calc?.total ?? Infinity)
+  const minTotal   = Math.min(...totales)
+  const maxTotal   = Math.max(...totales.filter((t) => t !== Infinity))
+  const diffAbs    = maxTotal - minTotal
+  const diffPct    = minTotal > 0 ? (diffAbs / minTotal) * 100 : 0
+  const esEmpate   = diffPct < DIFERENCIA_MINIMA_PCT && resultados.length === 2 && resultados.every((r) => r.calc)
 
   return (
     <div className="bg-paper-2">
@@ -81,7 +86,7 @@ export default function BulkCalculator() {
         <div className="grid grid-cols-2 gap-[2px] max-md:grid-cols-1">
           {resultados.map(({ formato, calc }) => {
             if (!calc) return null
-            const esMejor = calc.total === minTotal
+            const esMejor = !esEmpate && calc.total === minTotal
             const waText  = `Quiero cotizar ${calc.unidades} x ${formato.etiqueta} de ${producto.nombre}`
 
             return (
@@ -144,9 +149,20 @@ export default function BulkCalculator() {
           })}
         </div>
 
-        <p className="font-mono text-[9px] tracking-[0.1em] text-ink/35 uppercase mt-4 m-0">
-          * Se recomienda la opción de menor costo total. El sobrante queda disponible para uso futuro.
-        </p>
+        {esEmpate ? (() => {
+          const [a, b] = resultados
+          return (
+            <p className="font-body text-[13px] text-ink/55 leading-[1.6] mt-4 m-0">
+              Diferencia de {fmt(diffAbs)} ({diffPct.toFixed(1)}%) entre ambas opciones —{' '}
+              {a.calc!.unidades} {a.formato.etiqueta} vs. {b.calc!.unidades} {b.formato.etiqueta}.{' '}
+              La diferencia de costo es mínima; puede convenir priorizar según cuántos envases prefieras manejar.
+            </p>
+          )
+        })() : (
+          <p className="font-mono text-[9px] tracking-[0.1em] text-ink/35 uppercase mt-4 m-0">
+            * Se recomienda la opción de menor costo total. El sobrante queda disponible para uso futuro.
+          </p>
+        )}
       </div>
     </div>
   )

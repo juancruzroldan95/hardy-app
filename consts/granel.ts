@@ -1,3 +1,7 @@
+// Diferencia mínima porcentual para declarar "ganador" en la calculadora.
+// Por debajo de este umbral se muestra nota de empate técnico en lugar del badge.
+export const DIFERENCIA_MINIMA_PCT = 3
+
 export type Tramo = { min: number; max: number | null; precio_unidad: number }
 
 export type Formato = {
