@@ -1,6 +1,7 @@
 import { db } from '@/db'
 import { profiles, deliveryAddresses, orders, orderItems, clientAlerts } from '@/db/schema'
-import { and, eq, ne, desc, asc } from 'drizzle-orm'
+import type { AlertTipo } from '@/db/schema'
+import { and, eq, ne, desc, asc, or, isNull, lte } from 'drizzle-orm'
 
 export async function getProfileByUserId(userId: string) {
   return db.query.profiles.findFirst({
@@ -41,20 +42,42 @@ export async function getAllProfiles() {
   })
 }
 
-export async function getAllPendingAlerts() {
+function endOfToday() {
+  const d = new Date()
+  d.setHours(23, 59, 59, 999)
+  return d
+}
+
+export async function getAllPendingAlerts(opts?: {
+  tipo?: AlertTipo
+  profileId?: string
+  incluirFuturas?: boolean
+}) {
+  const today = endOfToday()
+  const conditions = [
+    eq(clientAlerts.isDeleted, false),
+    eq(clientAlerts.isResolved, false),
+    ...(!opts?.incluirFuturas
+      ? [or(isNull(clientAlerts.scheduledFor), lte(clientAlerts.scheduledFor, today))!]
+      : []),
+    ...(opts?.tipo      ? [eq(clientAlerts.tipo,      opts.tipo)]      : []),
+    ...(opts?.profileId ? [eq(clientAlerts.profileId, opts.profileId)] : []),
+  ]
   return db.query.clientAlerts.findMany({
-    where: and(
-      eq(clientAlerts.isDeleted, false),
-      eq(clientAlerts.isResolved, false),
-    ),
+    where: and(...conditions),
     orderBy: [asc(clientAlerts.scheduledFor), desc(clientAlerts.createdAt)],
     with: { profile: true },
   })
 }
 
 export async function getPendingAlertsCount() {
+  const today = endOfToday()
   const rows = await db.query.clientAlerts.findMany({
-    where: and(eq(clientAlerts.isDeleted, false), eq(clientAlerts.isResolved, false)),
+    where: and(
+      eq(clientAlerts.isDeleted, false),
+      eq(clientAlerts.isResolved, false),
+      or(isNull(clientAlerts.scheduledFor), lte(clientAlerts.scheduledFor, today)),
+    ),
     columns: { id: true },
   })
   return rows.length
