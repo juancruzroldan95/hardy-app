@@ -1,26 +1,34 @@
 import { redirect } from 'next/navigation'
+import { Suspense } from 'react'
 import { createClient } from '@/services/supabase/server'
-import { getProfileByUserId, getAllPendingAlerts } from '@/repository/queries/profile'
-import { resolveClientAlert } from '@/repository/mutations/admin'
+import { getProfileByUserId, getAllPendingAlerts, getAllClients } from '@/repository/queries/profile'
+import { resolveClientAlert, deleteClientAlert } from '@/repository/mutations/admin'
+import type { AlertTipo } from '@/db/schema'
 import DeleteButton from '@/components/portal/DeleteButton'
-import { deleteClientAlert } from '@/repository/mutations/admin'
+import TareasFilters from '@/components/portal/TareasFilters'
 import Link from 'next/link'
 
-const TIPO_LABELS = {
+const TIPO_LABELS: Record<AlertTipo, string> = {
   reorder:    'Recompra',
   payment:    'Pago',
   inactivity: 'Inactividad',
   custom:     'Nota',
-} as const
+}
 
-const TIPO_COLORS = {
+const TIPO_COLORS: Record<AlertTipo, string> = {
   reorder:    'text-blue-600   bg-blue-50   border-blue-200',
   payment:    'text-red        bg-[#fdecea] border-red/20',
   inactivity: 'text-amber-600  bg-amber-50  border-amber-200',
   custom:     'text-ink/60     bg-paper-2   border-ink/10',
-} as const
+}
 
-export default async function AdminTareasPage() {
+const ALERT_TIPOS: AlertTipo[] = ['reorder', 'payment', 'inactivity', 'custom']
+
+export default async function AdminTareasPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tipo?: string; cliente?: string; futuras?: string }>
+}) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
@@ -28,7 +36,16 @@ export default async function AdminTareasPage() {
   const profile = await getProfileByUserId(user.id)
   if (profile?.role !== 'admin') redirect('/portal')
 
-  const alerts = await getAllPendingAlerts()
+  const sp            = await searchParams
+  const tipoRaw       = sp.tipo
+  const tipo          = ALERT_TIPOS.includes(tipoRaw as AlertTipo) ? (tipoRaw as AlertTipo) : undefined
+  const profileId     = sp.cliente || undefined
+  const incluirFuturas = sp.futuras === '1'
+
+  const [alerts, clients] = await Promise.all([
+    getAllPendingAlerts({ tipo, profileId, incluirFuturas }),
+    getAllClients(),
+  ])
 
   // Agrupar por cliente
   const byClient = new Map<string, typeof alerts>()
@@ -43,15 +60,16 @@ export default async function AdminTareasPage() {
     alerts:  items,
   }))
 
-  // Ordenar: primero los que tienen scheduledFor más próxima
   groups.sort((a, b) => {
-    const aDate = a.alerts.find(al => al.scheduledFor)?.scheduledFor
-    const bDate = b.alerts.find(bl => bl.scheduledFor)?.scheduledFor
+    const aDate = a.alerts.find((al) => al.scheduledFor)?.scheduledFor
+    const bDate = b.alerts.find((bl) => bl.scheduledFor)?.scheduledFor
     if (aDate && bDate) return new Date(aDate).getTime() - new Date(bDate).getTime()
     if (aDate) return -1
     if (bDate) return  1
     return 0
   })
+
+  const hayFiltros = tipo || profileId || incluirFuturas
 
   return (
     <div className="max-w-[820px]">
@@ -59,11 +77,19 @@ export default async function AdminTareasPage() {
       <h1 className="font-heading text-[clamp(24px,3vw,36px)] font-medium leading-[1.1] tracking-[-0.02em] mb-2">
         Tareas pendientes
       </h1>
-      <p className="font-body text-[14px] text-ink/40 mb-8">
+      <p className="font-body text-[14px] text-ink/40 mb-6">
         {alerts.length === 0
-          ? 'No hay tareas pendientes.'
-          : `${alerts.length} ${alerts.length === 1 ? 'tarea pendiente' : 'tareas pendientes'} en ${groups.length} ${groups.length === 1 ? 'cliente' : 'clientes'}.`}
+          ? hayFiltros ? 'Sin tareas para los filtros aplicados.' : 'No hay tareas para hoy.'
+          : `${alerts.length} ${alerts.length === 1 ? 'tarea' : 'tareas'} en ${groups.length} ${groups.length === 1 ? 'cliente' : 'clientes'}.`}
+        {!incluirFuturas && !hayFiltros && (
+          <span className="ml-2 text-ink/30">Solo hoy y anteriores.</span>
+        )}
       </p>
+
+      {/* Filtros */}
+      <Suspense>
+        <TareasFilters clients={clients} />
+      </Suspense>
 
       {alerts.length === 0 ? (
         <div className="bg-paper border border-ink/8 p-12 text-center">
