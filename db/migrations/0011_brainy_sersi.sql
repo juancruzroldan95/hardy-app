@@ -1,0 +1,1 @@
+ALTER TABLE "solicitudes" ADD COLUMN "direccion" text;
