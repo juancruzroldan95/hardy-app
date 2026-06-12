@@ -61,10 +61,14 @@ export default function AdminOrderEditForm({
     Object.fromEntries(items.map((i) => [i.id, i.qty])),
   )
 
-  const total = items.reduce((acc, item) => {
+  const IVA_RATE = 0.21
+
+  const subtotalNeto = items.reduce((acc, item) => {
     const q = qtys[item.id] ?? item.qty
     return acc + (q > 0 ? q * item.unitPriceArs : 0)
   }, 0)
+  const ivaAmount = subtotalNeto * IVA_RATE
+  const total = subtotalNeto + ivaAmount
 
   const selectCls = 'w-full bg-paper-2 border border-ink/15 font-body text-[14px] px-4 py-3 outline-none focus:border-ink transition-colors'
 
@@ -118,8 +122,16 @@ export default function AdminOrderEditForm({
                 </div>
               )
             })}
+            <div className="flex items-center justify-between px-4 py-3 border-t border-ink/8">
+              <span className="font-mono text-[9px] tracking-[0.12em] uppercase text-ink/40">Subtotal neto</span>
+              <span className="font-mono text-[13px] text-ink/60">{formatARS(subtotalNeto)}</span>
+            </div>
+            <div className="flex items-center justify-between px-4 py-3">
+              <span className="font-mono text-[9px] tracking-[0.12em] uppercase text-ink/40">IVA 21%</span>
+              <span className="font-mono text-[13px] text-ink/60">{formatARS(ivaAmount)}</span>
+            </div>
             <div className="flex items-center justify-between px-4 py-3 bg-paper-2">
-              <span className="font-mono text-[9px] tracking-[0.15em] uppercase text-ink/50">Total</span>
+              <span className="font-mono text-[9px] tracking-[0.15em] uppercase text-ink/50">Total con IVA</span>
               <span className="font-heading text-[18px] font-medium text-ink">{formatARS(total)}</span>
             </div>
           </div>

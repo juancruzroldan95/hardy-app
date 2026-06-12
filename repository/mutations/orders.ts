@@ -168,6 +168,8 @@ async function _createOrderForUser({
   // Build price lookup with tiered pricing
   const getPrice = await buildPriceLookup(role)
 
+  const IVA_RATE = 0.21
+
   // Build order items
   let totalArs = 0
   const itemsToInsert: {
@@ -206,7 +208,7 @@ async function _createOrderForUser({
     userId,
     status:               'pending',
     paymentStatus:        'unpaid',
-    totalArs:             totalArs.toFixed(2),
+    totalArs:             (totalArs * (1 + IVA_RATE)).toFixed(2),
     shippingMethod,
     paymentMethod,
     notes,
@@ -236,7 +238,7 @@ async function _createOrderForUser({
         shippingMethod,
         paymentMethod,
         notes,
-        totalArs,
+        totalArs: totalArs * (1 + IVA_RATE),
         items:          itemsToInsert.map((i) => ({
           ...i,
           id:          '',
