@@ -646,7 +646,8 @@ export async function updateOrderDetails(
     where: and(eq(orderItems.orderId, orderId), eq(orderItems.isDeleted, false)),
   })
 
-  let newTotal = 0
+  const IVA_RATE = 0.21
+  let subtotalNeto = 0
 
   for (const item of currentItems) {
     const raw = formData.get(`qty_${item.id}`)
@@ -661,16 +662,18 @@ export async function updateOrderDetails(
       await db.update(orderItems)
         .set({ qty, subtotalArs: subtotal.toFixed(2) })
         .where(eq(orderItems.id, item.id))
-      newTotal += subtotal
+      subtotalNeto += subtotal
     }
   }
+
+  const totalConIva = subtotalNeto * (1 + IVA_RATE)
 
   await db.update(orders)
     .set({
       shippingMethod,
       paymentMethod,
       notes,
-      totalArs:  newTotal.toFixed(2),
+      totalArs:  totalConIva.toFixed(2),
       updatedAt: new Date(),
     })
     .where(eq(orders.id, orderId))

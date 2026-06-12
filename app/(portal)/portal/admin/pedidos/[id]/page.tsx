@@ -131,10 +131,27 @@ export default async function AdminPedidoDetailPage({ params }: Props) {
             </div>
           ))}
         </div>
-        <div className="flex items-center justify-between px-5 py-4 border-t border-ink/8 bg-paper-2">
-          <span className="font-mono text-[10px] tracking-[0.15em] uppercase text-ink/50">Total</span>
-          <span className="font-heading text-[20px] font-medium text-ink">{formatARS(Number(order.totalArs))}</span>
-        </div>
+        {(() => {
+          const subtotal = order.items.reduce((acc, i) => acc + Number(i.subtotalArs), 0)
+          const iva = subtotal * 0.21
+          const total = subtotal + iva
+          return (
+            <>
+              <div className="flex items-center justify-between px-5 py-3 border-t border-ink/8">
+                <span className="font-mono text-[9px] tracking-[0.12em] uppercase text-ink/40">Subtotal neto</span>
+                <span className="font-mono text-[13px] text-ink/60">{formatARS(subtotal)}</span>
+              </div>
+              <div className="flex items-center justify-between px-5 py-3">
+                <span className="font-mono text-[9px] tracking-[0.12em] uppercase text-ink/40">IVA 21%</span>
+                <span className="font-mono text-[13px] text-ink/60">{formatARS(iva)}</span>
+              </div>
+              <div className="flex items-center justify-between px-5 py-4 bg-paper-2">
+                <span className="font-mono text-[10px] tracking-[0.15em] uppercase text-ink/50">Total con IVA</span>
+                <span className="font-heading text-[20px] font-medium text-ink">{formatARS(total)}</span>
+              </div>
+            </>
+          )
+        })()}
       </div>
 
       {/* PO Number + Fecha deseada */}
