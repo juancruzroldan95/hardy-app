@@ -177,7 +177,7 @@ export default async function TiendaPage() {
       </section>
 
       {/* Envíos */}
-      <section className="bg-ink text-paper py-16 px-10 max-md:px-5">
+      <section className="bg-paper-2 py-16 px-10 max-md:px-5">
         <div className="max-w-[1100px] mx-auto grid grid-cols-2 gap-[60px] items-center max-md:grid-cols-1 max-md:gap-10">
           <div>
             <div className="font-mono text-[11px] tracking-[0.25em] text-red uppercase mb-4">── Envíos</div>
@@ -187,17 +187,17 @@ export default async function TiendaPage() {
             >
               Coordinamos el envío <em className="not-italic text-red">para vos.</em>
             </h2>
-            <p className="text-[15px] text-[#bbb] leading-[1.7] m-0 mb-3">
+            <p className="text-[15px] text-ink/60 leading-[1.7] m-0 mb-3">
               Enviamos a todo el país. El costo y el tiempo de entrega dependen de tu zona, el volumen del pedido y la urgencia — por eso lo coordinamos personalmente.
             </p>
-            <p className="text-[15px] text-[#bbb] leading-[1.7] m-0 mb-7">
+            <p className="text-[15px] text-ink/60 leading-[1.7] m-0 mb-7">
               Antes de finalizar tu compra, escribinos y te damos el detalle exacto del envío sin sorpresas.
             </p>
             <a
               href={`${WA_NUMBER}?text=Hola%20Hardy!%20Quiero%20saber%20el%20costo%20de%20env%C3%ADo%20a%20mi%20zona`}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-block bg-red text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-7 py-[14px] no-underline whitespace-nowrap"
+              className="inline-block bg-ink text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-7 py-[14px] no-underline whitespace-nowrap"
             >
               Consultar envío →
             </a>
@@ -209,11 +209,11 @@ export default async function TiendaPage() {
               { Icon: Package,      t: 'Según tu volumen',  d: 'El envío se calcula en función de lo que pedís — frascos, baldes o cajas mayoristas.' },
               { Icon: MessageCircle, t: 'Sin sorpresas',    d: 'Te confirmamos el costo antes de que pagues. Nada oculto, todo claro.' },
             ].map((f, i) => (
-              <div key={i} className="flex gap-[14px] items-start px-5 py-[18px]" style={{ background: 'rgba(255,255,255,0.05)' }}>
+              <div key={i} className="flex gap-[14px] items-start px-5 py-[18px] bg-paper">
                 <f.Icon size={18} className="flex-shrink-0 mt-[2px] text-red" />
                 <div>
-                  <div className="font-body font-bold text-[14px] mb-1">{f.t}</div>
-                  <div className="text-[13px] text-[#888] leading-[1.5]">{f.d}</div>
+                  <div className="font-body font-bold text-[14px] mb-1 text-ink">{f.t}</div>
+                  <div className="text-[13px] text-ink/50 leading-[1.5]">{f.d}</div>
                 </div>
               </div>
             ))}
@@ -222,17 +222,17 @@ export default async function TiendaPage() {
       </section>
 
       {/* Reseñas y consultas */}
-      <section className="py-20 px-10 bg-paper-2 max-md:px-6">
+      <section className="py-20 px-10 bg-ink text-paper max-md:px-6">
         <div className="max-w-[1100px] mx-auto grid grid-cols-2 gap-16 items-start max-md:grid-cols-1 max-md:gap-8">
           <RevealSection>
             <p className="font-mono text-[11px] tracking-[0.25em] text-red uppercase mb-4">── Tu opinión importa</p>
             <h2
-              className="font-heading font-medium m-0 mb-4 leading-[1.1] tracking-[-0.02em]"
+              className="font-heading font-medium m-0 mb-4 leading-[1.1] tracking-[-0.02em] text-paper"
               style={{ fontSize: 'clamp(26px,4vw,40px)' }}
             >
               Dejanos tu reseña <em className="not-italic text-red">o consulta.</em>
             </h2>
-            <p className="font-body text-[15px] text-ink/55 leading-[1.7] max-w-[420px]">
+            <p className="font-body text-[15px] text-paper/55 leading-[1.7] max-w-[420px]">
               ¿Tenés una pregunta sobre nuestros productos o querés contarnos tu experiencia? Nos llega directo y te respondemos.
             </p>
           </RevealSection>
