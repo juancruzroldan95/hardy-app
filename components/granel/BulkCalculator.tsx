@@ -123,7 +123,7 @@ export default function BulkCalculator() {
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span>$/kg efectivo</span>
+                    <span>$/kilo</span>
                     <span className="font-mono font-medium">{fmt(calc.precioKgReal)}</span>
                   </div>
                 </div>
