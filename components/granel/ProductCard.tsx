@@ -2,9 +2,8 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
-import { getTramo } from '@/consts/granel'
+import Link from 'next/link'
 import type { ProductoGranel } from '@/consts/granel'
-import { WA_NUMBER } from '@/consts/products'
 
 function fmt(n: number) {
   return n.toLocaleString('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 })
@@ -12,42 +11,23 @@ function fmt(n: number) {
 
 export default function ProductCard({ producto }: { producto: ProductoGranel }) {
   const [formatoIdx, setFormatoIdx] = useState(0)
-  const [qty, setQty] = useState(1)
 
-  const formato = producto.formatos[formatoIdx]
-  const tramo   = getTramo(formato.tramos, qty)!
-  const precioUnit = tramo.precio_unidad
+  const formato    = producto.formatos[formatoIdx]
+  const tramoBase  = formato.tramos[0]
+  const precioUnit = tramoBase.precio_unidad
   const precioKg   = precioUnit / formato.kg
-  const total      = precioUnit * qty
 
-  // Nudge: si el tramo actual tiene techo y faltan ≤ 2 unidades para el siguiente
-  const nudge = (() => {
-    if (tramo.max === null) return null
-    const extra = tramo.max - qty
-    if (extra > 2) return null
-    const nextTramo = getTramo(formato.tramos, tramo.max + 1)
-    if (!nextTramo) return null
-    const unidadesExtra = extra + 1
-    const totalNuevo = (qty + unidadesExtra) * nextTramo.precio_unidad
-    const totalSiSiguieraEnTramoActual = (qty + unidadesExtra) * tramo.precio_unidad
-    const ahorro = totalSiSiguieraEnTramoActual - totalNuevo
-    return {
-      unidadesExtra,
-      precioKgNext: nextTramo.precio_unidad / formato.kg,
-      ahorro,
+  // ID del producto en tienda derivado del id de granel
+  // mani → balde-45 / balde-23 ; miel → miel-balde-6 / miel-balde-30
+  const tiendaId = (() => {
+    const ids: Record<string, string> = {
+      mani_4_5kg: 'balde-45',
+      mani_23kg:  'balde-23',
+      miel_6kg:   'miel-balde-6',
+      miel_30kg:  'miel-balde-30',
     }
+    return ids[formato.id] ?? null
   })()
-
-  function changeFormato(idx: number) {
-    setFormatoIdx(idx)
-    setQty(1)
-  }
-
-  function changeQty(val: number) {
-    setQty(Math.max(1, val))
-  }
-
-  const waText = `Quiero cotizar ${qty} x ${formato.etiqueta} de ${producto.nombre}`
 
   return (
     <div className="bg-paper-2 flex flex-col">
@@ -58,7 +38,7 @@ export default function ProductCard({ producto }: { producto: ProductoGranel }) 
           <button
             key={f.id}
             type="button"
-            onClick={() => changeFormato(i)}
+            onClick={() => setFormatoIdx(i)}
             className={`flex-1 font-mono text-[10px] tracking-[0.15em] uppercase py-3 px-4 transition-colors ${
               i === formatoIdx
                 ? 'bg-ink text-paper'
@@ -89,7 +69,7 @@ export default function ProductCard({ producto }: { producto: ProductoGranel }) 
           <h3 className="font-heading text-[22px] font-medium m-0">{formato.etiqueta}</h3>
         </div>
 
-        {/* Precio principal */}
+        {/* Precio público (fijo = tramo 1-4) */}
         <div className="bg-paper px-4 py-3 border border-ink/10">
           <div className="font-heading text-[30px] font-medium leading-none">{fmt(precioUnit)}</div>
           <div className="font-mono text-[10px] tracking-[0.12em] uppercase text-ink/50 mt-1">
@@ -97,16 +77,15 @@ export default function ProductCard({ producto }: { producto: ProductoGranel }) 
           </div>
         </div>
 
-        {/* Tramos */}
+        {/* Tramos — tramo 0 con precios, tramos 1+ con % */}
         <div className="flex flex-col gap-[3px]">
           {formato.tramos.map((t, idx) => {
-            const activo = t === tramo
-            const tramoBase = formato.tramos[0]
+            const activo = idx === 0
             const pct = Math.round((1 - t.precio_unidad / tramoBase.precio_unidad) * 100)
             return (
               <div
                 key={t.min}
-                className={`flex justify-between px-3 py-[6px] font-mono text-[10px] tracking-[0.1em] transition-colors ${
+                className={`flex justify-between px-3 py-[6px] font-mono text-[10px] tracking-[0.1em] ${
                   activo ? 'bg-ink text-paper' : 'text-ink/40'
                 }`}
               >
@@ -132,63 +111,15 @@ export default function ProductCard({ producto }: { producto: ProductoGranel }) 
           accedés a precios preferenciales adicionales, condiciones de pago y envío programado.
         </p>
 
-        {/* Cantidad */}
-        <div>
-          <label className="font-mono text-[10px] tracking-[0.15em] uppercase text-ink/60 block mb-2">
-            Cantidad
-          </label>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => changeQty(qty - 1)}
-              className="w-10 h-10 border border-ink/20 font-mono text-[18px] flex items-center justify-center hover:border-ink transition-colors"
-            >
-              −
-            </button>
-            <input
-              type="number"
-              min={1}
-              value={qty}
-              onChange={(e) => changeQty(parseInt(e.target.value) || 1)}
-              className="w-16 text-center border border-ink/20 font-mono text-[16px] py-2 outline-none focus:border-ink bg-paper"
-            />
-            <button
-              type="button"
-              onClick={() => changeQty(qty + 1)}
-              className="w-10 h-10 border border-ink/20 font-mono text-[18px] flex items-center justify-center hover:border-ink transition-colors"
-            >
-              +
-            </button>
-            <span className="font-mono text-[10px] text-ink/40 uppercase tracking-[0.1em] ml-1">
-              unidades
-            </span>
-          </div>
-        </div>
-
-        {/* Total */}
-        <div className="flex items-baseline justify-between border-t border-ink/10 pt-3">
-          <span className="font-mono text-[10px] tracking-[0.15em] uppercase text-ink/50">Total estimado</span>
-          <span className="font-heading text-[24px] font-medium">{fmt(total)}</span>
-        </div>
-
-        {/* Nudge */}
-        {nudge && (
-          <div className="bg-[#f0fdf4] border-l-2 border-[#16a34a] px-3 py-[10px] text-[12px] font-body text-[#15803d] leading-[1.55]">
-            Comprando {nudge.unidadesExtra} unidad{nudge.unidadesExtra > 1 ? 'es' : ''} más, el precio baja a{' '}
-            <strong>{fmt(nudge.precioKgNext)}/kg</strong> en todo el pedido
-            (ahorro de <strong>{fmt(nudge.ahorro)}</strong>).
-          </div>
+        {/* CTA — comprar en tienda (1-4 u.) */}
+        {tiendaId && (
+          <Link
+            href={`/tienda?producto=${tiendaId}`}
+            className="bg-red text-paper font-mono text-[11px] tracking-[0.15em] uppercase px-6 py-[14px] text-center hover:opacity-90 transition-opacity mt-auto"
+          >
+            Comprar en tienda →
+          </Link>
         )}
-
-        {/* CTA */}
-        <a
-          href={`${WA_NUMBER}?text=${encodeURIComponent(waText)}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="bg-red text-paper font-mono text-[11px] tracking-[0.15em] uppercase px-6 py-[14px] text-center hover:opacity-90 transition-opacity mt-auto"
-        >
-          Cotizar este pedido →
-        </a>
 
       </div>
     </div>

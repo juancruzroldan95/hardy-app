@@ -4,7 +4,6 @@ import { MessageCircle } from 'lucide-react'
 import { WA_NUMBER } from '@/consts/products'
 import { GRANEL_PRODUCTOS } from '@/consts/granel'
 import ProductCard from '@/components/granel/ProductCard'
-import BulkCalculator from '@/components/granel/BulkCalculator'
 import WhatsAppLink from '@/components/analytics/WhatsAppLink'
 
 export const metadata: Metadata = {
@@ -43,24 +42,13 @@ export default function AGranelPage() {
         <div className="max-w-[1100px] mx-auto">
           <p className="font-mono text-[11px] tracking-[0.25em] text-red uppercase mb-2">── Productos y precios</p>
           <p className="font-body text-[14px] text-ink/50 mb-7">
-            Precios por unidad. Descuentos por volumen aplicados automáticamente al cambiar la cantidad.
+            Precio público por unidad. Para volúmenes de 5 o más unidades, solicitá acceso al Portal Cliente.
           </p>
           <div className="grid grid-cols-2 gap-[2px] max-md:grid-cols-1">
             {GRANEL_PRODUCTOS.map((p) => (
               <ProductCard key={p.id} producto={p} />
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* CALCULADORA */}
-      <section className="py-14 px-10 bg-paper-2 max-md:px-6">
-        <div className="max-w-[1100px] mx-auto">
-          <p className="font-mono text-[11px] tracking-[0.25em] text-red uppercase mb-2">── Calculadora de compra</p>
-          <p className="font-body text-[14px] text-ink/50 mb-7">
-            Ingresá los kg que necesitás y comparamos qué formato te sale más económico en total.
-          </p>
-          <BulkCalculator />
         </div>
       </section>
 
