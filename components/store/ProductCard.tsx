@@ -30,7 +30,7 @@ function Stars({ avg, size = 12 }: { avg: number; size?: number }) {
 }
 
 export default function ProductCard({ product, rating }: { product: Product; rating?: ProductRating }) {
-  const { addItem } = useCart()
+  const { addItem, cart } = useCart()
   const [imgIdx,        setImgIdx]        = useState(0)
   const [modalMounted,  setModalMounted]  = useState(false)  // controls DOM presence
   const [modalVisible,  setModalVisible]  = useState(false)  // controls CSS opacity/scale
@@ -113,6 +113,25 @@ export default function ProductCard({ product, rating }: { product: Product; rat
             </div>
           )}
         </div>
+
+        {/* Nudge mayorista — baldes con ≥5 unidades en el carrito */}
+        {product.line === 'balde' && (cart[product.id] ?? 0) >= 5 && (
+          <div
+            className="px-4 py-3 border-t border-ink/10 group-hover:border-white/10 transition-colors duration-[220ms]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p className="font-mono text-[10px] leading-[1.55] text-ink/60 group-hover:text-paper/50 m-0 transition-colors duration-[220ms]">
+              ¿Comprás por volumen?{' '}
+              <a
+                href="/mayoristas#solicitar"
+                className="underline text-ink group-hover:text-paper transition-colors duration-[220ms]"
+              >
+                Solicitá acceso al Portal Cliente
+              </a>{' '}
+              y accedé a un mejor precio por kg.
+            </p>
+          </div>
+        )}
 
         {/* Info */}
         <div className="p-5 pb-6 flex flex-col flex-1">

@@ -206,7 +206,7 @@ export const PRODUCTS: Product[] = [
     desc: 'Para cafeterías, restaurantes y pastelerías.',
     image: '/products/miel-balde-6-front.png',
     lifestyle: '/products/miel-balde-6-open.png',
-    price: 28500,
+    price: 40500,
     images: [
       '/products/miel-balde-6-front.png',
       '/products/miel-balde-6-open.png',
@@ -226,7 +226,7 @@ export const PRODUCTS: Product[] = [
     desc: 'Formato industrial para producción a escala.',
     image: '/products/miel-balde-30-front.png',
     lifestyle: '/products/miel-balde-30-open.png',
-    price: 118000,
+    price: 180000,
     images: [
       '/products/miel-balde-30-front.png',
       '/products/miel-balde-30-open.png',
