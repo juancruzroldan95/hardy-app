@@ -32,6 +32,7 @@ export const metadata: Metadata = {
 export default async function TiendaPage() {
   const products = getProducts()
   const frascos = products.filter((p) => p.line === 'frasco')
+  const baldes  = products.filter((p) => p.line === 'balde')
 
   // Agregados de reseñas publicadas por producto
   const reviews = await db.query.productReviews.findMany({
@@ -99,22 +100,25 @@ export default async function TiendaPage() {
             ))}
           </div>
 
-          {/* Baldes a granel — viven en /a-granel con "Consultar precio".
-              Ver correcciones web HARDY P1.2: la tienda pública queda solo con frascos. */}
-          <RevealSection delay={120} className="mt-10 border border-ink/10 bg-paper-2 px-6 py-7 flex items-center justify-between gap-6 max-md:flex-col max-md:items-start">
-            <div>
-              <div className="font-mono text-[10px] tracking-[0.2em] uppercase text-red mb-1">── A Granel · Baldes</div>
-              <p className="text-[14px] text-ink m-0 max-w-[520px] leading-[1.6]">
-                Crema de maní y miel en baldes de 4,5 kg, 6 kg, 23 kg y 30 kg. Para uso gastronómico, producción y reventa — con precio por volumen.
-              </p>
+          {/* Baldes */}
+          <RevealSection className="mt-14 mb-5">
+            <div className="flex items-baseline justify-between gap-4 flex-wrap">
+              <div>
+                <div className="font-mono text-[10px] tracking-[0.2em] uppercase text-red mb-1">── Baldes · A granel</div>
+                <p className="text-[13px] text-[#888] m-0">Crema de maní y miel · 4,5–30 kg · Por unidad</p>
+              </div>
+              <Link href="/a-granel" className="font-mono text-[10px] tracking-[0.15em] uppercase text-ink/50 hover:text-ink transition-colors whitespace-nowrap">
+                Calculadora de compra →
+              </Link>
             </div>
-            <Link
-              href="/a-granel"
-              className="inline-block bg-ink text-paper font-mono text-[11px] tracking-[0.18em] uppercase px-7 py-[14px] no-underline whitespace-nowrap"
-            >
-              Ver a granel →
-            </Link>
           </RevealSection>
+          <div className="grid grid-cols-4 gap-[2px] max-md:grid-cols-2">
+            {baldes.map((p, i) => (
+              <RevealSection key={p.id} delay={i * 80}>
+                <ProductCard product={p} rating={ratingByProduct.get(p.id)} />
+              </RevealSection>
+            ))}
+          </div>
 
         </div>
       </section>

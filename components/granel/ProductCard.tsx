@@ -99,8 +99,10 @@ export default function ProductCard({ producto }: { producto: ProductoGranel }) 
 
         {/* Tramos */}
         <div className="flex flex-col gap-[3px]">
-          {formato.tramos.map((t) => {
+          {formato.tramos.map((t, idx) => {
             const activo = t === tramo
+            const tramoBase = formato.tramos[0]
+            const pct = Math.round((1 - t.precio_unidad / tramoBase.precio_unidad) * 100)
             return (
               <div
                 key={t.min}
@@ -111,11 +113,24 @@ export default function ProductCard({ producto }: { producto: ProductoGranel }) 
                 <span>
                   {t.max === null ? `${t.min}+ unidades` : `${t.min}–${t.max} unidades`}
                 </span>
-                <span>{fmt(t.precio_unidad)}/u · {fmt(t.precio_unidad / formato.kg)}/kg</span>
+                <span>
+                  {idx === 0
+                    ? `${fmt(t.precio_unidad)}/u · ${fmt(t.precio_unidad / formato.kg)}/kg`
+                    : `-${pct}% sobre el $/kg`}
+                </span>
               </div>
             )
           })}
         </div>
+
+        {/* Nota de portal */}
+        <p className="font-mono text-[9px] tracking-[0.08em] text-ink/45 leading-[1.6] m-0">
+          ¿Compra recurrente o pedido especial?{' '}
+          <a href="/mayoristas#solicitar" className="underline text-ink/60 hover:text-ink transition-colors">
+            En el Portal Cliente
+          </a>{' '}
+          accedés a precios preferenciales adicionales, condiciones de pago y envío programado.
+        </p>
 
         {/* Cantidad */}
         <div>
