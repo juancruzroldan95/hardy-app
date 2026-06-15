@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/services/supabase/server'
 import { getProfileByUserId, getAllClientsWithOrdersAndAlerts } from '@/repository/queries/profile'
+import { getApprovedSolicitudesPendingAccess } from '@/repository/queries/solicitudes'
 import { ROLE_LABELS } from '@/consts/roles'
 import { formatARS } from '@/consts/products'
 import {
@@ -89,7 +90,10 @@ export default async function AdminClientesPage({ searchParams }: Props) {
   if (adminProfile?.role !== 'admin') redirect('/portal')
 
   // ── Fetch all non-admin clients with their orders + alerts ──────────────────
-  const allProfiles = await getAllClientsWithOrdersAndAlerts()
+  const [allProfiles, solicitudesPendientes] = await Promise.all([
+    getAllClientsWithOrdersAndAlerts(),
+    getApprovedSolicitudesPendingAccess(),
+  ])
 
   // Enriquecer cada contacto con su ciclo de vida (derivado del último pedido)
   const enriched = allProfiles
@@ -107,7 +111,7 @@ export default async function AdminClientesPage({ searchParams }: Props) {
     ? enriched.filter((c) => c.role === tipoFilter)
     : enriched
   const counts = {
-    prospecto: tipoScoped.filter((c) => c.lifecycle === 'prospecto').length,
+    prospecto: tipoScoped.filter((c) => c.lifecycle === 'prospecto').length + (!tipoFilter ? solicitudesPendientes.length : 0),
     activo:    tipoScoped.filter((c) => c.lifecycle === 'activo').length,
     inactivo:  tipoScoped.filter((c) => c.lifecycle === 'inactivo').length,
   }
@@ -220,6 +224,62 @@ export default async function AdminClientesPage({ searchParams }: Props) {
         </div>
       ) : (
         <div className="flex flex-col gap-6">
+
+          {/* ── Solicitudes aprobadas sin acceso creado (prospectos) ────────── */}
+          {!estadoFilter || estadoFilter === 'prospecto' ? solicitudesPendientes
+            .filter(() => !tipoFilter)
+            .map((sol) => (
+              <div key={sol.id} className="bg-paper border border-blue-200 relative">
+                <div className="absolute top-0 left-0 right-0 h-[3px] bg-blue-400" />
+                <div className="px-6 py-5 border-b border-ink/8 flex items-start justify-between gap-4 flex-wrap">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-3 mb-1 flex-wrap">
+                      <span className="font-body font-semibold text-[15px] text-ink">{sol.empresa}</span>
+                      <span className="font-mono text-[8px] tracking-[0.15em] uppercase text-blue-700 bg-blue-50 border border-blue-200 px-2 py-[3px]">
+                        Prospecto
+                      </span>
+                      <span className="font-mono text-[8px] tracking-[0.12em] uppercase text-[#2d6a35] bg-[#e8f4ea] border border-[#c6dfc7] px-2 py-[3px]">
+                        Aprobada · sin acceso
+                      </span>
+                    </div>
+                    <div className="flex gap-4 flex-wrap">
+                      <span className="font-mono text-[10px] tracking-[0.08em] text-ink/40">{sol.nombre}</span>
+                      <span className="font-mono text-[10px] tracking-[0.08em] text-ink/40">{sol.ciudad}, {sol.provincia}</span>
+                      {sol.whatsapp && (
+                        <a
+                          href={`https://wa.me/${sol.whatsapp.replace(/\D/g, '')}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-mono text-[10px] tracking-[0.08em] text-red"
+                        >
+                          {sol.whatsapp}
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex gap-3 items-start flex-wrap">
+                    <Link
+                      href={`/portal/admin/solicitudes/${sol.id}`}
+                      className="font-mono text-[9px] tracking-[0.12em] uppercase text-[#2d6a35] hover:text-[#2d6a35]/70 border border-[#c6dfc7] hover:border-[#2d6a35] px-3 py-[7px] transition-colors"
+                    >
+                      Crear acceso →
+                    </Link>
+                    <span className="font-mono text-[9px] tracking-[0.1em] text-ink/30 uppercase self-center">
+                      Aprobada {new Date(sol.updatedAt).toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric' })}
+                    </span>
+                  </div>
+                </div>
+                <div className="px-6 py-3 bg-blue-50/50">
+                  <p className="font-mono text-[9px] tracking-[0.1em] text-blue-600/70 uppercase">
+                    Solicitud aprobada — el acceso al portal todavía no fue creado.
+                    <Link href={`/portal/admin/solicitudes/${sol.id}`} className="underline ml-1 hover:text-blue-800 transition-colors">
+                      Crear acceso →
+                    </Link>
+                  </p>
+                </div>
+              </div>
+            )) : null}
+
           {clients.map((client) => {
             const clientOrders   = client.orders ?? []
             const clientAlertsList = client.alerts ?? []
