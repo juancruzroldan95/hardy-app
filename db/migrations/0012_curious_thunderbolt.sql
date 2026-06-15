@@ -1,0 +1,1 @@
+ALTER TABLE "solicitudes" ADD COLUMN "portal_acceso_creado" boolean DEFAULT false NOT NULL;

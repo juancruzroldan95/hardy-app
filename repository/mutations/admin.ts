@@ -425,9 +425,9 @@ export async function createPortalAccessFromSolicitud(
     return { error: 'Error al guardar el perfil.' }
   }
 
-  // 5. Marcar la solicitud como aprobada
+  // 5. Marcar la solicitud como aprobada y con acceso creado
   await db.update(solicitudes)
-    .set({ estado: 'aprobada', updatedAt: new Date() })
+    .set({ estado: 'aprobada', portalAccesoCreado: true, updatedAt: new Date() })
     .where(eq(solicitudes.id, solicitudId))
 
   revalidatePath(`/portal/admin/solicitudes/${solicitudId}`)

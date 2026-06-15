@@ -2,6 +2,17 @@ import { db } from '@/db'
 import { solicitudes } from '@/db/schema'
 import { and, eq, desc, count } from 'drizzle-orm'
 
+export async function getApprovedSolicitudesPendingAccess() {
+  return db.query.solicitudes.findMany({
+    where: and(
+      eq(solicitudes.isDeleted, false),
+      eq(solicitudes.estado, 'aprobada'),
+      eq(solicitudes.portalAccesoCreado, false),
+    ),
+    orderBy: [desc(solicitudes.createdAt)],
+  })
+}
+
 export async function getAllSolicitudes() {
   return db.query.solicitudes.findMany({
     where: eq(solicitudes.isDeleted, false),
