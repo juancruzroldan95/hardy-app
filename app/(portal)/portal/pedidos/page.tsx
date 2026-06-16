@@ -44,9 +44,15 @@ export default async function PedidosPage({ searchParams }: Props) {
   const { status: rawStatus } = await searchParams
   const statusFilter = rawStatus && isValidStatus(rawStatus) ? rawStatus : null
 
-  const [profile, userOrders] = await Promise.all([
-    getProfileByUserId(user.id),
-    getOrdersByUserId(user.id, statusFilter),
+  const timeout = new Promise<never>((_, reject) =>
+    setTimeout(() => reject(new Error('Timeout al cargar pedidos')), 8_000)
+  )
+  const [profile, userOrders] = await Promise.race([
+    Promise.all([
+      getProfileByUserId(user.id),
+      getOrdersByUserId(user.id, statusFilter),
+    ]),
+    timeout,
   ])
 
   const role = profile?.role ?? 'consumer'

@@ -90,6 +90,8 @@ export default function StockManager({ items }: { items: Item[] }) {
                 <div className="flex items-center gap-3">
                   <input
                     type="number"
+                    name={`stock-qty-${item.id}`}
+                    id={`stock-qty-${item.id}`}
                     min={0}
                     value={qtyStr}
                     onChange={(e) => setQtys((prev) => ({ ...prev, [item.id]: e.target.value }))}
@@ -136,6 +138,8 @@ export default function StockManager({ items }: { items: Item[] }) {
               {/* Notes */}
               <input
                 type="text"
+                name={`stock-notes-${item.id}`}
+                id={`stock-notes-${item.id}`}
                 value={notes[item.id]}
                 onChange={(e) => setNotes((prev) => ({ ...prev, [item.id]: e.target.value }))}
                 placeholder="Nota interna (opcional, no visible al cliente)"
