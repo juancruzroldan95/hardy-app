@@ -21,7 +21,7 @@ if (!DATABASE_URL) throw new Error('DATABASE_URL is required in .env.local')
 const client = postgres(DATABASE_URL, { prepare: false, max: 1 })
 const db = drizzle(client, { schema })
 
-type Role = 'mayorista' | 'gastronomico' | 'distribuidor'
+type Role = 'mayorista' | 'gastronomico' | 'distribuidor' | 'productor'
 
 interface Tier {
   role: Role
@@ -87,6 +87,20 @@ const TIERS: Tier[] = [
   { role: 'gastronomico', productId: 'miel-balde-30', minQty: 1,  priceArs: '180000' },
   { role: 'gastronomico', productId: 'miel-balde-30', minQty: 5,  priceArs: '171000' },
   { role: 'gastronomico', productId: 'miel-balde-30', minQty: 10, priceArs: '162000' },
+
+  // ── PRODUCTOR — baldes (precio por balde) ──────────────────────────────────────
+  { role: 'productor', productId: 'balde-45',      minQty: 1,  priceArs: '17708'  },
+  { role: 'productor', productId: 'balde-45',      minQty: 5,  priceArs: '16823'  },
+  { role: 'productor', productId: 'balde-45',      minQty: 10, priceArs: '15937'  },
+  { role: 'productor', productId: 'balde-23',      minQty: 1,  priceArs: '84750'  },
+  { role: 'productor', productId: 'balde-23',      minQty: 5,  priceArs: '80513'  },
+  { role: 'productor', productId: 'balde-23',      minQty: 10, priceArs: '76275'  },
+  { role: 'productor', productId: 'miel-balde-6',  minQty: 1,  priceArs: '40500'  },
+  { role: 'productor', productId: 'miel-balde-6',  minQty: 5,  priceArs: '38475'  },
+  { role: 'productor', productId: 'miel-balde-6',  minQty: 10, priceArs: '36450'  },
+  { role: 'productor', productId: 'miel-balde-30', minQty: 1,  priceArs: '180000' },
+  { role: 'productor', productId: 'miel-balde-30', minQty: 5,  priceArs: '171000' },
+  { role: 'productor', productId: 'miel-balde-30', minQty: 10, priceArs: '162000' },
 ]
 
 async function main() {

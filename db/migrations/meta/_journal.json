@@ -85,6 +85,13 @@
       "when": 1781225017143,
       "tag": "0011_brainy_sersi",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1781481883582,
+      "tag": "0012_curious_thunderbolt",
+      "breakpoints": true
     }
   ]
 }
