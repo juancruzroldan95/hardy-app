@@ -23,6 +23,10 @@ export default async function AdminDashboardPage() {
   const startOfLastM = new Date(now.getFullYear(), now.getMonth() - 1, 1)
 
   // ── Parallel queries ─────────────────────────────────────────────────────────
+  const timeout = new Promise<never>((_, reject) =>
+    setTimeout(() => reject(new Error('Timeout al cargar el dashboard')), 8_000)
+  )
+
   const [
     allOrders,
     revenueThisMonth,
@@ -31,14 +35,17 @@ export default async function AdminDashboardPage() {
     alertsCount,
     solicitudesCount,
     recentOrders,
-  ] = await Promise.all([
-    getOrdersSummaryForStats(),
-    getMonthlyRevenue(startOfMonth),
-    getMonthlyRevenue(startOfLastM, startOfMonth),
-    getAllClients(),
-    getPendingAlertsCount(),
-    getPendingSolicitudesCount(),
-    getAllOrders().then((orders) => orders.slice(0, 8)),
+  ] = await Promise.race([
+    Promise.all([
+      getOrdersSummaryForStats(),
+      getMonthlyRevenue(startOfMonth),
+      getMonthlyRevenue(startOfLastM, startOfMonth),
+      getAllClients(),
+      getPendingAlertsCount(),
+      getPendingSolicitudesCount(),
+      getAllOrders().then((orders) => orders.slice(0, 8)),
+    ]),
+    timeout,
   ])
 
   // ── Compute metrics ──────────────────────────────────────────────────────────
@@ -59,7 +66,10 @@ export default async function AdminDashboardPage() {
   }
 
   // Build a proper revenue per userId from allOrders
-  const allOrdersFull = await getAllOrdersForRevenueTracking()
+  const revenueTimeout = new Promise<never>((_, reject) =>
+    setTimeout(() => reject(new Error('Timeout al cargar el dashboard')), 8_000)
+  )
+  const allOrdersFull = await Promise.race([getAllOrdersForRevenueTracking(), revenueTimeout])
   const revenuePerUser = new Map<string, number>()
   for (const o of allOrdersFull) {
     if (!o.userId) continue

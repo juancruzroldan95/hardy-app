@@ -12,9 +12,15 @@ export default async function CatalogoPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const [profile, overrides] = await Promise.all([
-    getProfileByUserId(user.id),
-    getActivePriceOverrides(),
+  const timeout = new Promise<never>((_, reject) =>
+    setTimeout(() => reject(new Error('Timeout al cargar catálogo')), 8_000)
+  )
+  const [profile, overrides] = await Promise.race([
+    Promise.all([
+      getProfileByUserId(user.id),
+      getActivePriceOverrides(),
+    ]),
+    timeout,
   ])
 
   const role = profile?.role ?? 'consumer'
