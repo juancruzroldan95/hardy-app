@@ -90,9 +90,16 @@ export default async function AdminClientesPage({ searchParams }: Props) {
   if (adminProfile?.role !== 'admin') redirect('/portal')
 
   // ── Fetch all non-admin clients with their orders + alerts ──────────────────
-  const [allProfiles, solicitudesPendientes] = await Promise.all([
-    getAllClientsWithOrdersAndAlerts(),
-    getApprovedSolicitudesPendingAccess(),
+  const timeout = new Promise<never>((_, reject) =>
+    setTimeout(() => reject(new Error('Timeout al cargar clientes')), 8_000)
+  )
+
+  const [allProfiles, solicitudesPendientes] = await Promise.race([
+    Promise.all([
+      getAllClientsWithOrdersAndAlerts(),
+      getApprovedSolicitudesPendingAccess(),
+    ]),
+    timeout,
   ])
 
   // Enriquecer cada contacto con su ciclo de vida (derivado del último pedido)
