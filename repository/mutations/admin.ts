@@ -314,7 +314,7 @@ export async function createClientProfile(
     return { error: 'Este usuario ya tiene un perfil en el portal.' }
   }
 
-  // 4. Insertar el perfil
+  // 4. Insertar el perfil — si falla y el usuario es nuevo, rollback en Auth
   try {
     await db.insert(profiles).values({
       userId:      authUserId,
@@ -329,7 +329,13 @@ export async function createClientProfile(
     })
   } catch (e) {
     console.error('Error al insertar perfil:', e)
-    return { error: 'Error al guardar el perfil en la base de datos.' }
+    if (isNewUser) {
+      const adminClient = createAdminClient()
+      await adminClient.auth.admin.deleteUser(authUserId).catch((delErr) =>
+        console.error('Error al hacer rollback del usuario Auth:', delErr)
+      )
+    }
+    return { error: 'Error al guardar el perfil en la base de datos. El usuario no fue creado.' }
   }
 
   revalidatePath('/portal/admin/clientes')

@@ -1,8 +1,10 @@
 'use client'
 
-import { useActionState } from 'react'
+import { useActionState, useEffect, useRef, useState } from 'react'
 import { createClientProfile } from '@/repository/mutations/admin'
 import type { CreateClientState } from '@/repository/mutations/admin'
+
+const TIMEOUT_MS = 15_000
 
 const ROLE_OPTIONS = [
   { value: 'mayorista',    label: 'Mayorista'     },
@@ -18,6 +20,26 @@ export default function NewClientForm() {
     createClientProfile,
     undefined,
   )
+  const [timedOut, setTimedOut] = useState(false)
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    if (isPending) {
+      setTimedOut(false)
+      timerRef.current = setTimeout(() => setTimedOut(true), TIMEOUT_MS)
+    } else {
+      if (timerRef.current) clearTimeout(timerRef.current)
+      setTimedOut(false)
+    }
+    return () => { if (timerRef.current) clearTimeout(timerRef.current) }
+  }, [isPending])
+
+  const errorMsg =
+    timedOut
+      ? 'La operación tardó demasiado. Verificá si el cliente fue creado antes de reintentar.'
+      : state && 'error' in state
+        ? state.error
+        : null
 
   return (
     <form action={action} className="space-y-5">
@@ -144,9 +166,9 @@ export default function NewClientForm() {
       </div>
 
       {/* Error */}
-      {state && 'error' in state && (
+      {errorMsg && (
         <div className="bg-red/10 border border-red/20 px-5 py-4">
-          <p className="font-mono text-[11px] tracking-[0.1em] text-red">{state.error}</p>
+          <p className="font-mono text-[11px] tracking-[0.1em] text-red">{errorMsg}</p>
         </div>
       )}
 
