@@ -1,8 +1,15 @@
 import Link from 'next/link'
+import { Suspense } from 'react'
+import StoreNavWrapper from '@/components/layout/StoreNavWrapper'
+import Footer from '@/components/layout/Footer'
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen bg-ink text-paper flex flex-col items-center justify-center px-6 text-center">
+    <div className="min-h-screen flex flex-col bg-ink text-paper">
+      <Suspense fallback={null}>
+        <StoreNavWrapper />
+      </Suspense>
+      <div className="flex-1 flex flex-col items-center justify-center px-6 text-center">
       {/* Eyebrow */}
       <p className="font-mono text-[11px] tracking-[0.25em] text-red uppercase mb-6">
         ── Error 404
@@ -39,6 +46,8 @@ export default function NotFound() {
           Ver productos
         </Link>
       </div>
+      </div>
+      <Footer />
     </div>
   )
 }
