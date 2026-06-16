@@ -16,7 +16,10 @@ export default async function AdminStockPage() {
   const products = getProducts()
 
   // Load all availability records
-  const records = await getAllStockRecords()
+  const timeout = new Promise<never>((_, reject) =>
+    setTimeout(() => reject(new Error('Timeout al cargar stock')), 8_000)
+  )
+  const records = await Promise.race([getAllStockRecords(), timeout])
   const recordMap = new Map(records.map((r) => [r.productId, r]))
 
   const items = products.map((p) => ({
