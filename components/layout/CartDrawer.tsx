@@ -1,7 +1,7 @@
 'use client'
 
 import Image from 'next/image'
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 import { X, Plus, Minus, Loader2, ArrowLeft, Package, MapPin, CreditCard, Trash2 } from 'lucide-react'
 import { useCart } from '@/components/contexts/cart-context'
 import { trackInitiateCheckout } from '@/consts/meta-pixel'
@@ -16,12 +16,21 @@ const PROVINCIAS = [
   'Santa Cruz', 'Santa Fe', 'Santiago del Estero', 'Tierra del Fuego', 'Tucumán',
 ]
 
+const SHIPPING_OPTIONS = [
+  { method: 'sin_urgencia_caba',  label: 'CABA — Sin urgencia',  desc: '3–5 días hábiles', price: 2500 },
+  { method: 'urgente_caba',       label: 'CABA — Urgente',       desc: '24–48 hs',          price: 4500 },
+  { method: 'sin_urgencia_gba',   label: 'GBA — Sin urgencia',   desc: '3–5 días hábiles', price: 3200 },
+  { method: 'urgente_gba',        label: 'GBA — Urgente',        desc: '24–48 hs',          price: 5500 },
+  { method: 'coordinar_whatsapp', label: 'Interior del país',    desc: 'A coordinar',       price: 0    },
+  { method: 'retiro_deposito',    label: 'Retiro en depósito',   desc: 'CABA · sin costo',  price: 0    },
+]
+
 function isValidEmail(v: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)
 }
 
-function isValidCP(v: string) {
-  return /^\d{4,8}$/.test(v.trim())
+function fmtARS(n: number) {
+  return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(n)
 }
 
 // ─── Step 1: Formulario de datos de envío ────────────────────────────────────
@@ -33,70 +42,66 @@ interface Step1Props {
   onConfirm: (data: ShippingData) => void
 }
 
-function CheckoutStep1({ cartItems, cartTotal, formatARS, onConfirm }: Step1Props) {
+function CheckoutStep1({ cartTotal, formatARS, onConfirm }: Step1Props) {
   const [form, setForm] = useState({
     nombre: '', email: '', telefono: '',
     calle: '', numero: '', cp: '', ciudad: '', provincia: 'Buenos Aires',
+    shippingMethod: '',
   })
-  const [cotizando, setCotizando] = useState(false)
-  const [cotizacion, setCotizacion] = useState<{ precio: number; diasHabiles: number; servicio: string } | null>(null)
-  const [cotizError, setCotizError] = useState('')
-  const cpRef = useRef<string>('')
+  const [errors, setErrors]           = useState<Record<string, string>>({})
+  const [triedToAdvance, setTried]    = useState(false)
 
   function set(key: keyof typeof form) {
     return (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-      setForm((f) => ({ ...f, [key]: e.target.value }))
+      const val = e.target.value
+      setForm((f) => ({ ...f, [key]: val }))
+      if (triedToAdvance) setErrors((prev) => ({ ...prev, [key]: '' }))
     }
   }
 
-  async function cotizar(cp: string) {
-    if (!isValidCP(cp) || cartItems.length === 0) return
-    if (cpRef.current === cp && cotizacion) return  // misma cotización
-
-    cpRef.current = cp
-    setCotizando(true)
-    setCotizError('')
-    setCotizacion(null)
-
-    try {
-      const res = await fetch('/api/andreani/cotizar', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cpDestino: cp.trim(), items: cartItems }),
-      })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error ?? 'Error al cotizar')
-      setCotizacion(data)
-    } catch (err) {
-      setCotizError(err instanceof Error ? err.message : 'No pudimos calcular el envío')
-    } finally {
-      setCotizando(false)
-    }
+  function validate() {
+    const e: Record<string, string> = {}
+    if (!form.nombre.trim())          e.nombre         = 'Requerido'
+    if (!form.email.trim())           e.email          = 'Requerido'
+    else if (!isValidEmail(form.email)) e.email        = 'Email inválido'
+    if (!form.telefono.trim())        e.telefono       = 'Requerido'
+    if (!form.calle.trim())           e.calle          = 'Requerido'
+    if (!form.numero.trim())          e.numero         = 'Requerido'
+    if (!form.cp.trim())              e.cp             = 'Requerido'
+    if (!form.ciudad.trim())          e.ciudad         = 'Requerido'
+    if (!form.provincia)              e.provincia      = 'Requerido'
+    if (!form.shippingMethod)         e.shippingMethod = 'Seleccioná un método de envío'
+    setErrors(e)
+    return Object.keys(e).length === 0
   }
-
-  const isValid =
-    form.nombre.trim() &&
-    isValidEmail(form.email) &&
-    form.telefono.trim() &&
-    form.calle.trim() &&
-    form.numero.trim() &&
-    isValidCP(form.cp) &&
-    form.ciudad.trim() &&
-    form.provincia &&
-    cotizacion !== null
 
   function handleSubmit() {
-    if (!isValid || !cotizacion) return
+    setTried(true)
+    if (!validate()) return
+    const opt = SHIPPING_OPTIONS.find((o) => o.method === form.shippingMethod)!
     onConfirm({
-      ...form,
-      shippingCost: cotizacion.precio,
-      diasHabiles:  cotizacion.diasHabiles,
-      servicio:     cotizacion.servicio,
+      nombre:         form.nombre,
+      email:          form.email,
+      telefono:       form.telefono,
+      calle:          form.calle,
+      numero:         form.numero,
+      cp:             form.cp,
+      ciudad:         form.ciudad,
+      provincia:      form.provincia,
+      shippingMethod: form.shippingMethod,
+      shippingCost:   opt.price,
     })
   }
 
-  const inputCls = 'w-full bg-paper-2 border border-ink/10 px-4 py-[10px] font-mono text-[12px] text-ink placeholder:text-ink/30 focus:outline-none focus:border-red transition-colors'
-  const labelCls = 'block font-mono text-[9px] tracking-[0.15em] uppercase text-ink/50 mb-[6px]'
+  const inputCls = (field: string) =>
+    `w-full bg-paper-2 border px-4 py-[10px] font-mono text-[12px] text-ink placeholder:text-ink/30 focus:outline-none transition-colors ${
+      triedToAdvance && errors[field] ? 'border-red' : 'border-ink/10 focus:border-red'
+    }`
+  const labelCls  = 'block font-mono text-[9px] tracking-[0.15em] uppercase text-ink/50 mb-[6px]'
+  const errorCls  = 'font-mono text-[9px] text-red mt-[4px]'
+
+  const selectedOpt = SHIPPING_OPTIONS.find((o) => o.method === form.shippingMethod)
+  const totalConEnvio = cartTotal + (selectedOpt?.price ?? 0)
 
   return (
     <div className="flex flex-col h-full">
@@ -107,101 +112,172 @@ function CheckoutStep1({ cartItems, cartTotal, formatARS, onConfirm }: Step1Prop
 
         <div className="space-y-[14px]">
           <div>
-            <label className={labelCls}>Nombre completo *</label>
-            <input className={inputCls} placeholder="María García" value={form.nombre} onChange={set('nombre')} />
+            <label htmlFor="checkout-nombre" className={labelCls}>Nombre completo *</label>
+            <input
+              id="checkout-nombre"
+              name="nombre"
+              autoComplete="name"
+              className={inputCls('nombre')}
+              placeholder="María García"
+              value={form.nombre}
+              onChange={set('nombre')}
+            />
+            {triedToAdvance && errors.nombre && <p className={errorCls}>{errors.nombre}</p>}
           </div>
+
           <div className="grid grid-cols-2 gap-[10px]">
             <div>
-              <label className={labelCls}>Email *</label>
-              <input className={inputCls} type="email" placeholder="maria@email.com" value={form.email} onChange={set('email')} />
+              <label htmlFor="checkout-email" className={labelCls}>Email *</label>
+              <input
+                id="checkout-email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                className={inputCls('email')}
+                placeholder="maria@email.com"
+                value={form.email}
+                onChange={set('email')}
+              />
+              {triedToAdvance && errors.email && <p className={errorCls}>{errors.email}</p>}
             </div>
             <div>
-              <label className={labelCls}>Teléfono *</label>
-              <input className={inputCls} placeholder="11 1234 5678" value={form.telefono} onChange={set('telefono')} />
+              <label htmlFor="checkout-telefono" className={labelCls}>Teléfono *</label>
+              <input
+                id="checkout-telefono"
+                name="telefono"
+                type="tel"
+                autoComplete="tel"
+                className={inputCls('telefono')}
+                placeholder="11 1234 5678"
+                value={form.telefono}
+                onChange={set('telefono')}
+              />
+              {triedToAdvance && errors.telefono && <p className={errorCls}>{errors.telefono}</p>}
             </div>
           </div>
+
           <div className="grid grid-cols-[1fr_80px] gap-[10px]">
             <div>
-              <label className={labelCls}>Calle *</label>
-              <input className={inputCls} placeholder="Av. Corrientes" value={form.calle} onChange={set('calle')} />
+              <label htmlFor="checkout-calle" className={labelCls}>Calle *</label>
+              <input
+                id="checkout-calle"
+                name="calle"
+                autoComplete="address-line1"
+                className={inputCls('calle')}
+                placeholder="Av. Corrientes"
+                value={form.calle}
+                onChange={set('calle')}
+              />
+              {triedToAdvance && errors.calle && <p className={errorCls}>{errors.calle}</p>}
             </div>
             <div>
-              <label className={labelCls}>Número *</label>
-              <input className={inputCls} placeholder="1234" value={form.numero} onChange={set('numero')} />
+              <label htmlFor="checkout-numero" className={labelCls}>Número *</label>
+              <input
+                id="checkout-numero"
+                name="numero"
+                autoComplete="address-line2"
+                className={inputCls('numero')}
+                placeholder="1234"
+                value={form.numero}
+                onChange={set('numero')}
+              />
+              {triedToAdvance && errors.numero && <p className={errorCls}>{errors.numero}</p>}
             </div>
           </div>
+
           <div className="grid grid-cols-[120px_1fr] gap-[10px]">
             <div>
-              <label className={labelCls}>Código postal *</label>
+              <label htmlFor="checkout-cp" className={labelCls}>Cód. postal *</label>
               <input
-                className={inputCls}
+                id="checkout-cp"
+                name="cp"
+                autoComplete="postal-code"
+                className={inputCls('cp')}
                 placeholder="1425"
                 value={form.cp}
                 onChange={set('cp')}
-                onBlur={(e) => cotizar(e.target.value)}
               />
+              {triedToAdvance && errors.cp && <p className={errorCls}>{errors.cp}</p>}
             </div>
             <div>
-              <label className={labelCls}>Ciudad *</label>
-              <input className={inputCls} placeholder="Buenos Aires" value={form.ciudad} onChange={set('ciudad')} />
+              <label htmlFor="checkout-ciudad" className={labelCls}>Ciudad *</label>
+              <input
+                id="checkout-ciudad"
+                name="ciudad"
+                autoComplete="address-level2"
+                className={inputCls('ciudad')}
+                placeholder="Buenos Aires"
+                value={form.ciudad}
+                onChange={set('ciudad')}
+              />
+              {triedToAdvance && errors.ciudad && <p className={errorCls}>{errors.ciudad}</p>}
             </div>
           </div>
+
           <div>
-            <label className={labelCls}>Provincia *</label>
-            <select className={inputCls} value={form.provincia} onChange={set('provincia')}>
+            <label htmlFor="checkout-provincia" className={labelCls}>Provincia *</label>
+            <select
+              id="checkout-provincia"
+              name="provincia"
+              autoComplete="address-level1"
+              className={inputCls('provincia')}
+              value={form.provincia}
+              onChange={set('provincia')}
+            >
               {PROVINCIAS.map((p) => <option key={p}>{p}</option>)}
             </select>
           </div>
         </div>
 
-        {/* Cotización */}
+        {/* Método de envío */}
         <div className="mt-5">
-          {cotizando && (
-            <div className="flex items-center gap-2 text-ink/50 font-mono text-[11px]">
-              <Loader2 size={13} className="animate-spin" /> Calculando envío...
-            </div>
-          )}
-          {cotizError && (
-            <div className="text-red font-mono text-[11px]">{cotizError}</div>
-          )}
-          {cotizacion && !cotizando && (
-            <div className="bg-paper-2 border-l-2 border-red px-4 py-3">
-              <div className="flex justify-between items-center">
-                <div>
-                  <div className="font-mono text-[9px] tracking-[0.12em] uppercase text-ink/40">Envío Andreani</div>
-                  <div className="font-body text-[12px] text-ink/60">{cotizacion.servicio} · {cotizacion.diasHabiles} días hábiles</div>
-                </div>
-                <div className="font-heading text-[18px] font-medium text-red">
-                  {new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(cotizacion.precio)}
-                </div>
-              </div>
-              <div className="mt-[10px] pt-[10px] border-t border-ink/10 flex justify-between">
-                <span className="font-mono text-[10px] uppercase tracking-[0.1em] text-ink/50">Total con envío</span>
-                <span className="font-heading font-medium text-[16px]">
-                  {new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(cartTotal + cotizacion.precio)}
-                </span>
-              </div>
-            </div>
-          )}
-          {!cotizacion && !cotizando && isValidCP(form.cp) && (
-            <button
-              onClick={() => cotizar(form.cp)}
-              className="font-mono text-[10px] tracking-[0.12em] uppercase text-red border border-red px-4 py-2"
-            >
-              Calcular envío →
-            </button>
-          )}
-          {!isValidCP(form.cp) && form.cp.length > 0 && (
-            <div className="font-mono text-[11px] text-red/70">Ingresá un código postal válido (4 dígitos)</div>
+          <p className={`${labelCls} mb-3`}>Método de envío *</p>
+          <div className="flex flex-col gap-[6px]">
+            {SHIPPING_OPTIONS.map((opt) => {
+              const active = form.shippingMethod === opt.method
+              return (
+                <button
+                  key={opt.method}
+                  type="button"
+                  onClick={() => {
+                    setForm((f) => ({ ...f, shippingMethod: opt.method }))
+                    if (triedToAdvance) setErrors((prev) => ({ ...prev, shippingMethod: '' }))
+                  }}
+                  className={`flex items-center justify-between px-4 py-[10px] border text-left transition-colors ${
+                    active
+                      ? 'bg-ink text-paper border-ink'
+                      : 'bg-paper-2 border-ink/10 hover:border-ink/30'
+                  }`}
+                >
+                  <div>
+                    <div className={`font-mono text-[11px] ${active ? 'text-paper' : 'text-ink'}`}>{opt.label}</div>
+                    <div className={`font-mono text-[9px] ${active ? 'text-paper/50' : 'text-ink/40'}`}>{opt.desc}</div>
+                  </div>
+                  <div className={`font-heading text-[14px] font-medium ${active ? 'text-paper' : 'text-ink'}`}>
+                    {opt.price > 0 ? fmtARS(opt.price) : 'Gratis'}
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+          {triedToAdvance && errors.shippingMethod && (
+            <p className={errorCls}>{errors.shippingMethod}</p>
           )}
         </div>
+
+        {/* Total preview */}
+        {selectedOpt && (
+          <div className="mt-4 pt-4 border-t border-ink/10 flex justify-between items-center">
+            <span className="font-mono text-[10px] uppercase tracking-[0.1em] text-ink/50">Total estimado</span>
+            <span className="font-heading font-medium text-[16px]">{formatARS(totalConEnvio)}</span>
+          </div>
+        )}
       </div>
 
       <div className="px-7 py-5 border-t border-ink/15">
         <button
-          disabled={!isValid}
           onClick={handleSubmit}
-          className="w-full bg-red text-paper font-mono text-[11px] tracking-[0.2em] uppercase py-[18px] disabled:opacity-40 disabled:cursor-not-allowed transition-opacity"
+          className="w-full bg-red text-paper font-mono text-[11px] tracking-[0.2em] uppercase py-[18px] transition-opacity"
         >
           Continuar → Resumen
         </button>
@@ -224,6 +300,7 @@ interface Step2Props {
 function CheckoutStep2({ cartItems, shippingData, formatARS, onBack, onPay, paying }: Step2Props) {
   const productosTotal = cartItems.reduce((s, i) => s + i.subtotal, 0)
   const total          = productosTotal + shippingData.shippingCost
+  const opt            = SHIPPING_OPTIONS.find((o) => o.method === shippingData.shippingMethod)
 
   return (
     <div className="flex flex-col h-full">
@@ -246,10 +323,12 @@ function CheckoutStep2({ cartItems, shippingData, formatARS, onBack, onPay, payi
         {/* Envío */}
         <div className="bg-paper-2 px-4 py-3 mb-4">
           <div className="flex justify-between text-[13px] mb-1">
-            <span className="font-mono text-[10px] uppercase tracking-[0.1em] text-ink/50 self-center">Envío Andreani</span>
-            <span className="font-medium">{formatARS(shippingData.shippingCost)}</span>
+            <span className="font-mono text-[10px] uppercase tracking-[0.1em] text-ink/50 self-center">Envío</span>
+            <span className="font-medium">
+              {shippingData.shippingCost > 0 ? formatARS(shippingData.shippingCost) : 'Gratis'}
+            </span>
           </div>
-          <div className="font-mono text-[10px] text-ink/40">{shippingData.servicio} · {shippingData.diasHabiles} días hábiles</div>
+          {opt && <div className="font-mono text-[10px] text-ink/40">{opt.label} · {opt.desc}</div>}
         </div>
 
         {/* Total */}
@@ -429,7 +508,7 @@ export default function CartDrawer() {
                   Finalizar compra →
                 </button>
                 <div className="text-center mt-[10px] text-[10px] text-[#888] font-mono tracking-[0.1em]">
-                  Mercado Pago · Envío por Andreani
+                  Mercado Pago · Envío a todo el país
                 </div>
               </div>
             )}

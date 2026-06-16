@@ -4,6 +4,7 @@ import { db } from '@/db'
 import { orders, orderItems } from '@/db/schema'
 import { eq } from 'drizzle-orm'
 import type { ShippingData } from '@/types'
+import type { ShippingMethod } from '@/db/schema'
 import { sendReviewRequest } from '@/services/resend'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -35,7 +36,7 @@ export async function createStoreOrder(input: CreateStoreOrderInput): Promise<st
       channel:         'b2c',
       status:          'pending',
       paymentStatus:   'unpaid',
-      shippingMethod:  'andreani',
+      shippingMethod:  shippingData.shippingMethod as ShippingMethod,
       paymentMethod:   'transferencia', // MP — se actualiza post-webhook
       totalArs:        String(totalArs),
       shippingAddress: `${shippingData.calle} ${shippingData.numero}, ${shippingData.ciudad}, ${shippingData.provincia}`,

@@ -49,7 +49,7 @@ export async function createPreferenceWithOrder(
     })),
     ...(shippingData.shippingCost > 0
       ? [{
-          title:      `Envío Andreani — ${shippingData.servicio}`,
+          title:      `Envío — ${shippingData.shippingMethod}`,
           quantity:   1,
           unit_price: shippingData.shippingCost,
           currency_id: 'ARS',
