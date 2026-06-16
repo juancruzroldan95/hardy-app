@@ -246,6 +246,13 @@ export default function NuevoPedidoForm({
   const [qtys, setQtys] = useState<Record<string, number>>(
     Object.fromEntries(productos.map((p) => [p.id, initialQtys?.[p.id] ?? 0]))
   )
+
+  // initialQtys cambia cuando se aplica una sugerencia desde SuggestionsPanel
+  // (después del mount) — sincronizamos qtys para reflejar esa selección.
+  useEffect(() => {
+    if (!initialQtys) return
+    setQtys(Object.fromEntries(productos.map((p) => [p.id, initialQtys[p.id] ?? 0])))
+  }, [initialQtys]) // eslint-disable-line react-hooks/exhaustive-deps
   const [selectedPayment,   setSelectedPayment]   = useState<string | null>(null)
   const [selectedShipping,  setSelectedShipping]  = useState<string | null>(null)
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(
