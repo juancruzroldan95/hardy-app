@@ -25,6 +25,23 @@ export interface OrderLineInput {
 // Balde product IDs — counter is totalBaldes for these
 const BALDE_IDS = new Set(['balde-45', 'balde-23', 'miel-balde-6', 'miel-balde-30'])
 
+const IVA_RATE = 0.21
+
+// Debe coincidir con getShippingCost en components/portal/NuevoPedidoForm.tsx
+function getShippingCost(method: ShippingMethod, totalFrascoCajas: number, totalBaldes: number): number {
+  const tier = totalBaldes > 0 && totalFrascoCajas === 0
+    ? (totalBaldes <= 4 ? 0 : totalBaldes <= 9 ? 1 : 2)
+    : (totalFrascoCajas <= 14 ? 0 : totalFrascoCajas <= 25 ? 1 : 2)
+
+  switch (method) {
+    case 'urgente_caba':      return 50000
+    case 'urgente_gba':       return 75000
+    case 'sin_urgencia_caba': return [15000, 25000, 35000][tier]
+    case 'sin_urgencia_gba':  return [25000, 35000, 45000][tier]
+    default:                  return 0
+  }
+}
+
 // Minimum total frasco cajas per role (frasco orders only)
 const MIN_FRASCO_CAJAS: Partial<Record<UserRole, number>> = {
   mayorista:    3,
@@ -168,7 +185,7 @@ async function _createOrderForUser({
   // Build price lookup with tiered pricing
   const getPrice = await buildPriceLookup(role)
 
-  const IVA_RATE = 0.21
+  const shippingCost = getShippingCost(shippingMethod, totalFrascoCajas, totalBaldes)
 
   // Build order items
   let totalArs = 0
@@ -203,13 +220,16 @@ async function _createOrderForUser({
     })
   }
 
+  const grandTotal = (totalArs + shippingCost) * (1 + IVA_RATE)
+
   // Insert order
   const [newOrder] = await db.insert(orders).values({
     userId,
     status:               'pending',
     paymentStatus:        'unpaid',
-    totalArs:             (totalArs * (1 + IVA_RATE)).toFixed(2),
+    totalArs:             grandTotal.toFixed(2),
     shippingMethod,
+    shippingCost:          shippingCost.toFixed(2),
     paymentMethod,
     notes,
     purchaseOrderNumber,
@@ -238,7 +258,7 @@ async function _createOrderForUser({
         shippingMethod,
         paymentMethod,
         notes,
-        totalArs: totalArs * (1 + IVA_RATE),
+        totalArs: grandTotal,
         items:          itemsToInsert.map((i) => ({
           ...i,
           id:          '',
@@ -255,12 +275,22 @@ async function _createOrderForUser({
   // Mercado Pago: create preference and return init_point for client redirect
   if (paymentMethod === 'mercadopago') {
     const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://hardy.ar'
-    const mpItems = itemsToInsert.map((i) => ({
-      title:       `${i.productName} · ${i.variant} · ${i.size}`,
-      quantity:    i.qty,
-      unit_price:  Number(i.unitPriceArs),
-      currency_id: 'ARS',
-    }))
+    const mpItems = [
+      ...itemsToInsert.map((i) => ({
+        title:       `${i.productName} · ${i.variant} · ${i.size}`,
+        quantity:    i.qty,
+        unit_price:  Number((Number(i.unitPriceArs) * (1 + IVA_RATE)).toFixed(2)),
+        currency_id: 'ARS',
+      })),
+      ...(shippingCost > 0
+        ? [{
+            title:       `Envío — ${shippingMethod}`,
+            quantity:    1,
+            unit_price:  Number((shippingCost * (1 + IVA_RATE)).toFixed(2)),
+            currency_id: 'ARS',
+          }]
+        : []),
+    ]
 
     const mpRes = await fetch('https://api.mercadopago.com/checkout/preferences', {
       method: 'POST',
