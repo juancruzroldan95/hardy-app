@@ -13,7 +13,10 @@ export default async function AdminResenasPage() {
   const profile = await getProfileByUserId(user.id)
   if (profile?.role !== 'admin') redirect('/portal')
 
-  const allReviews = await getAllReviews()
+  const timeout = new Promise<never>((_, reject) =>
+    setTimeout(() => reject(new Error('Timeout al cargar reseñas')), 8_000)
+  )
+  const allReviews = await Promise.race([getAllReviews(), timeout])
 
   const pending   = allReviews.filter((r) => !r.isPublished)
   const published = allReviews.filter((r) => r.isPublished)

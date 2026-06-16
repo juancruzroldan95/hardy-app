@@ -14,7 +14,10 @@ export default async function AdminNovedadesPage() {
   const profile = await getProfileByUserId(user.id)
   if (profile?.role !== 'admin') redirect('/portal')
 
-  const items = await getAllNovedadesAdmin()
+  const timeout = new Promise<never>((_, reject) =>
+    setTimeout(() => reject(new Error('Timeout al cargar novedades')), 8_000)
+  )
+  const items = await Promise.race([getAllNovedadesAdmin(), timeout])
 
   return (
     <div className="max-w-[860px]">
