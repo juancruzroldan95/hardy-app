@@ -19,6 +19,7 @@ const BALDE_IDS   = new Set(['balde-45', 'balde-23', 'miel-balde-6', 'miel-balde
 const ROLE_VISIBLE: Record<string, Set<string>> = {
   mayorista:    FRASCO_IDS,
   gastronomico: BALDE_IDS,
+  productor:    BALDE_IDS,
   distribuidor: new Set([...FRASCO_IDS, ...BALDE_IDS]),
 }
 const MIN_ORDER_CAJAS: Record<string, number> = {
