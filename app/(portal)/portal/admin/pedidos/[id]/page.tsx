@@ -60,6 +60,17 @@ export default async function AdminPedidoDetailPage({ params }: Props) {
   ])
   if (!order) notFound()
 
+  // Generar URL firmada del comprobante si existe
+  let proofSignedUrl: string | undefined
+  if (order.paymentProofUrl) {
+    const { createAdminClient } = await import('@/services/supabase/admin')
+    const adminSupabase = createAdminClient()
+    const { data } = await adminSupabase.storage
+      .from('payment-proofs')
+      .createSignedUrl(order.paymentProofUrl, 3600)
+    proofSignedUrl = data?.signedUrl ?? undefined
+  }
+
   const clientProfile = order.userId
     ? await db.query.profiles.findFirst({
         where: and(eq(profiles.userId, order.userId), eq(profiles.isDeleted, false)),
@@ -248,6 +259,27 @@ export default async function AdminPedidoDetailPage({ params }: Props) {
           Al guardar, el número de seguimiento aparecerá en el detalle del pedido del cliente.
         </p>
       </div>
+
+      {/* Comprobante de pago */}
+      {proofSignedUrl && (
+        <div className="bg-paper border border-ink/8 p-6 mb-6">
+          <p className="font-mono text-[9px] tracking-[0.15em] uppercase text-ink/40 mb-3">Comprobante de pago</p>
+          <div className="flex items-center gap-3 bg-[#f0f7f0] border border-[#c6dfc7] px-4 py-3">
+            <span className="text-[18px]">📄</span>
+            <div className="flex-1 min-w-0">
+              <p className="font-mono text-[11px] text-[#2d6a35]">El cliente adjuntó un comprobante</p>
+              <a
+                href={proofSignedUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-mono text-[10px] text-[#2d6a35]/70 underline hover:text-[#2d6a35]"
+              >
+                Ver comprobante →
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Remito + Etiqueta Andreani */}
       <div className="mb-6 flex flex-wrap gap-3">

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import NuevoPedidoForm from './NuevoPedidoForm'
 import SuggestionsPanel from './SuggestionsPanel'
 import type { ProductOrden } from './NuevoPedidoForm'
@@ -31,7 +31,15 @@ export default function NuevoPedidoFormWithSuggestions({
   suggestions,
 }: Props) {
   const [appliedQtys, setAppliedQtys] = useState<Record<string, number> | undefined>(initialQtys)
-  const [suggestionApplied, setSuggestionApplied] = useState(false)
+  const [suggestionApplied, setSuggestionApplied] = useState(Boolean(initialQtys))
+
+  // initialQtys cambia cuando se navega a ?repeat=<id> desde el panel de
+  // sugerencias sin remontar este componente (misma ruta, nuevos searchParams).
+  useEffect(() => {
+    if (!initialQtys) return
+    setAppliedQtys(initialQtys)
+    setSuggestionApplied(true)
+  }, [initialQtys])
 
   function handleSelectSuggestion(qtys: Record<string, number>) {
     setAppliedQtys(qtys)

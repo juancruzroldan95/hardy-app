@@ -135,6 +135,7 @@ export const orders = pgTable('orders', {
   andreaniNroEnvio:     text('andreani_nro_envio'),
   purchaseOrderNumber:  text('purchase_order_number'),
   requestedDeliveryDate: text('requested_delivery_date'), // 'YYYY-MM-DD'
+  paymentProofUrl:      text('payment_proof_url'), // comprobante de transferencia/depósito
   // Guest buyer info (B2C — no Supabase user)
   guestName:       text('guest_name'),
   guestEmail:      text('guest_email'),
