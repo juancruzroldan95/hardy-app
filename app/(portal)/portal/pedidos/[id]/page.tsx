@@ -6,6 +6,7 @@ import { getOrderById, getOrderMessages } from '@/repository/queries/orders'
 import OrderStatusBadge from '@/components/portal/OrderStatusBadge'
 import { formatARS } from '@/consts/products'
 import MessageThread from '@/components/portal/MessageThread'
+import OrderPaymentActions from '@/components/portal/OrderPaymentActions'
 import type { OrderStatus } from '@/db/schema'
 
 const STATUS_STEPS: OrderStatus[] = ['pending', 'confirmed', 'preparing', 'shipped', 'delivered']
@@ -57,6 +58,15 @@ export default async function PedidoDetailPage({ params }: Props) {
     getProfileByUserId(user.id),
     getOrderMessages(id),
   ])
+
+  // Generar URL firmada del comprobante si existe (bucket privado, 1h de validez)
+  let proofSignedUrl: string | undefined
+  if (order?.paymentProofUrl) {
+    const { data } = await supabase.storage
+      .from('payment-proofs')
+      .createSignedUrl(order.paymentProofUrl, 3600)
+    proofSignedUrl = data?.signedUrl ?? undefined
+  }
 
   if (!order) notFound()
 
@@ -210,6 +220,19 @@ export default async function PedidoDetailPage({ params }: Props) {
         <div className="bg-paper border border-ink/8 p-5 mb-6">
           <p className="font-mono text-[9px] tracking-[0.2em] uppercase text-ink/40 mb-2">Notas</p>
           <p className="font-body text-[14px] text-ink/70">{order.notes}</p>
+        </div>
+      )}
+
+      {/* Payment actions */}
+      {!isAdmin && order.status !== 'cancelled' && (
+        <div className="mb-6">
+          <OrderPaymentActions
+            orderId={id}
+            paymentMethod={order.paymentMethod ?? null}
+            paymentStatus={order.paymentStatus}
+            paymentProofUrl={order.paymentProofUrl ?? null}
+            proofSignedUrl={proofSignedUrl}
+          />
         </div>
       )}
 
