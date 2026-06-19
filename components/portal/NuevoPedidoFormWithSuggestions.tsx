@@ -15,6 +15,7 @@ interface Props {
   overrideAction?:    (prev: CreateOrderState, formData: FormData) => Promise<CreateOrderState>
   deliveryAddresses?: { id: string; label: string; address: string; city: string | null; province: string | null; isDefault: boolean }[]
   stockByProduct?:    Record<string, string>
+  stockQtyByProduct?: Record<string, number | null>
   userId?:            string
   suggestions:        OrderSuggestion[]
 }
@@ -27,6 +28,7 @@ export default function NuevoPedidoFormWithSuggestions({
   overrideAction,
   deliveryAddresses,
   stockByProduct,
+  stockQtyByProduct,
   userId,
   suggestions,
 }: Props) {
@@ -81,6 +83,7 @@ export default function NuevoPedidoFormWithSuggestions({
         overrideAction={overrideAction}
         deliveryAddresses={deliveryAddresses}
         stockByProduct={stockByProduct}
+        stockQtyByProduct={stockQtyByProduct}
         userId={userId}
       />
     </>

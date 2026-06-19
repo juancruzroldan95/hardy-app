@@ -70,7 +70,11 @@ export default async function NuevoPedidoPage({ searchParams }: Props) {
   const role = profile?.role ?? 'consumer'
 
   const stockByProduct: Record<string, string> = {}
-  stockRecords.forEach((r) => { stockByProduct[r.productId] = r.status })
+  const stockQtyByProduct: Record<string, number | null> = {}
+  stockRecords.forEach((r) => {
+    stockByProduct[r.productId] = r.status
+    stockQtyByProduct[r.productId] = r.stockQty ?? null
+  })
 
   const tiersByProduct = new Map<string, Array<{ minQty: number; pricePerUnit: number; pricePerCaja: number }>>()
   const products = getProducts()
@@ -293,6 +297,7 @@ export default async function NuevoPedidoPage({ searchParams }: Props) {
           isDefault: a.isDefault,
         }))}
         stockByProduct={stockByProduct}
+        stockQtyByProduct={stockQtyByProduct}
         userId={user.id}
         suggestions={suggestions}
       />

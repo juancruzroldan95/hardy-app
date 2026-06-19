@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useMemo, useState } from 'react'
+import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import type { CartItem, CartState, ShippingData } from '@/types'
 import { PRODUCTS, formatARS } from '@/consts/products'
 import { trackAddToCart } from '@/consts/meta-pixel'
@@ -71,6 +71,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       return next
     })
   }
+
+  useEffect(() => {
+    const locked = cartOpen || checkoutOpen
+    document.body.style.overflow = locked ? 'hidden' : ''
+    return () => { document.body.style.overflow = '' }
+  }, [cartOpen, checkoutOpen])
 
   function clearCart() {
     setCart({})
