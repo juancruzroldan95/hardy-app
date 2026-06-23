@@ -46,9 +46,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const cartTotal = useMemo(() => cartItems.reduce((s, i) => s + i.subtotal, 0), [cartItems])
 
   function addItem(id: string) {
-    setCart((c) => ({ ...c, [id]: (c[id] ?? 0) + 1 }))
-    setCartOpen(true)
     const product = PRODUCTS.find((p) => p.id === id)
+    const minQty  = product?.line === 'frasco' ? 2 : 1
+    setCart((c) => {
+      const current = c[id] ?? 0
+      return { ...c, [id]: current === 0 ? minQty : current + 1 }
+    })
+    setCartOpen(true)
     if (product) {
       trackAddToCart({ value: product.price, contentName: product.name, contentIds: [product.id] })
     }
@@ -63,10 +67,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }
 
   function updateQty(id: string, delta: number) {
+    const product = PRODUCTS.find((p) => p.id === id)
+    const minQty  = product?.line === 'frasco' ? 2 : 1
     setCart((c) => {
-      const next = { ...c }
+      const next   = { ...c }
       const newQty = (next[id] ?? 0) + delta
-      if (newQty <= 0) delete next[id]
+      if (newQty < minQty) delete next[id]
       else next[id] = newQty
       return next
     })

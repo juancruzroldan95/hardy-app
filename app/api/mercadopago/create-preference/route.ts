@@ -11,7 +11,7 @@ export async function POST(request: Request): Promise<Response> {
       return Response.json({ error: 'No hay productos en la bolsa' }, { status: 400 })
     }
 
-    if (!shippingData?.nombre || !shippingData?.email || !shippingData?.cp) {
+    if (!shippingData?.nombre || !shippingData?.email) {
       return Response.json({ error: 'Datos de envío incompletos' }, { status: 400 })
     }
 

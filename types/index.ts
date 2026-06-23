@@ -46,11 +46,6 @@ export interface ShippingData {
   nombre:         string
   email:          string
   telefono:       string
-  calle:          string
-  numero:         string
-  cp:             string
-  ciudad:         string
-  provincia:      string
   shippingMethod: string
   shippingCost:   number
 }
