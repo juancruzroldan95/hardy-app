@@ -177,15 +177,21 @@ export default function ProductCard({ product, rating }: { product: Product; rat
                   <div className="font-heading text-[22px] font-medium whitespace-nowrap group-hover:text-paper transition-colors duration-[220ms]">
                     {formatARS(product.price)}
                   </div>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); addItem(product.id) }}
-                    className="bg-red text-paper font-mono text-[10px] tracking-[0.08em] uppercase px-[14px] py-[10px] whitespace-nowrap flex-shrink-0 cursor-pointer border-none max-md:w-full"
-                  >
-                    + Agregar
-                  </button>
+                  {product.comingSoon ? (
+                    <span className="font-mono text-[10px] tracking-[0.08em] uppercase px-[14px] py-[10px] whitespace-nowrap flex-shrink-0 border border-ink/20 group-hover:border-white/20 text-ink/40 group-hover:text-paper/40 transition-colors duration-[220ms] max-md:w-full max-md:text-center">
+                      Próximamente
+                    </span>
+                  ) : (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); addItem(product.id) }}
+                      className="bg-red text-paper font-mono text-[10px] tracking-[0.08em] uppercase px-[14px] py-[10px] whitespace-nowrap flex-shrink-0 cursor-pointer border-none max-md:w-full"
+                    >
+                      + Agregar
+                    </button>
+                  )}
                 </div>
                 <p className="font-mono text-[9px] tracking-[0.1em] text-ink/40 group-hover:text-paper/30 transition-colors duration-[220ms] m-0">
-                  Pedido mínimo: 2 unidades
+                  {product.comingSoon ? 'Reincorporando stock · volvé pronto' : 'Pedido mínimo: 2 unidades'}
                 </p>
               </>
             )}
@@ -339,6 +345,18 @@ export default function ProductCard({ product, rating }: { product: Product; rat
                   >
                     Consultar disponibilidad de stock →
                   </a>
+                ) : product.comingSoon ? (
+                  <>
+                    <div
+                      className="w-full p-[15px] font-mono text-[11px] tracking-[0.15em] uppercase text-center mb-2"
+                      style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.4)' }}
+                    >
+                      Próximamente en stock
+                    </div>
+                    <p className="font-mono text-[9px] tracking-[0.1em] text-center m-0" style={{ color: 'rgba(255,255,255,0.3)' }}>
+                      Reincorporando stock · volvé pronto
+                    </p>
+                  </>
                 ) : (
                   <>
                     <button
