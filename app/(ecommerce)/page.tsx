@@ -69,9 +69,9 @@ const USOS = [
   {
     src: '/lifestyle/uso-smoothie-dark.png',
     alt: 'Smoothie de crema de maní Hardy en vaso alto con maníes sueltos sobre piedra negra',
-    eyebrow: 'Tu entrenamiento',
-    title: 'Proteína natural',
-    desc: 'Pre y post entrenamiento. Energía real.',
+    eyebrow: 'Tu cocina profesional',
+    title: 'Tu cocina profesional',
+    desc: 'Insumo de rendimiento constante para chefs, baristas y reposteros.',
   },
   {
     src: '/lifestyle/uso-bowl-dark.png',
@@ -477,9 +477,9 @@ export default function HomePage() {
               className="font-heading font-medium leading-[1.1] m-0 mb-5 tracking-[-0.02em]"
               style={{ fontSize: 'clamp(32px, 4vw, 48px)' }}
             >
-              Nacimos en un gimnasio.
+              Once años haciendo una sola cosa bien.
               <br />
-              Hoy estamos en <em className="not-italic text-red">todo el país.</em>
+              Maní y miel en cocinas, cafés y mesas de <em className="not-italic text-red">todo el país.</em>
             </h2>
             <p className="text-[15px] leading-[1.8] m-0 text-paper/65">
               HARDY empezó en Buenos Aires con una idea simple: hacer productos nobles, de pocos ingredientes y sin vueltas. Diez años después llega a dietéticas, cafés, restaurantes y negocios de todo el país. La marca creció. La obsesión por lo simple, no.

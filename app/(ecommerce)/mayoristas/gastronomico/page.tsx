@@ -62,7 +62,7 @@ export default function GastronomicoPage() {
                 <p className="font-mono text-[10px] text-red tracking-[0.2em] uppercase mb-2">Crema de Maní · 4,5 kg</p>
                 <h3 className="font-heading text-[26px] font-medium m-0 mb-3">Balde mediano</h3>
                 <p className="text-[14px] text-[#bbb] leading-[1.6] m-0 mb-5">
-                  Para cocinas, cafeterías y pastelerías con consumo regular.
+                  Para cafeterías, cocinas profesionales y repostería.
                   Crema de maní 100% natural, sin azúcar ni aditivos.
                 </p>
                 <a
