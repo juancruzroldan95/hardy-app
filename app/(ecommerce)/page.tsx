@@ -477,7 +477,7 @@ export default function HomePage() {
               className="font-heading font-medium leading-[1.1] m-0 mb-5 tracking-[-0.02em]"
               style={{ fontSize: 'clamp(32px, 4vw, 48px)' }}
             >
-              Once años haciendo una sola cosa bien.
+              Más de 10 años con la misma obsesión por la calidad.
               <br />
               Maní y miel en cocinas, cafés y mesas de <em className="not-italic text-red">todo el país.</em>
             </h2>
