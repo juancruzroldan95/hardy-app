@@ -9,20 +9,21 @@ import type { ShippingData } from '@/types'
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-const PROVINCIAS = [
-  'Buenos Aires', 'Ciudad Autónoma de Buenos Aires', 'Catamarca', 'Chaco', 'Chubut',
-  'Córdoba', 'Corrientes', 'Entre Ríos', 'Formosa', 'Jujuy', 'La Pampa', 'La Rioja',
-  'Mendoza', 'Misiones', 'Neuquén', 'Río Negro', 'Salta', 'San Juan', 'San Luis',
-  'Santa Cruz', 'Santa Fe', 'Santiago del Estero', 'Tierra del Fuego', 'Tucumán',
-]
+const WA_ENVIO = 'https://wa.me/5491135736956?text=Hola%21+Quiero+hacer+un+pedido+y+consultar+el+env%C3%ADo+a+mi+domicilio.'
 
 const SHIPPING_OPTIONS = [
-  { method: 'sin_urgencia_caba',  label: 'CABA — Sin urgencia',  desc: '3–5 días hábiles', price: 2500 },
-  { method: 'urgente_caba',       label: 'CABA — Urgente',       desc: '24–48 hs',          price: 4500 },
-  { method: 'sin_urgencia_gba',   label: 'GBA — Sin urgencia',   desc: '3–5 días hábiles', price: 3200 },
-  { method: 'urgente_gba',        label: 'GBA — Urgente',        desc: '24–48 hs',          price: 5500 },
-  { method: 'coordinar_whatsapp', label: 'Interior del país',    desc: 'A coordinar',       price: 0    },
-  { method: 'retiro_deposito',    label: 'Retiro en depósito',   desc: 'CABA · sin costo',  price: 0    },
+  {
+    method: 'retiro_local',
+    label:  'Retiro en local',
+    desc:   'Mario Bravo 1314 · Sin costo',
+    price:  0,
+  },
+  {
+    method: 'envio_domicilio',
+    label:  'Envío a domicilio',
+    desc:   'UberMoto — puede ser gratis según pedido y ubicación. ¡Consultanos! 🛵',
+    price:  0,
+  },
 ]
 
 function isValidEmail(v: string) {
@@ -43,16 +44,12 @@ interface Step1Props {
 }
 
 function CheckoutStep1({ cartTotal, formatARS, onConfirm }: Step1Props) {
-  const [form, setForm] = useState({
-    nombre: '', email: '', telefono: '',
-    calle: '', numero: '', cp: '', ciudad: '', provincia: 'Buenos Aires',
-    shippingMethod: '',
-  })
-  const [errors, setErrors]           = useState<Record<string, string>>({})
-  const [triedToAdvance, setTried]    = useState(false)
+  const [form, setForm] = useState({ nombre: '', email: '', telefono: '', shippingMethod: '' })
+  const [errors, setErrors]        = useState<Record<string, string>>({})
+  const [triedToAdvance, setTried] = useState(false)
 
   function set(key: keyof typeof form) {
-    return (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    return (e: React.ChangeEvent<HTMLInputElement>) => {
       const val = e.target.value
       setForm((f) => ({ ...f, [key]: val }))
       if (triedToAdvance) setErrors((prev) => ({ ...prev, [key]: '' }))
@@ -61,16 +58,11 @@ function CheckoutStep1({ cartTotal, formatARS, onConfirm }: Step1Props) {
 
   function validate() {
     const e: Record<string, string> = {}
-    if (!form.nombre.trim())          e.nombre         = 'Requerido'
-    if (!form.email.trim())           e.email          = 'Requerido'
-    else if (!isValidEmail(form.email)) e.email        = 'Email inválido'
-    if (!form.telefono.trim())        e.telefono       = 'Requerido'
-    if (!form.calle.trim())           e.calle          = 'Requerido'
-    if (!form.numero.trim())          e.numero         = 'Requerido'
-    if (!form.cp.trim())              e.cp             = 'Requerido'
-    if (!form.ciudad.trim())          e.ciudad         = 'Requerido'
-    if (!form.provincia)              e.provincia      = 'Requerido'
-    if (!form.shippingMethod)         e.shippingMethod = 'Seleccioná un método de envío'
+    if (!form.nombre.trim())            e.nombre         = 'Requerido'
+    if (!form.email.trim())             e.email          = 'Requerido'
+    else if (!isValidEmail(form.email)) e.email          = 'Email inválido'
+    if (!form.telefono.trim())          e.telefono       = 'Requerido'
+    if (!form.shippingMethod)           e.shippingMethod = 'Seleccioná un método de entrega'
     setErrors(e)
     return Object.keys(e).length === 0
   }
@@ -83,11 +75,6 @@ function CheckoutStep1({ cartTotal, formatARS, onConfirm }: Step1Props) {
       nombre:         form.nombre,
       email:          form.email,
       telefono:       form.telefono,
-      calle:          form.calle,
-      numero:         form.numero,
-      cp:             form.cp,
-      ciudad:         form.ciudad,
-      provincia:      form.provincia,
       shippingMethod: form.shippingMethod,
       shippingCost:   opt.price,
     })
@@ -97,17 +84,17 @@ function CheckoutStep1({ cartTotal, formatARS, onConfirm }: Step1Props) {
     `w-full bg-paper-2 border px-4 py-[10px] font-mono text-[12px] text-ink placeholder:text-ink/30 focus:outline-none transition-colors ${
       triedToAdvance && errors[field] ? 'border-red' : 'border-ink/10 focus:border-red'
     }`
-  const labelCls  = 'block font-mono text-[9px] tracking-[0.15em] uppercase text-ink/50 mb-[6px]'
-  const errorCls  = 'font-mono text-[9px] text-red mt-[4px]'
+  const labelCls = 'block font-mono text-[9px] tracking-[0.15em] uppercase text-ink/50 mb-[6px]'
+  const errorCls = 'font-mono text-[9px] text-red mt-[4px]'
 
-  const selectedOpt = SHIPPING_OPTIONS.find((o) => o.method === form.shippingMethod)
+  const selectedOpt   = SHIPPING_OPTIONS.find((o) => o.method === form.shippingMethod)
   const totalConEnvio = cartTotal + (selectedOpt?.price ?? 0)
 
   return (
     <div className="flex flex-col h-full">
       <div className="flex-1 overflow-auto px-7 py-5">
         <p className="font-mono text-[9px] tracking-[0.2em] text-red uppercase mb-4">
-          Paso 1 de 2 — Datos de envío
+          Paso 1 de 2 — Tus datos
         </p>
 
         <div className="space-y-[14px]">
@@ -155,83 +142,11 @@ function CheckoutStep1({ cartTotal, formatARS, onConfirm }: Step1Props) {
               {triedToAdvance && errors.telefono && <p className={errorCls}>{errors.telefono}</p>}
             </div>
           </div>
-
-          <div className="grid grid-cols-[1fr_80px] gap-[10px]">
-            <div>
-              <label htmlFor="checkout-calle" className={labelCls}>Calle *</label>
-              <input
-                id="checkout-calle"
-                name="calle"
-                autoComplete="address-line1"
-                className={inputCls('calle')}
-                placeholder="Av. Corrientes"
-                value={form.calle}
-                onChange={set('calle')}
-              />
-              {triedToAdvance && errors.calle && <p className={errorCls}>{errors.calle}</p>}
-            </div>
-            <div>
-              <label htmlFor="checkout-numero" className={labelCls}>Número *</label>
-              <input
-                id="checkout-numero"
-                name="numero"
-                autoComplete="address-line2"
-                className={inputCls('numero')}
-                placeholder="1234"
-                value={form.numero}
-                onChange={set('numero')}
-              />
-              {triedToAdvance && errors.numero && <p className={errorCls}>{errors.numero}</p>}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-[120px_1fr] gap-[10px]">
-            <div>
-              <label htmlFor="checkout-cp" className={labelCls}>Cód. postal *</label>
-              <input
-                id="checkout-cp"
-                name="cp"
-                autoComplete="postal-code"
-                className={inputCls('cp')}
-                placeholder="1425"
-                value={form.cp}
-                onChange={set('cp')}
-              />
-              {triedToAdvance && errors.cp && <p className={errorCls}>{errors.cp}</p>}
-            </div>
-            <div>
-              <label htmlFor="checkout-ciudad" className={labelCls}>Ciudad *</label>
-              <input
-                id="checkout-ciudad"
-                name="ciudad"
-                autoComplete="address-level2"
-                className={inputCls('ciudad')}
-                placeholder="Buenos Aires"
-                value={form.ciudad}
-                onChange={set('ciudad')}
-              />
-              {triedToAdvance && errors.ciudad && <p className={errorCls}>{errors.ciudad}</p>}
-            </div>
-          </div>
-
-          <div>
-            <label htmlFor="checkout-provincia" className={labelCls}>Provincia *</label>
-            <select
-              id="checkout-provincia"
-              name="provincia"
-              autoComplete="address-level1"
-              className={inputCls('provincia')}
-              value={form.provincia}
-              onChange={set('provincia')}
-            >
-              {PROVINCIAS.map((p) => <option key={p}>{p}</option>)}
-            </select>
-          </div>
         </div>
 
-        {/* Método de envío */}
+        {/* Método de entrega */}
         <div className="mt-5">
-          <p className={`${labelCls} mb-3`}>Método de envío *</p>
+          <p className={`${labelCls} mb-3`}>Método de entrega *</p>
           <div className="flex flex-col gap-[6px]">
             {SHIPPING_OPTIONS.map((opt) => {
               const active = form.shippingMethod === opt.method
@@ -249,12 +164,12 @@ function CheckoutStep1({ cartTotal, formatARS, onConfirm }: Step1Props) {
                       : 'bg-paper-2 border-ink/10 hover:border-ink/30'
                   }`}
                 >
-                  <div>
+                  <div className="flex-1 pr-3">
                     <div className={`font-mono text-[11px] ${active ? 'text-paper' : 'text-ink'}`}>{opt.label}</div>
-                    <div className={`font-mono text-[9px] ${active ? 'text-paper/50' : 'text-ink/40'}`}>{opt.desc}</div>
+                    <div className={`font-mono text-[9px] leading-[1.5] mt-[2px] ${active ? 'text-paper/50' : 'text-ink/40'}`}>{opt.desc}</div>
                   </div>
-                  <div className={`font-heading text-[14px] font-medium ${active ? 'text-paper' : 'text-ink'}`}>
-                    {opt.price > 0 ? fmtARS(opt.price) : 'Gratis'}
+                  <div className={`font-heading text-[14px] font-medium flex-shrink-0 ${active ? 'text-paper' : 'text-ink'}`}>
+                    Gratis
                   </div>
                 </button>
               )
@@ -337,12 +252,8 @@ function CheckoutStep2({ cartItems, shippingData, formatARS, onBack, onPay, payi
           <span className="font-heading font-medium text-[24px]">{formatARS(total)}</span>
         </div>
 
-        {/* Datos de envío */}
+        {/* Datos de contacto */}
         <div className="border border-ink/10 divide-y divide-ink/8 text-[12px]">
-          <div className="px-4 py-[10px] flex gap-3">
-            <MapPin size={14} className="text-red flex-shrink-0 mt-[1px]" />
-            <span>{shippingData.calle} {shippingData.numero}, {shippingData.ciudad} ({shippingData.cp}), {shippingData.provincia}</span>
-          </div>
           <div className="px-4 py-[10px] flex gap-3">
             <Package size={14} className="text-red flex-shrink-0 mt-[1px]" />
             <span>{shippingData.nombre} · {shippingData.telefono}</span>
@@ -350,6 +261,14 @@ function CheckoutStep2({ cartItems, shippingData, formatARS, onBack, onPay, payi
           <div className="px-4 py-[10px] flex gap-3">
             <CreditCard size={14} className="text-red flex-shrink-0 mt-[1px]" />
             <span>{shippingData.email}</span>
+          </div>
+          <div className="px-4 py-[10px] flex gap-3">
+            <MapPin size={14} className="text-red flex-shrink-0 mt-[1px]" />
+            <span>
+              {shippingData.shippingMethod === 'retiro_local'
+                ? 'Retiro en local · Mario Bravo 1314'
+                : 'Envío a domicilio — te contactamos por WhatsApp para coordinar'}
+            </span>
           </div>
         </div>
       </div>
@@ -369,6 +288,8 @@ function CheckoutStep2({ cartItems, shippingData, formatARS, onBack, onPay, payi
         >
           {paying ? (
             <><Loader2 size={14} className="animate-spin" /> Procesando...</>
+          ) : shippingData.shippingMethod === 'envio_domicilio' ? (
+            'Confirmar y consultar envío →'
           ) : (
             'Pagar con Mercado Pago →'
           )}
@@ -418,6 +339,12 @@ export default function CartDrawer() {
 
   async function handlePay() {
     if (!shippingData) return
+    if (shippingData.shippingMethod === 'envio_domicilio') {
+      clearCart()
+      window.open(WA_ENVIO, '_blank', 'noopener,noreferrer')
+      handleCloseCheckout()
+      return
+    }
     setPaying(true)
     try {
       const res = await fetch('/api/mercadopago/create-preference', {

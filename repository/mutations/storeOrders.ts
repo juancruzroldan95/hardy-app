@@ -39,8 +39,8 @@ export async function createStoreOrder(input: CreateStoreOrderInput): Promise<st
       shippingMethod:  shippingData.shippingMethod as ShippingMethod,
       paymentMethod:   'transferencia', // MP — se actualiza post-webhook
       totalArs:        String(totalArs),
-      shippingAddress: `${shippingData.calle} ${shippingData.numero}, ${shippingData.ciudad}, ${shippingData.provincia}`,
-      shippingCp:      shippingData.cp,
+      shippingAddress: shippingData.shippingMethod === 'retiro_local' ? 'Retiro en local · Mario Bravo 1314' : undefined,
+      shippingCp:      undefined,
       shippingCost:    String(shippingCost),
       guestName:       shippingData.nombre,
       guestEmail:      shippingData.email,

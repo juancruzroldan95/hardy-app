@@ -20,13 +20,12 @@ interface Props {
 }
 
 const CLIENT_LINKS = [
-  { href: '/portal',               label: 'Dashboard'    },
+  { href: '/portal/perfil',        label: 'Mi Perfil'    },
   { href: '/portal/catalogo',      label: 'Catálogo'     },
   { href: '/portal/pedidos/nuevo', label: 'Nuevo Pedido' },
   { href: '/portal/pedidos',       label: 'Mis Pedidos'  },
   { href: '/portal/materiales',    label: 'Materiales'   },
   { href: '/portal/novedades',     label: 'Novedades'    },
-  { href: '/portal/perfil',        label: 'Mi Perfil'    },
 ]
 
 const ADMIN_LINKS = [
@@ -56,7 +55,6 @@ export default function PortalSidebar({
   const [open, setOpen] = useState(false)
 
   function isActive(href: string) {
-    if (href === '/portal') return pathname === '/portal'
     if (href === '/portal/admin') return pathname === '/portal/admin'
     // "Nuevo Pedido" solo activo en esa ruta exacta
     if (href === '/portal/pedidos/nuevo') return pathname === '/portal/pedidos/nuevo'
@@ -70,36 +68,51 @@ export default function PortalSidebar({
 
   const isAdmin = role === 'admin'
 
+  const links     = isAdmin ? ADMIN_LINKS : CLIENT_LINKS
+  const activeLink = links.find(({ href }) => isActive(href))
+
   return (
-    <aside className="w-[240px] max-md:w-full shrink-0 bg-ink flex flex-col min-h-screen max-md:min-h-0 max-md:sticky max-md:top-0 max-md:z-40 max-md:max-h-screen">
+    <aside className="w-[240px] max-md:w-full shrink-0 bg-ink flex flex-col min-h-screen max-md:min-h-0">
       {/* Logo + hamburger (mobile) */}
-      <div className="px-7 pt-8 pb-6 border-b border-[#2a2a2a] max-md:py-4 max-md:flex max-md:items-center max-md:justify-between">
-        <div>
-          <Link href="/portal" className="block" onClick={() => setOpen(false)}>
-            <div className="font-display text-[28px] tracking-[0.04em] text-paper leading-none max-md:text-[24px]">
+      <div className="px-7 pt-8 pb-6 border-b border-[#2a2a2a] max-md:py-0 max-md:flex max-md:flex-col">
+        {/* Fila superior: logo + hamburger */}
+        <div className="max-md:flex max-md:items-center max-md:justify-between max-md:py-4">
+          <Link href="/portal/perfil" className="block" onClick={() => setOpen(false)}>
+            <div className="font-display text-[28px] tracking-[0.04em] text-paper leading-none max-md:text-[22px]">
               HARDY
             </div>
-            <div className="font-mono text-[8px] tracking-[0.25em] text-red uppercase mt-1">
+            <div className="font-mono text-[8px] tracking-[0.25em] text-red uppercase mt-1 max-md:hidden">
               Portal
             </div>
           </Link>
-          <Link
-            href="/"
-            className="inline-flex items-center gap-1.5 mt-4 max-md:hidden font-mono text-[9px] tracking-[0.15em] uppercase text-paper/40 hover:text-paper transition-colors"
+          {/* Hamburger — solo mobile */}
+          <button
+            type="button"
+            onClick={() => setOpen((v) => !v)}
+            className="hidden max-md:flex items-center justify-center w-10 h-10 border border-[#2a2a2a] text-paper"
+            aria-label={open ? 'Cerrar menú' : 'Abrir menú'}
+            aria-expanded={open}
           >
-            ← Volver al sitio
-          </Link>
+            {open ? <X size={18} /> : <Menu size={18} />}
+          </button>
         </div>
-        {/* Hamburger — solo mobile */}
-        <button
-          type="button"
-          onClick={() => setOpen((v) => !v)}
-          className="hidden max-md:flex items-center justify-center w-10 h-10 border border-[#2a2a2a] text-paper"
-          aria-label={open ? 'Cerrar menú' : 'Abrir menú'}
-          aria-expanded={open}
+
+        {/* Indicador de sección — solo mobile, solo cuando menú cerrado */}
+        {!open && activeLink && (
+          <div className="hidden max-md:flex items-center gap-2 py-2 border-t border-[#2a2a2a]">
+            <span className="font-mono text-[8px] tracking-[0.2em] text-red uppercase">──</span>
+            <span className="font-mono text-[10px] tracking-[0.15em] uppercase text-paper/70">
+              {activeLink.label}
+            </span>
+          </div>
+        )}
+
+        <Link
+          href="/"
+          className="inline-flex items-center gap-1.5 mt-4 max-md:hidden font-mono text-[9px] tracking-[0.15em] uppercase text-paper/40 hover:text-paper transition-colors"
         >
-          {open ? <X size={18} /> : <Menu size={18} />}
-        </button>
+          ← Volver al sitio
+        </Link>
       </div>
 
       {/* Contenido colapsable en mobile — scroll interno para que el logout siempre sea alcanzable */}

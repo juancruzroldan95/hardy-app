@@ -155,33 +155,44 @@ export default function ProductCard({ product, rating }: { product: Product; rat
             {product.desc}
           </div>
           <div className="flex-1" />
-          <div className="pt-[14px] border-t border-ink/15 group-hover:border-white/15 flex justify-between items-center gap-2 transition-colors duration-[220ms] max-md:flex-col max-md:items-stretch max-md:gap-3">
-            {product.price ? (
-              <>
+          <div className="pt-[14px] border-t border-ink/15 group-hover:border-white/15 flex flex-col gap-2 transition-colors duration-[220ms]">
+            {product.line === 'balde' ? (
+              <div className="flex justify-between items-center gap-2 max-md:flex-col max-md:items-stretch max-md:gap-3">
                 <div className="font-heading text-[22px] font-medium whitespace-nowrap group-hover:text-paper transition-colors duration-[220ms]">
                   {formatARS(product.price)}
                 </div>
-                <button
-                  onClick={(e) => { e.stopPropagation(); addItem(product.id) }}
-                  className="bg-red text-paper font-mono text-[10px] tracking-[0.08em] uppercase px-[14px] py-[10px] whitespace-nowrap flex-shrink-0 cursor-pointer border-none max-md:w-full"
-                >
-                  + Agregar
-                </button>
-              </>
-            ) : (
-              <>
-                <span className="font-mono text-[11px] text-[#888] group-hover:text-[#aaa] tracking-[0.1em] transition-colors duration-[220ms]">
-                  A consultar
-                </span>
                 <a
-                  href={`${WA_NUMBER}?text=Hola%20Hardy,%20quiero%20info%20del%20${encodeURIComponent(product.name + ' ' + product.size)}`}
+                  href={`${WA_NUMBER}?text=Hola%21+Quiero+consultar+disponibilidad+de+${encodeURIComponent(product.name + ' ' + product.size)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={(e) => e.stopPropagation()}
                   className="bg-red text-paper font-mono text-[10px] tracking-[0.08em] uppercase px-[14px] py-[10px] whitespace-nowrap flex-shrink-0 no-underline text-center max-md:w-full"
                 >
-                  Consultar →
+                  Consultar stock →
                 </a>
+              </div>
+            ) : (
+              <>
+                <div className="flex justify-between items-center gap-2 max-md:flex-col max-md:items-stretch max-md:gap-3">
+                  <div className="font-heading text-[22px] font-medium whitespace-nowrap group-hover:text-paper transition-colors duration-[220ms]">
+                    {formatARS(product.price)}
+                  </div>
+                  {product.comingSoon ? (
+                    <span className="font-mono text-[10px] tracking-[0.08em] uppercase px-[14px] py-[10px] whitespace-nowrap flex-shrink-0 border border-ink/20 group-hover:border-white/20 text-ink/40 group-hover:text-paper/40 transition-colors duration-[220ms] max-md:w-full max-md:text-center">
+                      Próximamente
+                    </span>
+                  ) : (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); addItem(product.id) }}
+                      className="bg-red text-paper font-mono text-[10px] tracking-[0.08em] uppercase px-[14px] py-[10px] whitespace-nowrap flex-shrink-0 cursor-pointer border-none max-md:w-full"
+                    >
+                      + Agregar
+                    </button>
+                  )}
+                </div>
+                <p className="font-mono text-[9px] tracking-[0.1em] text-ink/40 group-hover:text-paper/30 transition-colors duration-[220ms] m-0">
+                  {product.comingSoon ? 'Reincorporando stock · volvé pronto' : 'Pedido mínimo: 2 unidades'}
+                </p>
               </>
             )}
           </div>
@@ -318,31 +329,46 @@ export default function ProductCard({ product, rating }: { product: Product; rat
               </div>
 
               <div>
-                {product.price ? (
-                  <>
-                    <div className="font-heading text-[26px] text-white font-medium mb-[14px] tracking-[-0.02em]">
-                      {formatARS(product.price)}
-                      <span className="font-mono text-[9px] ml-2 tracking-[0.1em]" style={{ color: 'rgba(255,255,255,0.35)' }}>
-                        + IVA
-                      </span>
-                    </div>
-                    <button
-                      onClick={() => { addItem(product.id); closeModal() }}
-                      className="w-full bg-red text-white border-none p-[15px] cursor-pointer font-mono text-[11px] tracking-[0.15em] uppercase"
-                    >
-                      + Agregar al carrito
-                    </button>
-                  </>
-                ) : (
+                <div className="font-heading text-[26px] text-white font-medium mb-[14px] tracking-[-0.02em]">
+                  {formatARS(product.price)}
+                  <span className="font-mono text-[9px] ml-2 tracking-[0.1em]" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                    + IVA
+                  </span>
+                </div>
+                {product.line === 'balde' ? (
                   <a
-                    href={`${WA_NUMBER}?text=Hola%20Hardy,%20quiero%20info%20del%20${encodeURIComponent(product.name + ' ' + product.size)}`}
+                    href={`${WA_NUMBER}?text=Hola%21+Quiero+consultar+disponibilidad+de+${encodeURIComponent(product.name + ' ' + product.size)}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="block w-full text-white p-[15px] font-mono text-[11px] tracking-[0.15em] uppercase no-underline text-center"
                     style={{ background: '#25D366' }}
                   >
-                    Consultar por WhatsApp →
+                    Consultar disponibilidad de stock →
                   </a>
+                ) : product.comingSoon ? (
+                  <>
+                    <div
+                      className="w-full p-[15px] font-mono text-[11px] tracking-[0.15em] uppercase text-center mb-2"
+                      style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.4)' }}
+                    >
+                      Próximamente en stock
+                    </div>
+                    <p className="font-mono text-[9px] tracking-[0.1em] text-center m-0" style={{ color: 'rgba(255,255,255,0.3)' }}>
+                      Reincorporando stock · volvé pronto
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      onClick={() => { addItem(product.id); closeModal() }}
+                      className="w-full bg-red text-white border-none p-[15px] cursor-pointer font-mono text-[11px] tracking-[0.15em] uppercase mb-2"
+                    >
+                      + Agregar al carrito
+                    </button>
+                    <p className="font-mono text-[9px] tracking-[0.1em] text-center m-0" style={{ color: 'rgba(255,255,255,0.3)' }}>
+                      Pedido mínimo: 2 unidades
+                    </p>
+                  </>
                 )}
               </div>
             </div>

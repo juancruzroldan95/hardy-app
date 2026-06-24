@@ -15,6 +15,7 @@ export interface Product {
   nutri?: [string, string][]
   nutriLabel?: string
   unitsPerBox?: number   // cajas de 15u (maní), 12u (miel), 1 (baldes)
+  comingSoon?: boolean
 }
 
 export interface Receta {
@@ -46,11 +47,6 @@ export interface ShippingData {
   nombre:         string
   email:          string
   telefono:       string
-  calle:          string
-  numero:         string
-  cp:             string
-  ciudad:         string
-  provincia:      string
   shippingMethod: string
   shippingCost:   number
 }

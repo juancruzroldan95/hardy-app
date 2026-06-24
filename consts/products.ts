@@ -76,6 +76,7 @@ export const PRODUCTS: Product[] = [
       '/products/crunchy-380-open.png',
       '/products/crunchy-380-back.png',
     ],
+    comingSoon: true,
     tagline: 'Para los que saben lo que quieren.',
     detail:
       'La misma base 100% natural con trozos enteros de maní que te recuerdan de dónde viene cada cucharada. Textura que se siente — no se disimula.',

@@ -5,6 +5,7 @@ import { and, eq, gt } from 'drizzle-orm'
 import { getPendingAlertsCount } from '@/repository/queries/profile'
 import PortalSidebar from '@/components/portal/PortalSidebar'
 import type { UserRole } from '@/db/schema'
+import { redirect } from 'next/navigation'
 
 export default async function PortalLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
@@ -25,10 +26,16 @@ export default async function PortalLayout({ children }: { children: React.React
     where: and(eq(profiles.userId, user.id), eq(profiles.isDeleted, false)),
   })
 
-  const role             = (profile?.role ?? 'consumer') as UserRole
-  const displayName      = profile?.displayName ?? ''
-  const vendedorNombre   = profile?.vendedorNombre ?? undefined
-  const vendedorWhatsapp = profile?.vendedorWhatsapp ?? undefined
+  // Perfil eliminado: cerrar sesión y redirigir al login
+  if (!profile) {
+    await supabase.auth.signOut()
+    redirect('/portal/login')
+  }
+
+  const role             = profile.role as UserRole
+  const displayName      = profile.displayName ?? ''
+  const vendedorNombre   = profile.vendedorNombre ?? undefined
+  const vendedorWhatsapp = profile.vendedorWhatsapp ?? undefined
 
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
   const recentlyUpdated = await db.query.orders.findMany({

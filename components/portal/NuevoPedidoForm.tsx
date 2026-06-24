@@ -45,8 +45,9 @@ interface Props {
   roleName:           string
   overrideAction?:    (prev: CreateOrderState, formData: FormData) => Promise<CreateOrderState>
   deliveryAddresses?: DeliveryAddressProp[]
-  stockByProduct?:    Record<string, string>   // productId → 'available'|'low_stock'|'out_of_stock'|'preorder'
-  userId?:            string                    // for localStorage draft key
+  stockByProduct?:    Record<string, string>         // productId → 'available'|'low_stock'|'out_of_stock'|'preorder'
+  stockQtyByProduct?: Record<string, number | null>  // productId → cantidad máxima (null = sin límite)
+  userId?:            string                          // for localStorage draft key
   clientPhone?:       string                    // admin mode: WA va al cliente
   clientName?:        string                    // admin mode: nombre del cliente
 }
@@ -225,6 +226,7 @@ export default function NuevoPedidoForm({
   overrideAction,
   deliveryAddresses = [],
   stockByProduct = {},
+  stockQtyByProduct = {},
   userId,
   clientPhone,
   clientName,
@@ -368,8 +370,9 @@ export default function NuevoPedidoForm({
   const tierGroups = useMemo(() => buildTierGroups(productos), [productos])
 
   function setQty(id: string, value: string) {
-    const n = Math.max(0, parseInt(value, 10) || 0)
-    setQtys((prev) => ({ ...prev, [id]: n }))
+    const max = stockQtyByProduct[id] ?? null
+    const n   = Math.max(0, parseInt(value, 10) || 0)
+    setQtys((prev) => ({ ...prev, [id]: max !== null ? Math.min(n, max) : n }))
   }
 
   const showBankDetails      = selectedPayment && BANK_PAYMENT_VALUES.has(selectedPayment)
@@ -629,8 +632,9 @@ export default function NuevoPedidoForm({
 
       {/* ── Productos ────────────────────────────────────────────────── */}
       <div className="bg-paper border border-ink/8 mb-6">
+        {/* Header — solo desktop */}
         <div
-          className="px-5 py-3 border-b border-ink/8 grid gap-4"
+          className="px-5 py-3 border-b border-ink/8 hidden md:grid gap-4"
           style={{ gridTemplateColumns: '1fr 120px 90px 80px' }}
         >
           <span className="font-mono text-[9px] tracking-[0.15em] uppercase text-ink/70">Producto</span>
@@ -649,69 +653,141 @@ export default function NuevoPedidoForm({
           const priceChanged  = activeTier && baseTier && activeTier.minQty !== baseTier.minQty
           const stockStatus   = stockByProduct[p.id]
           const isOutOfStock  = stockStatus === 'out_of_stock'
+          const maxQty        = stockQtyByProduct[p.id] ?? null
 
           return (
             <div
               key={p.id}
               className={[
-                'px-5 py-4 border-b border-ink/8 grid gap-4 items-center last:border-0',
+                'border-b border-ink/8 last:border-0',
                 isOutOfStock ? 'opacity-50' : '',
               ].join(' ')}
-              style={{ gridTemplateColumns: '1fr 120px 90px 80px' }}
             >
               <input type="hidden" name={`qty-${p.id}`} value={isOutOfStock ? 0 : qty} />
               <input type="hidden" name={`upb-${p.id}`} value={p.unitsPerBox} />
 
-              <div className="flex items-center gap-3 min-w-0">
-                <Image src={p.image} alt={p.name} width={40} height={40} className="object-contain shrink-0" />
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <div className="font-body font-semibold text-[13px]">{p.name}</div>
-                    <StockBadge status={stockStatus} />
+              {/* ── Desktop: 4 columnas ── */}
+              <div
+                className="px-5 py-4 hidden md:grid gap-4 items-center"
+                style={{ gridTemplateColumns: '1fr 120px 90px 80px' }}
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <Image src={p.image} alt={p.name} width={40} height={40} className="object-contain shrink-0" />
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <div className="font-body font-semibold text-[13px]">{p.name}</div>
+                      <StockBadge status={stockStatus} />
+                    </div>
+                    <div className="font-mono text-[9px] tracking-[0.12em] text-red uppercase">
+                      {p.variant} · {p.size}
+                      {!p.isBalde && <span className="text-ink/40 ml-2">· caja {p.unitsPerBox}u</span>}
+                    </div>
                   </div>
-                  <div className="font-mono text-[9px] tracking-[0.12em] text-red uppercase">
-                    {p.variant} · {p.size}
-                    {!p.isBalde && <span className="text-ink/40 ml-2">· caja {p.unitsPerBox}u</span>}
-                  </div>
+                </div>
+
+                <div className="text-right">
+                  <div className="font-mono text-[13px] font-semibold text-red">{formatARS(pricePerCaja)}</div>
+                  <div className="font-mono text-[9px] text-ink/55">{p.isBalde ? 'por unidad' : 'por caja'}</div>
+                  {priceChanged && (
+                    <div className="font-mono text-[8px] text-ink/40 line-through">{formatARS(p.b2bPriceCaja)}</div>
+                  )}
+                </div>
+
+                <div className="flex items-center justify-center">
+                  {isOutOfStock ? (
+                    <span className="font-mono text-[9px] text-ink/30 uppercase tracking-[0.08em]">No disp.</span>
+                  ) : (
+                    <div className="relative">
+                      <input
+                        type="number"
+                        min={0}
+                        max={maxQty ?? undefined}
+                        value={qty || ''}
+                        placeholder="0"
+                        onChange={(e) => setQty(p.id, e.target.value)}
+                        className="w-[70px] text-center bg-paper-2 border border-ink/15 font-mono text-[13px] py-2 outline-none focus:border-ink transition-colors"
+                      />
+                      {!p.isBalde && qty > 0 && (
+                        <div className="absolute -bottom-[16px] left-0 right-0 text-center font-mono text-[8px] text-ink/30 whitespace-nowrap">
+                          {qty * p.unitsPerBox}u
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                <div className={`font-heading text-[16px] font-medium text-right ${subtotal > 0 ? 'text-ink' : 'text-ink/20'}`}>
+                  {subtotal > 0 ? formatARS(subtotal) : '—'}
                 </div>
               </div>
 
-              <div className="text-right">
-                <div className={`font-mono text-[13px] font-semibold ${priceChanged ? 'text-red' : 'text-red'}`}>
-                  {formatARS(pricePerCaja)}
-                </div>
-                <div className="font-mono text-[9px] text-ink/55">{p.isBalde ? 'por unidad' : 'por caja'}</div>
-                {priceChanged && (
-                  <div className="font-mono text-[8px] text-ink/40 line-through">
-                    {formatARS(p.b2bPriceCaja)}
+              {/* ── Mobile: layout apilado ── */}
+              <div className="px-4 py-4 md:hidden flex items-start gap-3">
+                <Image src={p.image} alt={p.name} width={44} height={44} className="object-contain shrink-0 mt-0.5" />
+                <div className="flex-1 min-w-0">
+                  {/* Fila 1: nombre + precio */}
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <div className="font-body font-semibold text-[13px] leading-tight">{p.name}</div>
+                        <StockBadge status={stockStatus} />
+                      </div>
+                      <div className="font-mono text-[9px] tracking-[0.12em] text-red uppercase mt-[2px]">
+                        {p.variant} · {p.size}
+                        {!p.isBalde && <span className="text-ink/40 ml-1">· {p.unitsPerBox}u</span>}
+                      </div>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <div className="font-mono text-[13px] font-semibold text-red">{formatARS(pricePerCaja)}</div>
+                      <div className="font-mono text-[8px] text-ink/50">{p.isBalde ? '/unidad' : '/caja'}</div>
+                      {priceChanged && (
+                        <div className="font-mono text-[8px] text-ink/40 line-through">{formatARS(p.b2bPriceCaja)}</div>
+                      )}
+                    </div>
                   </div>
-                )}
-              </div>
 
-              <div className="flex items-center justify-center">
-                {isOutOfStock ? (
-                  <span className="font-mono text-[9px] text-ink/30 uppercase tracking-[0.08em]">No disp.</span>
-                ) : (
-                  <div className="relative">
-                    <input
-                      type="number"
-                      min={0}
-                      value={qty || ''}
-                      placeholder="0"
-                      onChange={(e) => setQty(p.id, e.target.value)}
-                      className="w-[70px] text-center bg-paper-2 border border-ink/15 font-mono text-[13px] py-2 outline-none focus:border-ink transition-colors"
-                    />
-                    {!p.isBalde && qty > 0 && (
-                      <div className="absolute -bottom-[16px] left-0 right-0 text-center font-mono text-[8px] text-ink/30 whitespace-nowrap">
-                        {qty * p.unitsPerBox}u
+                  {/* Fila 2: stepper + subtotal */}
+                  <div className="mt-3 flex items-center justify-between gap-2">
+                    {isOutOfStock ? (
+                      <span className="font-mono text-[9px] text-ink/30 uppercase tracking-[0.08em]">Sin stock</span>
+                    ) : (
+                      <div className="flex items-center">
+                        <button
+                          type="button"
+                          onClick={() => setQty(p.id, String(Math.max(0, qty - 1)))}
+                          className="w-9 h-10 bg-paper-2 border border-ink/15 border-r-0 font-mono text-[18px] leading-none text-ink/50 hover:text-ink hover:bg-paper-2 transition-colors flex items-center justify-center"
+                        >
+                          −
+                        </button>
+                        <input
+                          type="number"
+                          min={0}
+                          max={maxQty ?? undefined}
+                          value={qty || ''}
+                          placeholder="0"
+                          onChange={(e) => setQty(p.id, e.target.value)}
+                          className="w-[48px] text-center bg-paper-2 border border-ink/15 font-mono text-[14px] py-2 outline-none focus:border-ink transition-colors"
+                        />
+                        <button
+                          type="button"
+                          disabled={maxQty !== null && qty >= maxQty}
+                          onClick={() => setQty(p.id, String(qty + 1))}
+                          className="w-9 h-10 bg-paper-2 border border-ink/15 border-l-0 font-mono text-[18px] leading-none text-ink/50 hover:text-ink hover:bg-paper-2 transition-colors flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed"
+                        >
+                          +
+                        </button>
                       </div>
                     )}
+                    <div className="text-right">
+                      {!p.isBalde && qty > 0 && (
+                        <div className="font-mono text-[8px] text-ink/30 mb-[1px]">{qty * p.unitsPerBox}u</div>
+                      )}
+                      <div className={`font-heading text-[16px] font-medium ${subtotal > 0 ? 'text-ink' : 'text-ink/20'}`}>
+                        {subtotal > 0 ? formatARS(subtotal) : '—'}
+                      </div>
+                    </div>
                   </div>
-                )}
-              </div>
-
-              <div className={`font-heading text-[16px] font-medium text-right ${subtotal > 0 ? 'text-ink' : 'text-ink/20'}`}>
-                {subtotal > 0 ? formatARS(subtotal) : '—'}
+                </div>
               </div>
             </div>
           )

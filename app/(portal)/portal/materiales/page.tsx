@@ -1,7 +1,11 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/services/supabase/server'
+import { db } from '@/db'
+import { profiles } from '@/db/schema'
+import { and, eq } from 'drizzle-orm'
 import { WA_NUMBER } from '@/consts/products'
+import type { UserRole } from '@/db/schema'
 
 interface Material {
   id:       string
@@ -13,36 +17,44 @@ interface Material {
   isNew?:   boolean
 }
 
-const MATERIALS: { section: string; items: Material[] }[] = [
+const ALL_CATALOGOS: Material[] = [
   {
-    section: 'Catálogos de precios',
-    items: [
-      {
-        id:    'catalogo-mayorista',
-        label: 'Catálogo Mayorista',
-        sub:   'Lista de precios por volumen · Canal revendedor',
-        type:  'PDF',
-        size:  '2 MB',
-        href:  '/catalogos/catalogo-mayorista.pdf',
-      },
-      {
-        id:    'catalogo-distribuidor',
-        label: 'Catálogo Distribuidor',
-        sub:   'Lista de precios · Canal distribución',
-        type:  'PDF',
-        size:  '16 MB',
-        href:  '/catalogos/catalogo-distribuidor.pdf',
-      },
-      {
-        id:    'catalogo-gastronomico',
-        label: 'Catálogo Gastronómico',
-        sub:   'Baldes y formatos profesionales',
-        type:  'PDF',
-        size:  '1.7 MB',
-        href:  '/catalogos/catalogo-gastronomico.pdf',
-      },
-    ],
+    id:    'catalogo-mayorista',
+    label: 'Catálogo Mayorista',
+    sub:   'Lista de precios por volumen · Canal revendedor',
+    type:  'PDF',
+    size:  '2 MB',
+    href:  '/api/catalogos/mayorista',
   },
+  {
+    id:    'catalogo-distribuidor',
+    label: 'Catálogo Distribuidor',
+    sub:   'Lista de precios · Canal distribución',
+    type:  'PDF',
+    size:  '16 MB',
+    href:  '/api/catalogos/distribuidor',
+  },
+  {
+    id:    'catalogo-gastronomico',
+    label: 'Catálogo Gastronómico',
+    sub:   'Baldes y formatos profesionales',
+    type:  'PDF',
+    size:  '1.7 MB',
+    href:  '/api/catalogos/gastronomico',
+  },
+]
+
+const CATALOGS_BY_ROLE: Record<UserRole, string[]> = {
+  admin:         ['catalogo-mayorista', 'catalogo-distribuidor', 'catalogo-gastronomico'],
+  mayorista:     ['catalogo-mayorista'],
+  distribuidor:  ['catalogo-distribuidor'],
+  gastronomico:  ['catalogo-gastronomico'],
+  productor:     ['catalogo-gastronomico'],
+  consumer:      [],
+}
+
+const MATERIALS_BASE: { section: string; items: Material[] }[] = [
+  // sección catálogos se inyecta dinámicamente según el rol
   {
     section: 'Imágenes de producto',
     items: [
@@ -131,6 +143,19 @@ export default async function MaterialesPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
+
+  const profile = await db.query.profiles.findFirst({
+    where: and(eq(profiles.userId, user.id), eq(profiles.isDeleted, false)),
+    columns: { role: true },
+  })
+
+  const role = (profile?.role ?? 'consumer') as UserRole
+  const allowedIds = CATALOGS_BY_ROLE[role] ?? []
+  const catalogItems = ALL_CATALOGOS.filter((c) => allowedIds.includes(c.id))
+
+  const MATERIALS = catalogItems.length > 0
+    ? [{ section: 'Catálogos de precios', items: catalogItems }, ...MATERIALS_BASE]
+    : MATERIALS_BASE
 
   return (
     <div className="max-w-[860px]">
