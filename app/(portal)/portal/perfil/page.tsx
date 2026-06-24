@@ -48,7 +48,7 @@ export default async function PerfilPage() {
   let totalBaldes = 0
   for (const item of allItems) {
     const prod = getProductById(item.productId)
-    if (prod?.isBalde) totalBaldes += item.qty
+    if (prod?.line === 'balde') totalBaldes += item.qty
     else               totalCajas  += item.qty
   }
 
@@ -82,7 +82,7 @@ export default async function PerfilPage() {
       byProduct[item.productId] = {
         name:    item.productName,
         size:    item.size,
-        isBalde: prod?.isBalde ?? false,
+        isBalde: prod?.line === 'balde',
         qty:     0,
         subtotal: 0,
       }
