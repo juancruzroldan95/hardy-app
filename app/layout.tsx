@@ -37,7 +37,7 @@ export const metadata: Metadata = {
     template: '%s | HARDY',
   },
   description:
-    'Crema de maní y miel 100% naturales. Un ingrediente, sin aditivos. Envíos a todo el país.',
+    'Insumo para gastronomía y consumo directo. Un solo ingrediente, sin aditivos. Hecho en Argentina.',
   keywords: ['crema de maní', 'miel', 'natural', 'sin aditivos', 'Argentina', 'Hardy'],
   openGraph: {
     siteName: 'HARDY',
@@ -45,7 +45,7 @@ export const metadata: Metadata = {
     type: 'website',
     title: 'HARDY — Crema de Maní y Miel Natural',
     description:
-      'Crema de maní y miel 100% naturales. Un ingrediente. Sin azúcar, sin conservantes. Envíos a todo el país.',
+      'Insumo para gastronomía y consumo directo. Un solo ingrediente, sin aditivos. Hecho en Argentina.',
     images: [
       {
         url: '/lifestyle/og-home.png',
