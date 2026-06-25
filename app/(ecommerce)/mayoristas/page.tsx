@@ -30,7 +30,7 @@ const PRODUCTOS = [
 const BENEFICIOS = [
   { n: '01', t: 'Precio escalonado', d: 'Más cantidad, mejor precio por unidad.' },
   { n: '02', t: 'Reposición rápida', d: '48-72hs. Coordinamos el envío según tu necesidad.' },
-  { n: '03', t: 'Soporte directo', d: 'Un contacto para pedidos y logística.' },
+  { n: '03', t: 'Un producto que se explica solo.', d: 'Maní o miel. Sin lista de ingredientes que defender. Tu cliente ya sabe lo que compra.' },
   { n: '04', t: 'Un solo proveedor', d: 'Crema de maní y miel del mismo lugar.' },
   { n: '05', t: 'Marca con recorrido', d: '10 años en el mercado. Un producto que se explica solo: un ingrediente.' },
 ]
