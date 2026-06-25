@@ -84,7 +84,7 @@ const USOS = [
 
 const PHILOSOPHY = [
   { n: '01', title: 'Un ingrediente, sin excepciones.', desc: 'Maní seleccionado. Miel pura. Nada más.' },
-  { n: '02', title: 'Calidad controlada, lote a lote.', desc: 'Trabajamos con estándares claros para cuidar cada producto.' },
+  { n: '02', title: 'La fórmula no cambió en 10 años.', desc: 'Porque no hay razón para cambiarla.' },
   { n: '03', title: 'Calidad sobre tendencia.', desc: 'Si un agregado no mejora el producto, no entra.' },
   { n: '04', title: 'Sin azúcar. Sin aceite. Sin conservantes.', desc: 'Lo que dice la etiqueta es lo que hay adentro.' },
 ]
@@ -120,26 +120,26 @@ export default function HomePage() {
             className="font-heading font-medium tracking-[-0.02em] m-0 text-paper max-md:text-ink"
             style={{ fontSize: 'clamp(48px, 8vw, 112px)', lineHeight: 0.92 }}
           >
-            Alimentá tu
+            Maní. Miel.
             <br />
-            <em className="not-italic text-red">instinto.</em>
+            <em className="not-italic text-red">Nada más.</em>
           </h1>
           <p className="mt-8 text-[17px] leading-[1.6] max-w-[480px] text-[#d0d0d0] font-light max-md:mt-5 max-md:text-[15px] max-md:text-ink/70">
-            Crema de maní y miel 100% naturales. Un solo ingrediente, sin aditivos. Hecha en Argentina.
+            Crema de maní. Miel pura. Un ingrediente cada una. Sin más.
           </p>
           <div className="mt-9 flex gap-3 max-md:flex-col max-md:mt-7">
             <Link
-              href="/mayoristas#solicitar"
+              href="/tienda"
               className="bg-red text-paper font-mono text-[12px] tracking-[0.15em] uppercase px-8 py-[18px] inline-flex items-center justify-center gap-[10px] max-md:w-full"
             >
-              CONSULTAR PRECIO MAYORISTA →
+              COMPRAR →
             </Link>
             <Link
-              href="/tienda"
-              className="text-paper font-mono text-[12px] tracking-[0.15em] uppercase px-8 py-[18px] border border-white/30 text-center max-md:w-full max-md:text-ink max-md:border-ink/30"
+              href="/mayoristas#solicitar"
+              className="text-paper font-mono text-[11px] tracking-[0.15em] uppercase px-8 py-[18px] border border-white/30 text-center max-md:w-full max-md:text-ink max-md:border-ink/30"
               style={{ background: 'rgba(255,255,255,0.08)' }}
             >
-              VER PRODUCTOS →
+              QUIERO VENDER HARDY →
             </Link>
           </div>
         </div>
@@ -482,7 +482,7 @@ export default function HomePage() {
               Maní y miel en cocinas, cafés y mesas de <em className="not-italic text-red">todo el país.</em>
             </h2>
             <p className="text-[15px] leading-[1.8] m-0 text-paper/65">
-              HARDY empezó en Buenos Aires con una idea simple: hacer productos nobles, de pocos ingredientes y sin vueltas. Diez años después llega a dietéticas, cafés, restaurantes y negocios de todo el país. La marca creció. La obsesión por lo simple, no.
+              HARDY empezó en Buenos Aires con una idea simple: hacer productos nobles, de pocos ingredientes y sin vueltas. Diez años después llega a dietéticas, cafés, restaurantes y negocios de todo el país. La marca creció.<br />La fórmula, no cambia.
             </p>
           </RevealSection>
           <RevealSection delay={120}>

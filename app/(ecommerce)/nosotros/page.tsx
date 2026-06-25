@@ -46,7 +46,7 @@ const TIMELINE = [
   },
   {
     year: '2025',
-    desc: 'Presencia nacional. Portal para clientes mayoristas. Hardy sigue siendo Hardy.',
+    desc: 'Nueva conducción. Portal mayorista. Hardy vuelve con todo.',
   },
 ]
 
@@ -82,8 +82,9 @@ export default function NosotrosPage() {
             ── Nuestra historia
           </p>
           <h1 className="font-heading text-[clamp(40px,6vw,80px)] font-medium leading-[1.05] tracking-[-0.02em] mb-8">
-            10 años haciendo lo mismo.{' '}
-            <em className="not-italic text-red">Bien.</em>
+            10 años.
+            <br />
+            <em className="not-italic text-red">La misma fórmula.</em>
           </h1>
           <p className="font-body text-[clamp(16px,2vw,20px)] text-paper/70 max-w-xl leading-relaxed">
             Desde 2015 hacemos crema de maní con un solo ingrediente. Maní. Nada más.

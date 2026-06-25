@@ -4,7 +4,6 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { MessageCircle } from 'lucide-react'
 import { WA_NUMBER } from '@/consts/products'
-import NewsletterForm from '@/components/layout/NewsletterForm'
 
 interface FooterLink {
   label: string
@@ -66,9 +65,6 @@ export default function Footer() {
               <p className="mt-5 text-[#888] text-[14px] leading-[1.5] max-w-[320px]">
                 Crema de maní y miel natural. Un solo ingrediente. Sin aditivos. Hecho en Argentina.
               </p>
-              <div className="mt-8 max-w-[360px]">
-                <NewsletterForm />
-              </div>
             </div>
 
             {/* Columns */}
