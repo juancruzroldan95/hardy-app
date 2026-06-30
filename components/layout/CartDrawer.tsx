@@ -9,7 +9,7 @@ import type { ShippingData } from '@/types'
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-const WA_ENVIO = 'https://wa.me/5491135736956?text=Hola%21+Quiero+hacer+un+pedido+y+consultar+el+env%C3%ADo+a+mi+domicilio.'
+const WA_ENVIO = 'https://wa.me/5491155244283?text=Hola%21+Quiero+hacer+un+pedido+y+consultar+el+env%C3%ADo+a+mi+domicilio.'
 
 const SHIPPING_OPTIONS = [
   {
