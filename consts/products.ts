@@ -14,7 +14,7 @@ export const ESCALAS: Escala[] = [
   { name: 'Mayorista full', big: '15 cajas', sub: '225 unidades', target: 'Volumen regular' },
 ]
 
-export const WA_NUMBER = 'https://wa.me/5491135736956'
+export const WA_NUMBER = 'https://wa.me/5491155244283'
 
 export function formatARS(n: number): string {
   return '$' + n.toLocaleString('es-AR')

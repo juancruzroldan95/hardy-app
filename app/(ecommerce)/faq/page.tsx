@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   },
 }
 
-const WA_URL = 'https://wa.me/5491135736956'
+const WA_URL = 'https://wa.me/5491155244283'
 
 const sections = [
   {

@@ -201,7 +201,7 @@ export default function PortalSidebar({
       {!isAdmin && (
         <div className="px-4 mt-4 mb-2">
           <a
-            href="https://wa.me/5491135736956?text=Hola%20Hardy%2C%20tengo%20una%20consulta%20sobre%20mi%20cuenta"
+            href="https://wa.me/5491155244283?text=Hola%20Hardy%2C%20tengo%20una%20consulta%20sobre%20mi%20cuenta"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2 px-3 py-2 font-mono text-[10px] tracking-[0.12em] uppercase text-[#25D366] border border-[#25D366]/30 hover:bg-[#25D366]/10 transition-colors"

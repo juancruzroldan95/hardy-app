@@ -136,7 +136,7 @@ export default async function GraciasPage({ searchParams }: Props) {
                 Intentar de nuevo →
               </Link>
               <WhatsAppLink
-                href="https://wa.me/5491135736956"
+                href="https://wa.me/5491155244283"
                 className="border border-paper/30 text-paper font-mono text-[11px] tracking-[0.15em] uppercase px-8 py-[16px] hover:bg-paper/8 transition-colors"
               >
                 Contactar por WhatsApp →

@@ -175,7 +175,7 @@ export default async function CatalogoPage() {
           Los precios incluyen el listado actualizado para tu segmento. Para consultar disponibilidad,
           condiciones de pago o coordinar un pedido especial, contactanos por{' '}
           <a
-            href="https://wa.me/5491135736956"
+            href="https://wa.me/5491155244283"
             target="_blank"
             rel="noopener noreferrer"
             className="text-ink border-b border-ink/40"
