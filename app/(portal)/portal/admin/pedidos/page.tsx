@@ -181,8 +181,15 @@ export default async function AdminPedidosPage({ searchParams }: Props) {
                     style={{ gridTemplateColumns: '1fr 110px 130px 100px 110px 100px 60px 36px' }}
                   >
                     <div>
-                      <div className="font-body font-semibold text-[13px] text-ink truncate">
-                        {p?.company ?? p?.displayName ?? '—'}
+                      <div className="flex items-center gap-1.5">
+                        <div className="font-body font-semibold text-[13px] text-ink truncate">
+                          {p?.company ?? p?.displayName ?? '—'}
+                        </div>
+                        {order.isCustomOrder && (
+                          <span className="font-mono text-[7px] tracking-[0.1em] uppercase bg-ink text-paper px-1 py-0.5 shrink-0">
+                            Personalizado
+                          </span>
+                        )}
                       </div>
                       <div className="font-mono text-[9px] tracking-[0.08em] text-ink/40 mt-[2px]">
                         {order.items.length} {order.items.length === 1 ? 'producto' : 'productos'}

@@ -138,12 +138,19 @@ async function _createOrderForUser({
   role:      UserRole
   isAdmin?:  boolean
 }): Promise<CreateOrderState> {
-  const shippingMethod       = formData.get('shippingMethod') as ShippingMethod | null
+  const shippingMethod       = (formData.get('shippingMethod') as ShippingMethod | null)?.trim() || null
   const paymentMethod        = formData.get('paymentMethod')  as PaymentMethod  | null
   const notes                = (formData.get('notes')                as string)?.trim() || null
   const purchaseOrderNumber  = (formData.get('purchaseOrderNumber')  as string)?.trim() || null
   const requestedDeliveryDate = (formData.get('requestedDeliveryDate') as string)?.trim() || null
   const shippingAddress      = (formData.get('shippingAddress')      as string)?.trim() || null
+
+  // Admin-only: pedido personalizado — envío con costo manual y precios editables por línea
+  const customMode              = isAdmin && formData.get('customMode') === '1'
+  const shippingCostOverrideRaw = isAdmin ? formData.get('shippingCostOverride') : null
+  const shippingCostOverride    = shippingCostOverrideRaw !== null && shippingCostOverrideRaw !== ''
+    ? Math.max(0, Number(shippingCostOverrideRaw) || 0)
+    : null
 
   if (!shippingMethod) return { error: 'Seleccioná un método de envío.' }
   if (!paymentMethod)  return { error: 'Seleccioná un método de pago.' }
@@ -185,7 +192,9 @@ async function _createOrderForUser({
   // Build price lookup with tiered pricing
   const getPrice = await buildPriceLookup(role)
 
-  const shippingCost = getShippingCost(shippingMethod, totalFrascoCajas, totalBaldes)
+  const shippingCost = shippingCostOverride !== null
+    ? shippingCostOverride
+    : getShippingCost(shippingMethod, totalFrascoCajas, totalBaldes)
 
   // Build order items
   let totalArs = 0
@@ -203,9 +212,11 @@ async function _createOrderForUser({
     const product = getProductById(line.productId)
     if (!product) return { error: `Producto no encontrado: ${line.productId}` }
 
-    const unitPrice    = getPrice(line.productId, totalFrascoCajas, totalBaldes) ?? product.price
-    const unitsPerBox  = unitsPerBoxMap.get(line.productId) ?? product.unitsPerBox ?? 1
-    const pricePerCaja = unitPrice * unitsPerBox
+    const unitsPerBox     = unitsPerBoxMap.get(line.productId) ?? product.unitsPerBox ?? 1
+    const customPriceRaw  = customMode ? formData.get(`price-${line.productId}`) : null
+    const pricePerCaja    = customPriceRaw !== null && customPriceRaw !== ''
+      ? Math.max(0, Number(customPriceRaw) || 0)
+      : (getPrice(line.productId, totalFrascoCajas, totalBaldes) ?? product.price) * unitsPerBox
     const subtotal     = pricePerCaja * line.qty
     totalArs          += subtotal
 
@@ -235,6 +246,7 @@ async function _createOrderForUser({
     purchaseOrderNumber,
     requestedDeliveryDate,
     shippingAddress,
+    isCustomOrder:         customMode,
   }).returning({ id: orders.id })
 
   await db.insert(orderItems).values(
