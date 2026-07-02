@@ -4,16 +4,12 @@ import { useActionState, useState } from 'react'
 import { updateOrderDetails } from '@/repository/mutations/admin'
 import type { OrderUpdateState } from '@/repository/mutations/admin'
 
-const SHIPPING_OPTIONS = [
-  { value: '',                  label: 'Sin especificar' },
-  { value: 'coordinar_whatsapp', label: 'Coordinar por WhatsApp' },
-  { value: 'andreani',           label: 'Andreani' },
-  { value: 'oca',                label: 'OCA' },
-  { value: 'retiro_deposito',    label: 'Retiro en depósito' },
-  { value: 'urgente_caba',       label: 'Urgente CABA' },
-  { value: 'urgente_gba',        label: 'Urgente GBA' },
-  { value: 'sin_urgencia_caba',  label: 'Sin urgencia CABA' },
-  { value: 'sin_urgencia_gba',   label: 'Sin urgencia GBA' },
+const SHIPPING_METHOD_SUGGESTIONS = [
+  'Andreani',
+  'OCA',
+  'Retiro en depósito',
+  'Coordinar por WhatsApp',
+  'Flete propio',
 ]
 
 const PAYMENT_OPTIONS = [
@@ -45,12 +41,13 @@ type Props = {
   orderId: string
   items: Item[]
   shippingMethod: string | null
+  shippingCost: number | null
   paymentMethod: string | null
   notes: string | null
 }
 
 export default function AdminOrderEditForm({
-  orderId, items, shippingMethod, paymentMethod, notes,
+  orderId, items, shippingMethod, shippingCost, paymentMethod, notes,
 }: Props) {
   const [state, action, isPending] = useActionState<OrderUpdateState, FormData>(
     updateOrderDetails,
@@ -60,6 +57,7 @@ export default function AdminOrderEditForm({
   const [qtys, setQtys] = useState<Record<string, number>>(
     Object.fromEntries(items.map((i) => [i.id, i.qty])),
   )
+  const [shippingCostValue, setShippingCostValue] = useState(shippingCost ?? 0)
 
   const IVA_RATE = 0.21
 
@@ -67,8 +65,8 @@ export default function AdminOrderEditForm({
     const q = qtys[item.id] ?? item.qty
     return acc + (q > 0 ? q * item.unitPriceArs : 0)
   }, 0)
-  const ivaAmount = subtotalNeto * IVA_RATE
-  const total = subtotalNeto + ivaAmount
+  const ivaAmount = (subtotalNeto + shippingCostValue) * IVA_RATE
+  const total = subtotalNeto + shippingCostValue + ivaAmount
 
   const selectCls = 'w-full bg-paper-2 border border-ink/15 font-body text-[14px] px-4 py-3 outline-none focus:border-ink transition-colors'
 
@@ -126,6 +124,12 @@ export default function AdminOrderEditForm({
               <span className="font-mono text-[9px] tracking-[0.12em] uppercase text-ink/40">Subtotal neto</span>
               <span className="font-mono text-[13px] text-ink/60">{formatARS(subtotalNeto)}</span>
             </div>
+            {shippingCostValue > 0 && (
+              <div className="flex items-center justify-between px-4 py-3">
+                <span className="font-mono text-[9px] tracking-[0.12em] uppercase text-ink/40">Envío</span>
+                <span className="font-mono text-[13px] text-ink/60">{formatARS(shippingCostValue)}</span>
+              </div>
+            )}
             <div className="flex items-center justify-between px-4 py-3">
               <span className="font-mono text-[9px] tracking-[0.12em] uppercase text-ink/40">IVA 21%</span>
               <span className="font-mono text-[13px] text-ink/60">{formatARS(ivaAmount)}</span>
@@ -143,14 +147,32 @@ export default function AdminOrderEditForm({
         </div>
 
         {/* Envío + Pago */}
-        <div className="grid grid-cols-2 gap-4 max-md:grid-cols-1">
+        <div className="grid grid-cols-3 gap-4 max-md:grid-cols-1">
           <div>
-            <label className="font-mono text-[10px] tracking-[0.12em] uppercase text-ink/60 block mb-2">Envío</label>
-            <select name="shippingMethod" defaultValue={shippingMethod ?? ''} className={selectCls}>
-              {SHIPPING_OPTIONS.map((o) => (
-                <option key={o.value} value={o.value}>{o.label}</option>
-              ))}
-            </select>
+            <label className="font-mono text-[10px] tracking-[0.12em] uppercase text-ink/60 block mb-2">Método de envío</label>
+            <input
+              type="text"
+              name="shippingMethod"
+              defaultValue={shippingMethod ?? ''}
+              list="shipping-method-suggestions-edit"
+              placeholder="Ej: Andreani, Retiro en depósito"
+              className={selectCls}
+            />
+            <datalist id="shipping-method-suggestions-edit">
+              {SHIPPING_METHOD_SUGGESTIONS.map((s) => <option key={s} value={s} />)}
+            </datalist>
+          </div>
+          <div>
+            <label className="font-mono text-[10px] tracking-[0.12em] uppercase text-ink/60 block mb-2">Costo de envío</label>
+            <input
+              type="number"
+              name="shippingCost"
+              min={0}
+              step="0.01"
+              value={shippingCostValue}
+              onChange={(e) => setShippingCostValue(Math.max(0, parseFloat(e.target.value) || 0))}
+              className={selectCls}
+            />
           </div>
           <div>
             <label className="font-mono text-[10px] tracking-[0.12em] uppercase text-ink/60 block mb-2">Forma de pago</label>

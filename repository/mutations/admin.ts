@@ -642,9 +642,13 @@ export async function updateOrderDetails(
   await getAdminUser()
 
   const orderId        = (formData.get('orderId')        as string)?.trim()
-  const shippingMethod = (formData.get('shippingMethod') as ShippingMethod) || null
+  const shippingMethod = ((formData.get('shippingMethod') as ShippingMethod)?.trim()) || null
   const paymentMethod  = (formData.get('paymentMethod')  as PaymentMethod)  || null
   const notes          = (formData.get('notes')          as string)?.trim()  || null
+  const shippingCostRaw = formData.get('shippingCost')
+  const shippingCost    = shippingCostRaw !== null && shippingCostRaw !== ''
+    ? Math.max(0, Number(shippingCostRaw) || 0)
+    : 0
 
   if (!orderId) return { error: 'ID de pedido requerido.' }
 
@@ -672,11 +676,12 @@ export async function updateOrderDetails(
     }
   }
 
-  const totalConIva = subtotalNeto * (1 + IVA_RATE)
+  const totalConIva = (subtotalNeto + shippingCost) * (1 + IVA_RATE)
 
   await db.update(orders)
     .set({
       shippingMethod,
+      shippingCost: shippingCost.toFixed(2),
       paymentMethod,
       notes,
       totalArs:  totalConIva.toFixed(2),

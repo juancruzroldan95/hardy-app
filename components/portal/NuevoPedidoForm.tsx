@@ -169,6 +169,22 @@ const PAYMENT_OPTIONS = [
   { value: 'echeq_30',         label: 'E-CHEQ 30 días',       sub: 'Liberamos mercadería al recibir el E-CHEQ', showBank: true },
 ] as const
 
+// Métodos adicionales — solo disponibles cuando el admin arma el pedido
+const PAYMENT_OPTIONS_ADMIN_EXTRA = [
+  { value: 'efectivo',  label: 'Efectivo',        sub: 'Efectivo al recibir la mercadería',   showBank: false },
+  { value: 'credito30', label: 'Crédito 30 días', sub: 'Pago a 30 días de la entrega',         showBank: false },
+  { value: 'credito60', label: 'Crédito 60 días', sub: 'Pago a 60 días de la entrega',         showBank: false },
+  { value: 'cheque',    label: 'Cheque',          sub: 'Pago con cheque físico',               showBank: false },
+]
+
+const SHIPPING_METHOD_SUGGESTIONS = [
+  'Andreani',
+  'OCA',
+  'Retiro en depósito',
+  'Coordinar por WhatsApp',
+  'Flete propio',
+]
+
 const BANK_PAYMENT_VALUES = new Set(['transferencia', 'deposito_bancario', 'echeq_30'])
 
 // ─── Pricing table helper ─────────────────────────────────────────────────────
@@ -235,6 +251,14 @@ export default function NuevoPedidoForm({
     overrideAction ?? createPortalOrder,
     undefined,
   )
+
+  // Modo admin: cuando el pedido lo arma un admin para un cliente (overrideAction presente),
+  // habilita envío/pago libres y un toggle para editar precios por línea manualmente.
+  const isAdminMode = !!overrideAction
+  const [customMode, setCustomMode]           = useState(false)
+  const [customPrices, setCustomPrices]       = useState<Record<string, number>>({})
+  const [adminShippingMethod, setAdminShippingMethod] = useState('')
+  const [adminShippingCost, setAdminShippingCost]     = useState(0)
 
   // Redirect to MP checkout when the action returns an initPoint
   useEffect(() => {
@@ -337,14 +361,28 @@ export default function NuevoPedidoForm({
     return map
   }, [productos, totalFrascoCajas, totalBaldes])
 
+  // Precios efectivos: iguales a los automáticos, salvo que el admin haya
+  // activado la edición manual y haya pisado el precio de esa línea.
+  const effectivePrices = useMemo(() => {
+    if (!customMode) return activePrices
+    const map = new Map(activePrices)
+    for (const [id, val] of Object.entries(customPrices)) {
+      if (val !== undefined && !Number.isNaN(val)) map.set(id, val)
+    }
+    return map
+  }, [activePrices, customMode, customPrices])
+
   const total = useMemo(
-    () => productos.reduce((acc, p) => acc + (qtys[p.id] ?? 0) * (activePrices.get(p.id) ?? p.b2bPriceCaja), 0),
-    [qtys, productos, activePrices],
+    () => productos.reduce((acc, p) => acc + (qtys[p.id] ?? 0) * (effectivePrices.get(p.id) ?? p.b2bPriceCaja), 0),
+    [qtys, productos, effectivePrices],
   )
 
-  const productIVA   = Math.round(total * IVA)
-  const totalConIVA  = total + productIVA
-  const shippingCost = selectedShipping ? getShippingCost(selectedShipping, totalFrascoCajas, totalBaldes) : 0
+  const productIVA      = Math.round(total * IVA)
+  const totalConIVA     = total + productIVA
+  const shippingChosen  = isAdminMode ? adminShippingMethod.trim().length > 0 : !!selectedShipping
+  const shippingCost    = isAdminMode
+    ? adminShippingCost
+    : (selectedShipping ? getShippingCost(selectedShipping, totalFrascoCajas, totalBaldes) : 0)
   const shippingIVA  = Math.round(shippingCost * IVA)
   const grandTotal   = totalConIVA + shippingCost + shippingIVA
 
@@ -376,6 +414,7 @@ export default function NuevoPedidoForm({
   }
 
   const showBankDetails      = selectedPayment && BANK_PAYMENT_VALUES.has(selectedPayment)
+  const paymentOptions       = isAdminMode ? [...PAYMENT_OPTIONS, ...PAYMENT_OPTIONS_ADMIN_EXTRA] : PAYMENT_OPTIONS
 
   // ── WA contact (consulta) ────────────────────────────────────────────────────
 
@@ -398,7 +437,7 @@ export default function NuevoPedidoForm({
         const qty = qtys[p.id] ?? 0
         if (qty > 0) {
           hasItems = true
-          const pricePerCaja = activePrices.get(p.id) ?? p.b2bPriceCaja
+          const pricePerCaja = effectivePrices.get(p.id) ?? p.b2bPriceCaja
           lines.push(`• ${p.name} ${p.size} × ${qty} ${p.isBalde ? 'unidades' : 'cajas'} — ${formatARS(pricePerCaja)}/${p.isBalde ? 'unidad' : 'caja'}`)
         }
       }
@@ -415,7 +454,7 @@ export default function NuevoPedidoForm({
       const qty = qtys[p.id] ?? 0
       if (qty > 0) {
         hasItems = true
-        const pricePerCaja = activePrices.get(p.id) ?? p.b2bPriceCaja
+        const pricePerCaja = effectivePrices.get(p.id) ?? p.b2bPriceCaja
         lines.push(`• ${p.name} ${p.size} × ${qty} ${p.isBalde ? 'unidades' : 'cajas'} — ${formatARS(pricePerCaja)}/caja`)
       }
     }
@@ -423,7 +462,7 @@ export default function NuevoPedidoForm({
     lines.push(`\n*Total estimado (c/IVA 21%):* ${formatARS(totalConIVA)}`)
     lines.push(`\n¿Pueden confirmar disponibilidad y coordinar el envío?`)
     return encodeURIComponent(lines.join('\n'))
-  }, [qtys, productos, activePrices, totalConIVA, roleName, clientPhone, clientName])
+  }, [qtys, productos, effectivePrices, totalConIVA, roleName, clientPhone, clientName])
 
   // Selected delivery address details
   const selectedAddress = deliveryAddresses.find((a) => a.id === selectedAddressId)
@@ -630,6 +669,38 @@ export default function NuevoPedidoForm({
         {/* COLUMNA IZQUIERDA (formulario) */}
         <div className="md:col-start-1 md:row-start-1">
 
+      {/* ── Pedido personalizado (solo admin) ───────────────────────────── */}
+      {isAdminMode && (
+        <>
+          <input type="hidden" name="customMode" value={customMode ? '1' : '0'} />
+          <div className="mb-6 flex items-center justify-between gap-4 bg-paper border border-ink/8 px-5 py-4">
+            <div>
+              <p className="font-mono text-[10px] tracking-[0.15em] uppercase text-ink font-semibold">
+                Pedido personalizado
+              </p>
+              <p className="font-mono text-[9px] text-ink/50 mt-[2px]">
+                Editá el precio de cada producto a mano en vez del precio automático por volumen.
+              </p>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={customMode}
+              onClick={() => setCustomMode((v) => !v)}
+              className={[
+                'relative w-11 h-6 rounded-full transition-colors shrink-0',
+                customMode ? 'bg-red' : 'bg-ink/15',
+              ].join(' ')}
+            >
+              <span className={[
+                'absolute top-[3px] left-[3px] w-[18px] h-[18px] rounded-full bg-paper transition-transform',
+                customMode ? 'translate-x-5' : 'translate-x-0',
+              ].join(' ')} />
+            </button>
+          </div>
+        </>
+      )}
+
       {/* ── Productos ────────────────────────────────────────────────── */}
       <div className="bg-paper border border-ink/8 mb-6">
         {/* Header — solo desktop */}
@@ -645,7 +716,7 @@ export default function NuevoPedidoForm({
 
         {productos.map((p) => {
           const qty           = qtys[p.id] ?? 0
-          const pricePerCaja  = activePrices.get(p.id) ?? p.b2bPriceCaja
+          const pricePerCaja  = effectivePrices.get(p.id) ?? p.b2bPriceCaja
           const subtotal      = qty * pricePerCaja
           const counter       = p.isBalde ? totalBaldes : totalFrascoCajas
           const activeTier    = getActiveTier(p.priceTiers, counter)
@@ -665,6 +736,7 @@ export default function NuevoPedidoForm({
             >
               <input type="hidden" name={`qty-${p.id}`} value={isOutOfStock ? 0 : qty} />
               <input type="hidden" name={`upb-${p.id}`} value={p.unitsPerBox} />
+              {customMode && <input type="hidden" name={`price-${p.id}`} value={pricePerCaja} />}
 
               {/* ── Desktop: 4 columnas ── */}
               <div
@@ -686,9 +758,21 @@ export default function NuevoPedidoForm({
                 </div>
 
                 <div className="text-right">
-                  <div className="font-mono text-[13px] font-semibold text-red">{formatARS(pricePerCaja)}</div>
+                  {customMode ? (
+                    <input
+                      type="number"
+                      min={0}
+                      step="0.01"
+                      value={pricePerCaja || ''}
+                      placeholder="0"
+                      onChange={(e) => setCustomPrices((prev) => ({ ...prev, [p.id]: Math.max(0, parseFloat(e.target.value) || 0) }))}
+                      className="w-[100px] text-right bg-paper-2 border border-ink/15 font-mono text-[13px] px-2 py-2 outline-none focus:border-ink transition-colors"
+                    />
+                  ) : (
+                    <div className="font-mono text-[13px] font-semibold text-red">{formatARS(pricePerCaja)}</div>
+                  )}
                   <div className="font-mono text-[9px] text-ink/55">{p.isBalde ? 'por unidad' : 'por caja'}</div>
-                  {priceChanged && (
+                  {!customMode && priceChanged && (
                     <div className="font-mono text-[8px] text-ink/40 line-through">{formatARS(p.b2bPriceCaja)}</div>
                   )}
                 </div>
@@ -738,9 +822,21 @@ export default function NuevoPedidoForm({
                       </div>
                     </div>
                     <div className="text-right shrink-0">
-                      <div className="font-mono text-[13px] font-semibold text-red">{formatARS(pricePerCaja)}</div>
+                      {customMode ? (
+                        <input
+                          type="number"
+                          min={0}
+                          step="0.01"
+                          value={pricePerCaja || ''}
+                          placeholder="0"
+                          onChange={(e) => setCustomPrices((prev) => ({ ...prev, [p.id]: Math.max(0, parseFloat(e.target.value) || 0) }))}
+                          className="w-[90px] text-right bg-paper-2 border border-ink/15 font-mono text-[13px] px-2 py-1 outline-none focus:border-ink transition-colors"
+                        />
+                      ) : (
+                        <div className="font-mono text-[13px] font-semibold text-red">{formatARS(pricePerCaja)}</div>
+                      )}
                       <div className="font-mono text-[8px] text-ink/50">{p.isBalde ? '/unidad' : '/caja'}</div>
-                      {priceChanged && (
+                      {!customMode && priceChanged && (
                         <div className="font-mono text-[8px] text-ink/40 line-through">{formatARS(p.b2bPriceCaja)}</div>
                       )}
                     </div>
@@ -828,6 +924,45 @@ export default function NuevoPedidoForm({
       {/* ── Envío ────────────────────────────────────────────────────── */}
       <div className="mb-6">
         <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-ink font-semibold mb-3">── Método de envío *</p>
+        {isAdminMode ? (
+          <div className="bg-paper border border-ink/8 p-5 space-y-4">
+            <div>
+              <label htmlFor="shippingMethod" className="font-mono text-[9px] tracking-[0.15em] uppercase text-ink/60 block mb-2">
+                Método de envío
+              </label>
+              <input
+                id="shippingMethod"
+                type="text"
+                name="shippingMethod"
+                required
+                list="shipping-method-suggestions"
+                placeholder="Ej: Andreani, Retiro en depósito, Coordinar por WhatsApp"
+                value={adminShippingMethod}
+                onChange={(e) => setAdminShippingMethod(e.target.value)}
+                className="w-full bg-paper-2 border border-ink/15 font-body text-[14px] px-4 py-3 outline-none focus:border-ink transition-colors"
+              />
+              <datalist id="shipping-method-suggestions">
+                {SHIPPING_METHOD_SUGGESTIONS.map((s) => <option key={s} value={s} />)}
+              </datalist>
+            </div>
+            <div>
+              <label htmlFor="shippingCostOverride" className="font-mono text-[9px] tracking-[0.15em] uppercase text-ink/60 block mb-2">
+                Costo de envío (sin IVA)
+              </label>
+              <input
+                id="shippingCostOverride"
+                type="number"
+                name="shippingCostOverride"
+                min={0}
+                step="0.01"
+                placeholder="0"
+                value={adminShippingCost || ''}
+                onChange={(e) => setAdminShippingCost(Math.max(0, parseFloat(e.target.value) || 0))}
+                className="w-full bg-paper-2 border border-ink/15 font-mono text-[14px] px-4 py-3 outline-none focus:border-ink transition-colors"
+              />
+            </div>
+          </div>
+        ) : (
         <div className="bg-paper border border-ink/8 divide-y divide-ink/8">
           {SHIPPING_OPTIONS.map((opt) => (
             <label
@@ -883,10 +1018,11 @@ export default function NuevoPedidoForm({
             </label>
           ))}
         </div>
+        )}
       </div>
 
       {/* ── Resumen total con IVA ────────────────────────────────────── */}
-      {selectedShipping && total > 0 && (
+      {shippingChosen && total > 0 && (
         <div className="mb-6 bg-ink text-paper px-5 py-5">
           <p className="font-mono text-[9px] tracking-[0.25em] uppercase text-red mb-4">── Resumen del pedido</p>
           <div className="space-y-2">
@@ -933,7 +1069,7 @@ export default function NuevoPedidoForm({
       <div className="mb-6">
         <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-ink font-semibold mb-3">── Forma de pago *</p>
         <div className="bg-paper border border-ink/8 divide-y divide-ink/8">
-          {PAYMENT_OPTIONS.map((opt) => (
+          {paymentOptions.map((opt) => (
             <label
               key={opt.value}
               className={[
@@ -1094,7 +1230,7 @@ export default function NuevoPedidoForm({
         {isPending
           ? 'Confirmando pedido...'
           : canSubmit
-            ? `Confirmar pedido${total > 0 ? ` — ${formatARS(selectedShipping ? grandTotal : totalConIVA)} c/IVA` : ''} →`
+            ? `Confirmar pedido${total > 0 ? ` — ${formatARS(shippingChosen ? grandTotal : totalConIVA)} c/IVA` : ''} →`
             : `Pedido mínimo: ${minTotalCajas} cajas`
         }
       </button>

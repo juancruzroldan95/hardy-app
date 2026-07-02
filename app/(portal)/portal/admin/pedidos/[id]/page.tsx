@@ -113,6 +113,11 @@ export default async function AdminPedidoDetailPage({ params }: Props) {
           )}
         </div>
         <div className="flex items-center gap-2">
+          {order.isCustomOrder && (
+            <span className="font-mono text-[9px] tracking-[0.12em] uppercase bg-ink text-paper px-2 py-1">
+              Personalizado
+            </span>
+          )}
           <OrderStatusBadge status={order.status} />
           <PaymentStatusBadge status={order.paymentStatus} />
         </div>
@@ -200,6 +205,7 @@ export default async function AdminPedidoDetailPage({ params }: Props) {
             qty:          i.qty,
           }))}
           shippingMethod={order.shippingMethod ?? null}
+          shippingCost={order.shippingCost !== null ? Number(order.shippingCost) : null}
           paymentMethod={order.paymentMethod ?? null}
           notes={order.notes ?? null}
         />

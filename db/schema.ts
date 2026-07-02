@@ -40,17 +40,6 @@ export const paymentStatusEnum = pgEnum('payment_status', [
   'failed',
 ])
 
-export const shippingMethodEnum = pgEnum('shipping_method', [
-  'coordinar_whatsapp',
-  'andreani',
-  'oca',
-  'retiro_deposito',
-  'urgente_caba',
-  'urgente_gba',
-  'sin_urgencia_caba',
-  'sin_urgencia_gba',
-])
-
 export const paymentMethodEnum = pgEnum('payment_method', [
   'transferencia',
   'efectivo',
@@ -125,8 +114,9 @@ export const orders = pgTable('orders', {
   status:          orderStatusEnum('status').notNull().default('pending'),
   paymentStatus:   paymentStatusEnum('payment_status').notNull().default('unpaid'),
   totalArs:        numeric('total_ars', { precision: 12, scale: 2 }).notNull(),
-  shippingMethod:  shippingMethodEnum('shipping_method'),
+  shippingMethod:  text('shipping_method'),
   paymentMethod:   paymentMethodEnum('payment_method'),
+  isCustomOrder:   boolean('is_custom_order').notNull().default(false),
   notes:           text('notes'),
   shippingAddress: text('shipping_address'),
   shippingCp:      text('shipping_cp'),
@@ -414,7 +404,7 @@ export type StockStatus      = (typeof stockStatusEnum.enumValues)[number]
 export type UserRole         = (typeof userRoleEnum.enumValues)[number]
 export type OrderStatus      = (typeof orderStatusEnum.enumValues)[number]
 export type PaymentStatus    = (typeof paymentStatusEnum.enumValues)[number]
-export type ShippingMethod   = (typeof shippingMethodEnum.enumValues)[number]
+export type ShippingMethod   = string
 export type PaymentMethod    = (typeof paymentMethodEnum.enumValues)[number]
 export type TipoNegocio      = (typeof tipoNegocioEnum.enumValues)[number]
 export type EstadoSolicitud  = (typeof estadoSolicitudEnum.enumValues)[number]
