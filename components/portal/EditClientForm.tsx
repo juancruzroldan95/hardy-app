@@ -157,6 +157,20 @@ export default function EditClientForm({ client, email }: EditClientFormProps) {
         />
       </div>
 
+      {/* Notas internas */}
+      <div>
+        <label className="font-mono text-[10px] tracking-[0.12em] uppercase text-ink/50 block mb-2">
+          Notas internas
+        </label>
+        <textarea
+          name="notes"
+          rows={3}
+          defaultValue={client.notes ?? ''}
+          placeholder="Notas privadas sobre este cliente..."
+          className="w-full bg-paper border border-ink/15 font-body text-[14px] px-4 py-3 outline-none focus:border-ink transition-colors resize-none"
+        />
+      </div>
+
       {/* Error */}
       {state && 'error' in state && (
         <div className="bg-red/10 border border-red/20 px-5 py-4">

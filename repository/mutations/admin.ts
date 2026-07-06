@@ -462,6 +462,7 @@ export async function updateClientProfileAdmin(
   const province    = (formData.get('province')    as string)?.trim() || null
   const cuit        = (formData.get('cuit')        as string)?.trim() || null
   const address     = (formData.get('address')     as string)?.trim() || null
+  const notes       = (formData.get('notes')       as string)?.trim() || null
 
   if (!displayName) return { error: 'El nombre es requerido.' }
 
@@ -476,6 +477,7 @@ export async function updateClientProfileAdmin(
         province,
         cuit,
         address,
+        notes,
         updatedAt: new Date(),
       })
       .where(eq(profiles.id, profileId))
