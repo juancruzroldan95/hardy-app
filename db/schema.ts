@@ -48,6 +48,7 @@ export const paymentMethodEnum = pgEnum('payment_method', [
   'cheque',
   'deposito_bancario',
   'echeq_30',
+  'echeq_60',
   'mercadopago',
 ])
 

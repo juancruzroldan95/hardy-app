@@ -172,6 +172,7 @@ const PAYMENT_OPTIONS = [
 // Métodos adicionales — solo disponibles cuando el admin arma el pedido
 const PAYMENT_OPTIONS_ADMIN_EXTRA = [
   { value: 'efectivo',  label: 'Efectivo',        sub: 'Efectivo al recibir la mercadería',   showBank: false },
+  { value: 'echeq_60',  label: 'E-CHEQ 60 días',  sub: 'Liberamos mercadería al recibir el E-CHEQ', showBank: true },
   { value: 'credito30', label: 'Crédito 30 días', sub: 'Pago a 30 días de la entrega',         showBank: false },
   { value: 'credito60', label: 'Crédito 60 días', sub: 'Pago a 60 días de la entrega',         showBank: false },
   { value: 'cheque',    label: 'Cheque',          sub: 'Pago con cheque físico',               showBank: false },
@@ -185,7 +186,7 @@ const SHIPPING_METHOD_SUGGESTIONS = [
   'Flete propio',
 ]
 
-const BANK_PAYMENT_VALUES = new Set(['transferencia', 'deposito_bancario', 'echeq_30'])
+const BANK_PAYMENT_VALUES = new Set(['transferencia', 'deposito_bancario', 'echeq_30', 'echeq_60'])
 
 // ─── Pricing table helper ─────────────────────────────────────────────────────
 

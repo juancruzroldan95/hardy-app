@@ -1,0 +1,1 @@
+ALTER TYPE "public"."payment_method" ADD VALUE 'echeq_60' BEFORE 'mercadopago';

@@ -19,6 +19,7 @@ const PAYMENT_OPTIONS = [
   { value: 'efectivo',       label: 'Efectivo al recibir' },
   { value: 'deposito_bancario', label: 'Depósito bancario' },
   { value: 'echeq_30',       label: 'E-CHEQ 30 días' },
+  { value: 'echeq_60',       label: 'E-CHEQ 60 días' },
   { value: 'credito30',      label: 'Crédito a 30 días' },
   { value: 'credito60',      label: 'Crédito a 60 días' },
   { value: 'cheque',         label: 'Cheque' },
