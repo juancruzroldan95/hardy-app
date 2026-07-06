@@ -27,6 +27,7 @@ const PAYMENT_LABELS: Record<string, string> = {
   transferencia:    'Transferencia bancaria — 50% + 50%',
   deposito_bancario: 'Depósito bancario — 50% + 50%',
   echeq_30:         'E-CHEQ 30 días',
+  echeq_60:         'E-CHEQ 60 días',
   efectivo:         'Efectivo',
   credito30:        'Crédito 30 días',
   credito60:        'Crédito 60 días',

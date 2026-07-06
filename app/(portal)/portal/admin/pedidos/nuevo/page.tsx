@@ -22,7 +22,7 @@ const MIN_ORDER_CAJAS: Record<string, number> = {
 }
 
 interface Props {
-  searchParams: Promise<{ clientId?: string }>
+  searchParams: Promise<{ clientId?: string; q?: string }>
 }
 
 export default async function AdminNuevoPedidoPage({ searchParams }: Props) {
@@ -33,13 +33,24 @@ export default async function AdminNuevoPedidoPage({ searchParams }: Props) {
   const adminProfile = await getProfileByUserId(user.id)
   if (adminProfile?.role !== 'admin') redirect('/portal')
 
-  const { clientId } = await searchParams
+  const { clientId, q: queryRaw } = await searchParams
+  const query = queryRaw?.trim().toLowerCase() ?? ''
 
   // ── Client list (always load for the selector) ──────────────────────────────
   const allClients = await getAllClients()
 
   // ── If no client selected, show selector ────────────────────────────────────
   if (!clientId) {
+    const filteredClients = query
+      ? allClients.filter((c) => {
+          const haystack = [c.displayName, c.company, c.phone, c.city, c.province, c.cuit]
+            .filter(Boolean)
+            .join(' ')
+            .toLowerCase()
+          return haystack.includes(query)
+        })
+      : allClients
+
     return (
       <div className="max-w-[600px]">
         <Link
@@ -53,17 +64,34 @@ export default async function AdminNuevoPedidoPage({ searchParams }: Props) {
         <h1 className="font-heading text-[clamp(26px,3vw,38px)] font-medium leading-[1.1] tracking-[-0.02em] mb-1">
           Crear pedido para cliente
         </h1>
-        <p className="font-body text-[14px] text-ink/50 mb-8">
+        <p className="font-body text-[14px] text-ink/50 mb-6">
           Seleccioná el cliente para quien vas a cargar el pedido.
         </p>
 
+        <form method="GET" action="/portal/admin/pedidos/nuevo" className="relative mb-6">
+          <svg
+            width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+            strokeLinecap="round" strokeLinejoin="round"
+            className="absolute left-4 top-1/2 -translate-y-1/2 text-ink/30 pointer-events-none"
+          >
+            <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+          <input
+            type="text"
+            name="q"
+            defaultValue={queryRaw ?? ''}
+            placeholder="Buscar por nombre, empresa, teléfono o ciudad..."
+            className="w-full bg-paper border border-ink/15 font-body text-[14px] pl-11 pr-4 py-3 outline-none focus:border-ink transition-colors"
+          />
+        </form>
+
         <div className="bg-paper border border-ink/8">
-          {allClients.length === 0 ? (
+          {filteredClients.length === 0 ? (
             <p className="px-5 py-6 font-mono text-[11px] text-ink/40 text-center">
-              No hay clientes disponibles.
+              {query ? 'No hay clientes que coincidan con esta búsqueda.' : 'No hay clientes disponibles.'}
             </p>
           ) : (
-            allClients.map((c) => (
+            filteredClients.map((c) => (
               <Link
                 key={c.id}
                 href={`/portal/admin/pedidos/nuevo?clientId=${c.id}`}

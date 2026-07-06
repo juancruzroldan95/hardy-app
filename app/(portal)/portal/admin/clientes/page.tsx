@@ -76,7 +76,7 @@ const TIPO_FILTERS: { value: string; label: string }[] = [
 ]
 
 interface Props {
-  searchParams: Promise<{ estado?: string; tipo?: string }>
+  searchParams: Promise<{ estado?: string; tipo?: string; q?: string }>
 }
 
 export default async function AdminClientesPage({ searchParams }: Props) {
@@ -85,7 +85,8 @@ export default async function AdminClientesPage({ searchParams }: Props) {
   if (!user) redirect('/login')
 
   const adminProfile = await getProfileByUserId(user.id)
-  const { estado: estadoFilter, tipo: tipoFilter } = await searchParams
+  const { estado: estadoFilter, tipo: tipoFilter, q: queryRaw } = await searchParams
+  const query = queryRaw?.trim().toLowerCase() ?? ''
 
   if (adminProfile?.role !== 'admin') redirect('/portal')
 
@@ -123,20 +124,28 @@ export default async function AdminClientesPage({ searchParams }: Props) {
     inactivo:  tipoScoped.filter((c) => c.lifecycle === 'inactivo').length,
   }
 
-  // Aplicar filtros (estado + tipo)
+  // Aplicar filtros (estado + tipo + búsqueda)
   const clients = enriched.filter((c) => {
     if (estadoFilter && c.lifecycle !== estadoFilter) return false
     if (tipoFilter && c.role !== tipoFilter) return false
+    if (query) {
+      const haystack = [c.displayName, c.company, c.phone, c.city, c.province, c.cuit]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase()
+      if (!haystack.includes(query)) return false
+    }
     return true
   })
 
-  // Helper para construir URLs de filtro preservando el otro parámetro
+  // Helper para construir URLs de filtro preservando los otros parámetros
   function filterUrl(next: { estado?: string; tipo?: string }) {
     const params = new URLSearchParams()
     const e = next.estado !== undefined ? next.estado : (estadoFilter ?? '')
     const t = next.tipo   !== undefined ? next.tipo   : (tipoFilter ?? '')
     if (e) params.set('estado', e)
     if (t) params.set('tipo', t)
+    if (queryRaw) params.set('q', queryRaw)
     const qs = params.toString()
     return qs ? `/portal/admin/clientes?${qs}` : '/portal/admin/clientes'
   }
@@ -150,6 +159,26 @@ export default async function AdminClientesPage({ searchParams }: Props) {
       <p className="font-body text-[14px] text-ink/40 mb-6">
         Historial de compras, alertas y gestión de cuenta por cliente.
       </p>
+
+      {/* ── Buscador ─────────────────────────────────────────────────── */}
+      <form method="GET" action="/portal/admin/clientes" className="relative mb-6">
+        {estadoFilter && <input type="hidden" name="estado" value={estadoFilter} />}
+        {tipoFilter && <input type="hidden" name="tipo" value={tipoFilter} />}
+        <svg
+          width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+          strokeLinecap="round" strokeLinejoin="round"
+          className="absolute left-4 top-1/2 -translate-y-1/2 text-ink/30 pointer-events-none"
+        >
+          <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+        </svg>
+        <input
+          type="text"
+          name="q"
+          defaultValue={queryRaw ?? ''}
+          placeholder="Buscar por nombre, empresa, teléfono, ciudad o CUIT..."
+          className="w-full bg-paper border border-ink/15 font-body text-[14px] pl-11 pr-4 py-3 outline-none focus:border-ink transition-colors"
+        />
+      </form>
 
       {/* ── Segmentación por ciclo de vida ──────────────────────────── */}
       <div className="grid grid-cols-3 gap-3 mb-5 max-md:grid-cols-1">
@@ -202,7 +231,7 @@ export default async function AdminClientesPage({ searchParams }: Props) {
             </Link>
           )
         })}
-        {(estadoFilter || tipoFilter) && (
+        {(estadoFilter || tipoFilter || queryRaw) && (
           <Link
             href="/portal/admin/clientes"
             className="font-mono text-[9px] tracking-[0.1em] uppercase text-red hover:text-ink transition-colors ml-1"
@@ -224,8 +253,8 @@ export default async function AdminClientesPage({ searchParams }: Props) {
       {clients.length === 0 ? (
         <div className="bg-paper border border-ink/8 p-10 text-center">
           <p className="font-body text-[14px] text-ink/40">
-            {estadoFilter || tipoFilter
-              ? 'No hay contactos que coincidan con este segmento.'
+            {estadoFilter || tipoFilter || queryRaw
+              ? 'No hay contactos que coincidan con esta búsqueda.'
               : 'No hay clientes registrados todavía.'}
           </p>
         </div>
@@ -235,6 +264,7 @@ export default async function AdminClientesPage({ searchParams }: Props) {
           {/* ── Solicitudes aprobadas sin acceso creado (prospectos) ────────── */}
           {!estadoFilter || estadoFilter === 'prospecto' ? solicitudesPendientes
             .filter(() => !tipoFilter)
+            .filter((sol) => !query || `${sol.empresa} ${sol.nombre} ${sol.whatsapp ?? ''}`.toLowerCase().includes(query))
             .map((sol) => (
               <div key={sol.id} className="bg-paper border border-blue-200 relative">
                 <div className="absolute top-0 left-0 right-0 h-[3px] bg-blue-400" />
