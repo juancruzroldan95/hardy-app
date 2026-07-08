@@ -11,7 +11,7 @@ Marca argentina de crema de maní y miel 100% naturales. Estética minimalista, 
 - **Fundación**: 2015
 - **Voz**: Directa, sin vueltas, auténtica. Sin adjetivos vacíos. El producto habla solo.
 - **Tagline**: Alimentá tu instinto
-- **WhatsApp**: `https://wa.me/5491135736956`
+- **WhatsApp**: `https://wa.me/5491125910510`
 - **Instagram**: `https://www.instagram.com/hardy.arg/`
 
 ---

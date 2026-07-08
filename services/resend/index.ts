@@ -614,7 +614,7 @@ export async function sendCatalogEmail(data: CatalogEmailData): Promise<void> {
 
         <div style="background:#f1efe9;padding:14px 18px;">
           <p style="font-family:Helvetica,Arial,sans-serif;font-size:13px;color:#777;margin:0;line-height:1.6;">
-            ¿Tenés alguna consulta urgente? Escribinos por WhatsApp al <strong>+54 11 3573-6956</strong>.
+            ¿Tenés alguna consulta urgente? Escribinos por WhatsApp al <strong>+54 9 11 2591-0510</strong>.
           </p>
         </div>
       </td></tr>
