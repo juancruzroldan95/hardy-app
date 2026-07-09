@@ -207,7 +207,7 @@ export default function NosotrosPage() {
             gastronómicos y colaboraciones.
           </p>
           <WhatsAppLink
-            href="https://wa.me/5491155244283"
+            href="https://wa.me/5491125910510"
             className="inline-block bg-paper text-ink font-mono text-[12px] tracking-[0.15em] uppercase px-8 py-[18px] hover:bg-ink hover:text-paper transition-colors duration-200"
           >
             Escribinos por WhatsApp →
