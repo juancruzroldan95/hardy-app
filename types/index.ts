@@ -41,8 +41,6 @@ export interface CartItem extends Product {
   subtotal: number
 }
 
-export type CartState = Record<string, number>
-
 export interface ShippingData {
   nombre:         string
   email:          string

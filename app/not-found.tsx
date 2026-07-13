@@ -1,13 +1,13 @@
 import Link from 'next/link'
 import { Suspense } from 'react'
-import StoreNavWrapper from '@/components/layout/StoreNavWrapper'
+import Nav from '@/components/layout/Nav'
 import Footer from '@/components/layout/Footer'
 
 export default function NotFound() {
   return (
     <div className="min-h-screen flex flex-col bg-ink text-paper">
       <Suspense fallback={null}>
-        <StoreNavWrapper />
+        <Nav />
       </Suspense>
       <div className="flex-1 flex flex-col items-center justify-center px-6 text-center">
       {/* Eyebrow */}

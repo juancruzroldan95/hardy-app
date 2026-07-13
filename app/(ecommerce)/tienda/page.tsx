@@ -66,7 +66,7 @@ export default async function TiendaPage() {
               Comprá <em className="not-italic text-red">directo.</em>
             </h1>
             <p className="text-[#666] text-[16px] mt-3 mb-0 max-w-[420px] leading-[1.6]">
-              Enviamos a todo el país. Coordinamos el envío según tu zona y volumen. Pagás con Mercado Pago.
+              Enviamos a todo el país. Coordiná tu compra y el envío directo por WhatsApp.
             </p>
           </div>
           {/* Imagen colección */}

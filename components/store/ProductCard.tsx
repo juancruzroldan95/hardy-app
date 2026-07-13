@@ -3,7 +3,6 @@
 import { useState, useCallback, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import Image from 'next/image'
-import { useCart } from '@/components/contexts/cart-context'
 import { formatARS, WA_NUMBER } from '@/consts/products'
 import type { Product } from '@/types'
 
@@ -30,7 +29,6 @@ function Stars({ avg, size = 12 }: { avg: number; size?: number }) {
 }
 
 export default function ProductCard({ product, rating }: { product: Product; rating?: ProductRating }) {
-  const { addItem, cart } = useCart()
   const [imgIdx,        setImgIdx]        = useState(0)
   const [modalMounted,  setModalMounted]  = useState(false)  // controls DOM presence
   const [modalVisible,  setModalVisible]  = useState(false)  // controls CSS opacity/scale
@@ -114,25 +112,6 @@ export default function ProductCard({ product, rating }: { product: Product; rat
           )}
         </div>
 
-        {/* Nudge mayorista — baldes con ≥5 unidades en el carrito */}
-        {product.line === 'balde' && (cart[product.id] ?? 0) >= 5 && (
-          <div
-            className="px-4 py-3 border-t border-ink/10 group-hover:border-white/10 transition-colors duration-[220ms]"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <p className="font-mono text-[10px] leading-[1.55] text-ink/60 group-hover:text-paper/50 m-0 transition-colors duration-[220ms]">
-              ¿Comprás por volumen?{' '}
-              <a
-                href="/mayoristas#solicitar"
-                className="underline text-ink group-hover:text-paper transition-colors duration-[220ms]"
-              >
-                Solicitá acceso al Portal Cliente
-              </a>{' '}
-              y accedé a un mejor precio por kg.
-            </p>
-          </div>
-        )}
-
         {/* Info */}
         <div className="p-5 pb-6 flex flex-col flex-1">
           <div className="font-mono text-[9px] tracking-[0.2em] text-red uppercase mb-1">
@@ -182,12 +161,15 @@ export default function ProductCard({ product, rating }: { product: Product; rat
                       Próximamente
                     </span>
                   ) : (
-                    <button
-                      onClick={(e) => { e.stopPropagation(); addItem(product.id) }}
-                      className="bg-red text-paper font-mono text-[10px] tracking-[0.08em] uppercase px-[14px] py-[10px] whitespace-nowrap flex-shrink-0 cursor-pointer border-none max-md:w-full"
+                    <a
+                      href={`${WA_NUMBER}?text=Hola%21+Quiero+comprar+${encodeURIComponent(product.name + ' ' + product.size)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="bg-red text-paper font-mono text-[10px] tracking-[0.08em] uppercase px-[14px] py-[10px] whitespace-nowrap flex-shrink-0 no-underline text-center max-md:w-full"
                     >
-                      + Agregar
-                    </button>
+                      Comprar →
+                    </a>
                   )}
                 </div>
                 <p className="font-mono text-[9px] tracking-[0.1em] text-ink/40 group-hover:text-paper/30 transition-colors duration-[220ms] m-0">
@@ -359,12 +341,16 @@ export default function ProductCard({ product, rating }: { product: Product; rat
                   </>
                 ) : (
                   <>
-                    <button
-                      onClick={() => { addItem(product.id); closeModal() }}
-                      className="w-full bg-red text-white border-none p-[15px] cursor-pointer font-mono text-[11px] tracking-[0.15em] uppercase mb-2"
+                    <a
+                      href={`${WA_NUMBER}?text=Hola%21+Quiero+comprar+${encodeURIComponent(product.name + ' ' + product.size)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="block w-full text-white p-[15px] font-mono text-[11px] tracking-[0.15em] uppercase no-underline text-center mb-2"
+                      style={{ background: '#25D366' }}
                     >
-                      + Agregar al carrito
-                    </button>
+                      Comprar por WhatsApp →
+                    </a>
                     <p className="font-mono text-[9px] tracking-[0.1em] text-center m-0" style={{ color: 'rgba(255,255,255,0.3)' }}>
                       Pedido mínimo: 2 unidades
                     </p>
