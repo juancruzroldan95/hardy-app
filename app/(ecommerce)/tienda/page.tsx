@@ -90,7 +90,7 @@ export default async function TiendaPage() {
           {/* Frascos */}
           <RevealSection className="mb-5">
             <div className="font-mono text-[10px] tracking-[0.2em] uppercase text-red mb-1">── Frascos</div>
-            <p className="text-[13px] text-[#888] m-0">Crema de maní y miel · 380g–500g · Por unidad</p>
+            <p className="text-[13px] text-[#888] m-0">Crema de maní y miel · 380g–500g · Por caja</p>
           </RevealSection>
           <div className="grid grid-cols-4 gap-[2px] mb-[2px] max-md:grid-cols-2">
             {frascos.map((p, i) => (
@@ -105,7 +105,7 @@ export default async function TiendaPage() {
             <div className="flex items-baseline justify-between gap-4 flex-wrap">
               <div>
                 <div className="font-mono text-[10px] tracking-[0.2em] uppercase text-red mb-1">── Baldes · A granel</div>
-                <p className="text-[13px] text-[#888] m-0">Crema de maní y miel · 4,5–30 kg · Por unidad</p>
+                <p className="text-[13px] text-[#888] m-0">Crema de maní y miel · 4,5–30 kg · Por balde</p>
               </div>
               <Link href="/a-granel" className="font-mono text-[10px] tracking-[0.15em] uppercase text-ink/50 hover:text-ink transition-colors whitespace-nowrap">
                 Calculadora de compra →
@@ -140,13 +140,6 @@ export default async function TiendaPage() {
                 name: `Hardy ${p.name}`,
                 description: p.desc,
                 brand: { '@type': 'Brand', name: 'Hardy' },
-                offers: {
-                  '@type': 'Offer',
-                  priceCurrency: 'ARS',
-                  price: p.price,
-                  availability: 'https://schema.org/InStock',
-                  seller: { '@type': 'Organization', name: 'Hardy' },
-                },
               },
             })),
           }),
