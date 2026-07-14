@@ -3,13 +3,8 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
-import { ShoppingBag, Menu, X, MessageCircle } from 'lucide-react'
+import { Menu, X, MessageCircle } from 'lucide-react'
 import { WA_NUMBER } from '@/consts/products'
-
-interface NavProps {
-  cartCount?: number
-  onCartOpen?: () => void
-}
 
 const links = [
   { href: '/tienda',          label: 'Tienda'  },
@@ -21,7 +16,7 @@ const links = [
   { href: '/nosotros',        label: 'Nosotros'                       },
 ]
 
-export default function Nav({ cartCount = 0, onCartOpen }: NavProps) {
+export default function Nav() {
   const [menuOpen, setMenuOpen] = useState(false)
   const pathname = usePathname()
 
@@ -74,16 +69,6 @@ export default function Nav({ cartCount = 0, onCartOpen }: NavProps) {
           >
             Contactanos <MessageCircle size={14} />
           </a>
-
-          {onCartOpen && (
-            <button
-              onClick={onCartOpen}
-              className="text-paper border border-paper/30 font-mono text-[11px] tracking-[0.1em] uppercase px-[14px] py-[9px] flex items-center gap-[6px]"
-            >
-              <ShoppingBag size={13} />
-              ({cartCount})
-            </button>
-          )}
 
           {/* Hamburger */}
           <button

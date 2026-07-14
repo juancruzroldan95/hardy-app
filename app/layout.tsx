@@ -1,7 +1,5 @@
 import type { Metadata } from 'next'
 import { Anton, Fraunces, JetBrains_Mono, Manrope } from 'next/font/google'
-import { CartProvider } from '@/components/contexts/cart-context'
-import CartDrawer from '@/components/layout/CartDrawer'
 import MetaPixel from '@/components/analytics/MetaPixel'
 import './globals.css'
 
@@ -75,10 +73,7 @@ export default function RootLayout({
     >
       <body className="min-h-screen flex flex-col font-body bg-paper text-ink">
         <MetaPixel />
-        <CartProvider>
-          {children}
-          <CartDrawer />
-        </CartProvider>
+        {children}
       </body>
     </html>
   )

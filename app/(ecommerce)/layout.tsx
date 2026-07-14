@@ -1,5 +1,5 @@
 import { Suspense } from 'react'
-import StoreNavWrapper from '@/components/layout/StoreNavWrapper'
+import Nav from '@/components/layout/Nav'
 import Footer from '@/components/layout/Footer'
 import MayoristasBanner from '@/components/layout/MayoristasBanner'
 import MetaPixel from '@/components/analytics/MetaPixel'
@@ -11,7 +11,7 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
       <Suspense fallback={null}>
         <MetaPixel />
       </Suspense>
-      <StoreNavWrapper />
+      <Nav />
       <main className="flex-1">
         <PageTransition>{children}</PageTransition>
       </main>
